@@ -184,19 +184,24 @@
       `).join('');
     }
 
-      // Ховати клавіатуру при натисканні на будь-яке місце
+      // Ховати клавіатуру при натисканні на будь-що, крім input
   document.addEventListener('click', (e) => {
-  // Якщо натискаємо НЕ на input, тоді ховаємо клавіатуру
-  if (e.target.tagName !== 'INPUT') {
-    const active = document.activeElement;
-    if (active && typeof active.blur === 'function') {
-      active.blur();
+    if (e.target.tagName !== 'INPUT') {
+      const active = document.activeElement;
+      if (active && typeof active.blur === 'function') {
+        active.blur();
+      }
     }
-  }
-});
+  });
 
-    
-  </script>
+  // Ховати клавіатуру при Enter у полі пошуку
+  document.getElementById('searchInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
+</script>
   
   
 </body>
