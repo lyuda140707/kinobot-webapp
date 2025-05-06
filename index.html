@@ -183,6 +183,23 @@
         </div>
       `).join('');
     }
+
+      // Ховати клавіатуру при натисканні на будь-яке місце
+  document.addEventListener('click', () => {
+    const active = document.activeElement;
+    if (active && typeof active.blur === 'function') {
+      active.blur();
+    }
+  });
+
+  // Ховати клавіатуру при Enter у полі пошуку
+  document.getElementById('searchInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
+    
   </script>
   
   
