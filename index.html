@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KinoBot Web App</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #111;
+      color: #fff;
+    }
+    .section {
+      display: none;
+      padding: 20px;
+    }
+    .active {
+      display: block;
+    }
+    .nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #222;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #333;
+    }
+    .nav button {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .nav button.active {
+      color: #fff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+    <div id="home" class="section active">
+        <h2>🎬 Фільм дня</h2>
+        <div style="background-color:#1c1c1c; padding:15px; border-radius:10px;">
+          <img src="https://upload.wikimedia.org/wikipedia/en/4/4e/Game_plan_ver2.jpg" alt="The Game Plan" style="width:100%; border-radius:10px;">
+          <h3 style="margin-top:10px;">The Game Plan (2007)</h3>
+          <p>💪 Зірка футболу дізнається, що у нього є донька. І життя змінюється — від м’язів до балету.</p>
+          <a href="https://t.me/KinoTochkaUA" target="_blank" style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; text-decoration:none;">Дивитись ▶️</a>
+          <button onclick="addToFavorites('The Game Plan', '💪 Зірка футболу дізнається, що у нього є донька.')"
+ style="margin-top:10px; background:#444; color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">
+  💛 Додати в улюблене
+</button>
+
+        </div>
+      </div>
+      
+
+  <!-- 🎞️ Категорії -->
+<div id="categories" class="section">
+  <h2>Категорії</h2>
+  <div style="overflow-x: auto; display: flex; gap: 10px; padding: 10px 0;">
+    <button class="genre-btn">🎭 Драми</button>
+    <button class="genre-btn">😂 Комедії</button>
+    <button class="genre-btn">👨‍👩‍👧 Родинні</button>
+    <button class="genre-btn">🎬 Екшн</button>
+    <button class="genre-btn">👻 Жахи</button>
+    <button class="genre-btn">💘 Романтика</button>
+    <button class="genre-btn">📺 Серіали</button>
+    <button class="genre-btn">🐭 Мультфільми</button>
+  </div>
+  <p style="margin-top:20px; opacity: 0.7;">(Тут пізніше зʼявлятимуться фільми за обраною категорією)</p>
+</div>
+
+
+  <!-- ❤️ Улюблене -->
+  <div id="favorites" class="section">
+    <h2>Улюблене</h2>
+    <p>Список збережених фільмів...</p>
+  </div>
+
+  <!-- 🔍 Пошук -->
+  <div id="search" class="section">
+    <h2>Пошук</h2>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Введіть назву або жанр..."
+      style="width:100%;padding:10px;"
+      oninput="searchFilms()"
+    />
+    <div id="searchResults" style="margin-top: 20px;"></div>
+  </div>
+  
+
+  <!-- Меню навігації -->
+  <div class="nav">
+    <button class="active" onclick="switchTab('home', this)">Головна</button>
+    <button onclick="switchTab('categories', this)">Категорії</button>
+    <button onclick="switchTab('favorites', this)">Улюблене</button>
+    <button onclick="switchTab('search', this)">Пошук</button>
+  </div>
+
+  <script>
+    let films = [];
+  
+    async function loadFilms() {
+      const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
+      films = await res.json();
+    }
+  
+    window.addEventListener('DOMContentLoaded', loadFilms);
+  
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+  
+      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+  
+      if (tabId === 'favorites') {
+        showFavorites();
+      }
+    }
+  
+    function addToFavorites(title, description) {
+      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+      favorites.push({ title, description });
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      alert('Додано в улюблене 💛');
+    }
+  
+    function showFavorites() {
+      const container = document.getElementById('favorites');
+      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  
+      let html = '<h2>Улюблене</h2>';
+      if (favorites.length === 0) {
+        html += '<p>Нічого не збережено 😢</p>';
+      } else {
+        favorites.forEach(item => {
+          html += `
+            <div style="background:#1c1c1c; padding:10px; margin-bottom:10px; border-radius:8px;">
+              <h3>${item.title}</h3>
+              <p>${item.description}</p>
+            </div>
+          `;
+        });
+      }
+      container.innerHTML = html;
+    }
+  
+    function searchFilms() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const results = films.filter(film =>
+        film['Назва'].toLowerCase().includes(query) ||
+        film['Жанр'].toLowerCase().includes(query) ||
+        film['Опис'].toLowerCase().includes(query)
+      );
+  
+      const container = document.getElementById('searchResults');
+      if (results.length === 0) {
+        container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+        return;
+      }
+  
+      container.innerHTML = results.map(film => `
+        <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
+          <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
+
+          <h3>${film['Назва']}</h3>
+          <p>${film['Опис']}</p>
+          <a href="${film['Посилання']}" target="_blank"
+            style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; text-decoration:none; margin-top:10px;">
+            🎬 Дивитись у Telegram
+          </a>
+        </div>
+      `).join('');
+    }
+  </script>
+  
+  
+</body>
+</html>
