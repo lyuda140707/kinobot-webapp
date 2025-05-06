@@ -105,6 +105,21 @@
     <button onclick="switchTab('search', this)">Пошук</button>
   </div>
 
+  // Ховати клавіатуру при натисканні на екран
+document.addEventListener('click', () => {
+  const active = document.activeElement;
+  if (active && active.blur) active.blur();
+});
+
+// Ховати клавіатуру при натисканні Enter у полі вводу
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    e.target.blur();
+  }
+});
+
+
   <script>
     let films = [];
   
