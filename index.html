@@ -262,16 +262,23 @@
   }
 
   container.innerHTML += filtered.map(film => `
-    <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
-      <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-        style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
-        ▶️ Пошукати в боті
-      </button>
-    </div>
-  `).join('');
+  <div style="
+    background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  ">
+    <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+    <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
+    <p style="opacity:0.85;">${film['Опис']}</p>
+    <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
+      style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
+      ▶️ Пошукати в боті
+    </button>
+  </div>
+`).join('');
+
 
   // Додаємо слухачі на кнопки
   container.querySelectorAll('.search-button').forEach(button => {
