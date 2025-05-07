@@ -20,4 +20,25 @@ button {
   transform: scale(1.05);
 }
 
+.genre-main-btn {
+  padding: 10px 16px;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.genre-main-btn:hover {
+  background: #e50914;
+  color: #fff;
+}
+
+.genre-main-btn.active {
+  background: #e50914;
+  color: #fff;
+}
 
