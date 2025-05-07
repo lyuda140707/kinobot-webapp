@@ -184,11 +184,11 @@
 
           <h3>${film['Назва']}</h3>
           <p>${film['Опис']}</p>
-         <button onclick="openBotWithQuery('${film['Назва']}')" ...>▶️ Пошукати в боті</button>
-
+         <button onclick="openBotWithQuery('${film['Назва']}')" 
   style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
   ▶️ Пошукати в боті
 </button>
+
 
         </div>
       `).join('');
@@ -218,26 +218,6 @@ function openBotWithQuery(query) {
   window.open(url, '_blank'); // відкриває бот у новому вікні
 }
 
-
-
-  fetch("https://kinobot-qm9q.onrender.com/telegram-search", {
-
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user_id: user.id,
-      query: title
-    })
-  }).then(res => {
-    if (res.ok) {
-      alert("🔍 Запит відправлено! Очікуйте відповідь у Telegram.");
-    } else {
-      alert("Помилка на сервері 😢");
-    }
-  });
-}
 
   
 </script>
