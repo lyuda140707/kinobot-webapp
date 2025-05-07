@@ -176,10 +176,11 @@
 
           <h3>${film['Назва']}</h3>
           <p>${film['Опис']}</p>
-          <a href="${film['Посилання']}" target="_blank"
-            style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; text-decoration:none; margin-top:10px;">
-            🎬 Дивитись у Telegram
-          </a>
+         <button onclick="openBotWithQuery('${film['Назва']}')"
+  style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
+  ▶️ Пошукати в боті
+</button>
+
         </div>
       `).join('');
     }
@@ -201,6 +202,14 @@
       e.target.blur();
     }
   });
+
+function openBotWithQuery(query) {
+  const botUsername = "НазваТвогоБотаБез@"; // ❗️ВСТАВ СЮДИ
+  const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
+  window.open(url, "_blank");
+}
+
+  
 </script>
   
   
