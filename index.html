@@ -122,12 +122,7 @@
      window.Telegram.WebApp.ready();   // ✅ ОБОВʼЯЗКОВО!
       loadFilms();
     });
-function openBotWithQuery(query) {
-  console.log("🔍 Надіслано до бота:", query);
-  const botUsername = "UAKinoTochka_bot";
-  const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
-  window.open(url, '_blank');
-}
+
 
   
     function switchTab(tabId, btn) {
@@ -216,10 +211,16 @@ function openBotWithQuery(query) {
   });
 
 function openBotWithQuery(query) {
-    const botUsername = "UAKinoTochka_bot";
-    const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
-    window.open(url, '_blank'); // відкриває бот у новій вкладці
+  const botUsername = "UAKinoTochka_bot";
+  const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
+
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
+    Telegram.WebApp.openTelegramLink(url); // ✅ працює в Telegram WebApp
+  } else {
+    window.open(url, '_blank'); // ✅ fallback для браузера
   }
+}
+
   
 </script>
   
