@@ -165,11 +165,13 @@
 
   <!-- Меню навігації -->
   <div class="nav">
-    <button class="active" onclick="switchTab('home', this)">Головна</button>
-    <button onclick="switchTab('categories', this)">Категорії</button>
-    <button onclick="switchTab('favorites', this)">Улюблене</button>
-    <button onclick="switchTab('search', this)">Пошук</button>
-  </div>
+  <button class="nav-btn active" data-tab="home">Головна</button>
+  <button class="nav-btn" data-tab="categories">Категорії</button>
+  <button class="nav-btn" data-tab="favorites">Улюблене</button>
+  <button class="nav-btn" data-tab="search">Пошук</button>
+</div>
+
+
 
 
 
@@ -183,7 +185,19 @@
       const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
       films = await res.json();
     }
-  
+
+    function switchTab(tabId, btn) {
+  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (tabId === 'favorites') {
+    showFavorites();
+  }
+}
+
     window.addEventListener('DOMContentLoaded', () => {
   window.Telegram.WebApp.ready();
   loadFilms();
@@ -205,24 +219,18 @@
       });
     }
   });
+
+  // ✅ Прив’язка кнопок нижнього меню
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.dataset.tab;
+      switchTab(tabId, btn);
+    });
+  });
+
 });
 
 
-
-
-  
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-  
-      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-  
-      if (tabId === 'favorites') {
-        showFavorites();
-      }
-    }
-  
     function addToFavorites(title, description) {
       const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
       favorites.push({ title, description });
