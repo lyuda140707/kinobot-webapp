@@ -176,7 +176,7 @@
 
           <h3>${film['Назва']}</h3>
           <p>${film['Опис']}</p>
-         <button onclick="openBotWithQuery('${film['Назва']}')"
+         <button onclick="searchInBot('${film['Назва']}')"
   style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
   ▶️ Пошукати в боті
 </button>
@@ -209,6 +209,30 @@ function openBotWithQuery(query) {
   location.href = url; // спроба редиректу прямо з WebApp
 }
 
+function searchInBot(title) {
+  const user = Telegram.WebApp.initDataUnsafe?.user;
+  if (!user) {
+    alert("Не вдалось визначити користувача Telegram.");
+    return;
+  }
+
+  fetch("https://твій-бекенд/telegram-search", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: user.id,
+      query: title
+    })
+  }).then(res => {
+    if (res.ok) {
+      alert("🔍 Запит відправлено! Очікуйте відповідь у Telegram.");
+    } else {
+      alert("Помилка на сервері 😢");
+    }
+  });
+}
 
   
 </script>
