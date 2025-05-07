@@ -204,10 +204,11 @@
   });
 
 function openBotWithQuery(query) {
-  const botUsername = "UAKinoTochka_bot"; // ❗️ВСТАВ СЮДИ
+  const botUsername = "UAKinoTochka_bot";
   const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
-  window.open(url, "_blank");
+  location.href = url; // спроба редиректу прямо з WebApp
 }
+
 
   
 </script>
