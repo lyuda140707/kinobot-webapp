@@ -1,18 +1,4 @@
-.genre-btn {
-    background-color: #333;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    white-space: nowrap;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  .genre-btn:hover {
-    background-color: #555;
-  }
-  
+
 button {
   pointer-events: auto;
 }
@@ -28,9 +14,10 @@ button {
   cursor: pointer;
   transition: 0.2s ease-in-out;
 }
-
 .genre-btn:hover {
   background: #e50914;
   color: #fff;
   transform: scale(1.05);
 }
+
+
