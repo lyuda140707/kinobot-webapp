@@ -233,7 +233,7 @@ async function searchInBot(query) {
   }
 
   const user_id = user.id;
-  const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";  // ⚠️ Обов’язково заміни на правильний URL бекенду
+  const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";
 
   console.log("📤 Надсилаємо запит:", { user_id, query });
 
@@ -249,7 +249,8 @@ async function searchInBot(query) {
   console.log("📥 Відповідь від сервера:", data);
 
   if (data.found && data.videoUrl) {
-    window.open(data.videoUrl, '_blank');
+    alert("🎥 Переходимо на відео: " + data.videoUrl);
+    window.location.href = data.videoUrl;  // ⬅️ Новий надійний варіант
   } else {
     alert("Фільм не знайдено 😢");
   }
