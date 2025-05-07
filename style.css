@@ -1,56 +1,13 @@
-
-button {
-  pointer-events: auto;
-}
-
-.genre-btn {
-  background: #2a2a2a;
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 18px;
-  font-size: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-}
-.genre-btn:hover {
-  background: #e50914;
-  color: #fff;
-  transform: scale(1.05);
-}
-
 .genre-main-btn {
-  padding: 10px 16px;
   background: #333;
-  color: #fff;
   border: none;
   border-radius: 25px;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.genre-main-btn:hover {
-  background: #e50914;
-  color: #fff;
-}
-
-.genre-main-btn.active {
-  background: #e50914;
-  color: #fff;
-}
-
-.genre-main-btn {
-  background: #333;
-  border: none;
-  border-radius: 20px;
   padding: 10px 16px;
   font-size: 16px;
   font-weight: bold;
   color: #fff;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  cursor: pointer;
   transition: background 0.3s, transform 0.2s;
 }
 
@@ -63,4 +20,3 @@ button {
   background: #e50914;
   color: #fff;
 }
-
