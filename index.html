@@ -187,13 +187,7 @@
   window.Telegram.WebApp.ready();
   loadFilms();
 
-  // 🔁 Прив’язка genre-main-кнопок (типу За жанром / Серіали / Мультики)
-  document.querySelectorAll('[onclick^="openGenreGroup"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const type = btn.getAttribute('onclick').match(/'(.+?)'/)[1];
-      openGenreGroup(type);
-    });
-  });
+  
 
   // ✅ Прив’язка підкатегорій до фільтра
   document.querySelectorAll('.genre-btn').forEach(btn => {
