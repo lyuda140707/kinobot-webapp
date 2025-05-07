@@ -39,7 +39,7 @@
       color: #fff;
       font-weight: bold;
     }
-    .genre-main-btn, .genre-btn {
+    .genre-btn {
       background: #2a2a2a;
       color: #fff;
       border: none;
@@ -50,86 +50,62 @@
       cursor: pointer;
       transition: 0.2s ease-in-out;
     }
-    .genre-main-btn:hover, .genre-btn:hover {
+    .genre-btn:hover {
       background: #e50914;
       transform: scale(1.05);
-    }
-    .genre-button-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="category-menu" class="section active">
-    <h2>Категорії</h2>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-      <button class="genre-main-btn" data-type="genre">За жанром 🎯</button>
-      <button class="genre-main-btn" data-type="series">Серіали 📺</button>
-      <button class="genre-main-btn" data-type="cartoons">Мультики 👧</button>
+  <div id="home" class="section active" style="padding: 20px;">
+    <h2 style="margin-bottom: 10px;">🎬 Фільм дня</h2>
+    <div style="background-color:#1c1c1c; padding:15px; border-radius:15px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+      <img src="https://upload.wikimedia.org/wikipedia/en/4/4e/Game_plan_ver2.jpg" alt="The Game Plan" style="width:100%; border-radius:10px;">
+      <h3 style="margin:15px 0 5px;">The Game Plan</h3>
+      <p style="margin-bottom:15px;">Зірка футболу дізнається, що у нього є донька.</p>
+      <a href="https://t.me/KinoTochkaUA" target="_blank" style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:bold;">
+        ▶️ Дивитись
+      </a>
     </div>
-  </div>
 
-  <div id="genre-section" class="section">
-    <h3>Жанри фільмів</h3>
-    <div class="genre-button-container">
-      <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
-      <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
-      <button class="genre-btn" data-genre="Детективи">🕵️ Детективи</button>
-      <button class="genre-btn" data-genre="Драма">🎭 Драми</button>
-      <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
-      <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
-      <button class="genre-btn" data-genre="Документальні">📚 Документальні</button>
-      <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
-      <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
-      <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
-      <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінал</button>
-      <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
-      <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
-      <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
-      <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
-      <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
+    <div style="margin: 25px 0 10px;">
+      <h3>Жанри</h3>
+      <div style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;">
+        <button class="genre-btn" data-genre="Новинки">Новинки</button>
+        <button class="genre-btn" data-genre="Комедії">Комедії</button>
+        <button class="genre-btn" data-genre="Драми">Драми</button>
+        <button class="genre-btn" data-genre="Серіали">Серіали</button>
+        <button class="genre-btn" data-genre="Мультфільми">Мультфільми</button>
+      </div>
     </div>
-    <div id="genre-results" style="margin-top:20px;"></div>
-  </div>
 
-  <div id="series-section" class="section">
-    <h3>Жанри серіалів</h3>
-    <div class="genre-button-container">
-      <button class="genre-btn" data-genre="Українські">🇺🇦 Українські</button>
-      <button class="genre-btn" data-genre="Детективні">🕵️‍♀️ Детективні</button>
-      <button class="genre-btn" data-genre="Драми">🎭 Драми</button>
-      <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
-      <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
-      <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
-      <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
-      <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
-      <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінальні</button>
+    <div>
+      <h3>Добірки</h3>
+      <div style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;">
+        <div style="min-width:120px; background:#222; padding:10px; border-radius:10px;">
+          <img src="https://i.postimg.cc/XY1GbWNR/cry.jpg" style="width:100%; border-radius:8px;">
+          <p style="margin-top:5px; font-size:14px;">10 сліз під подушку</p>
+        </div>
+        <div style="min-width:120px; background:#222; padding:10px; border-radius:10px;">
+          <img src="https://i.postimg.cc/L6DGMgMz/daddy.jpg" style="width:100%; border-radius:8px;">
+          <p style="margin-top:5px; font-size:14px;">Батько і дитина</p>
+        </div>
+        <div style="min-width:120px; background:#222; padding:10px; border-radius:10px;">
+          <img src="https://i.postimg.cc/TYwF0mXB/ukr.jpg" style="width:100%; border-radius:8px;">
+          <p style="margin-top:5px; font-size:14px;">Тільки українською</p>
+        </div>
+      </div>
     </div>
-    <div id="genre-results" style="margin-top:20px;"></div>
-  </div>
-
-  <div id="cartoon-section" class="section">
-    <h3>Мультфільми</h3>
-    <div class="genre-button-container">
-      <button class="genre-btn" data-genre="Мультфільми">👧 Усі мультфільми</button>
-    </div>
-    <div id="genre-results" style="margin-top:20px;"></div>
   </div>
 
   <div class="nav">
-    <button class="active" onclick="switchTab('category-menu', this)">Категорії</button>
+    <button class="active" onclick="switchTab('home', this)">Головна</button>
+    <button onclick="switchTab('category-menu', this)">Категорії</button>
+    <button onclick="switchTab('favorites', this)">Улюблене</button>
+    <button onclick="switchTab('search', this)">Пошук</button>
   </div>
 
   <script>
-    let films = [];
-    async function loadFilms() {
-      const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
-      films = await res.json();
-    }
-
     function switchTab(tabId, btn) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
@@ -138,51 +114,6 @@
         btn.classList.add('active');
       }
     }
-
-    function filterByGenre(genre) {
-      const filtered = films.filter(film =>
-        film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
-      );
-
-      const container = document.querySelector(`#${document.querySelector('.section.active').id} #genre-results`);
-      container.innerHTML = `<h3 style="margin-top:10px;">🎬 ${genre}</h3>`;
-
-      if (filtered.length === 0) {
-        container.innerHTML += `<p>Нічого не знайдено 😢</p>`;
-        return;
-      }
-
-      container.innerHTML += filtered.map(film => `
-        <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
-          <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
-          <h3>${film['Назва']}</h3>
-          <p>${film['Опис']}</p>
-        </div>
-      `).join('');
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      loadFilms();
-      window.Telegram.WebApp.ready();
-
-      document.querySelectorAll('.genre-main-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const type = btn.dataset.type;
-          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-
-          if (type === 'genre') document.getElementById('genre-section').classList.add('active');
-          else if (type === 'series') document.getElementById('series-section').classList.add('active');
-          else if (type === 'cartoons') document.getElementById('cartoon-section').classList.add('active');
-        });
-      });
-
-      document.querySelectorAll('.genre-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const genre = btn.dataset.genre;
-          filterByGenre(genre);
-        });
-      });
-    });
   </script>
 </body>
 </html>
