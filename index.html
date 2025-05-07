@@ -111,32 +111,7 @@
 
 
   <script>
-    async function openBotWithQuery(query) {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-
-  if (!user) {
-    alert("❗️Не вдалося отримати Telegram ID");
-    return;
-  }
-
-  const user_id = user.id;
-  const backendUrl = "https://kinobot-qm9q.onrender.com/telegram-search";  // ⬅️ ЗАМІНИ!
-
-  console.log("📤 Надсилаємо запит:", { user_id, query });
-
-  const res = await fetch(backendUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ user_id, query })
-  });
-
-  const data = await res.json();
-  console.log("📥 Відповідь від сервера:", data);
-}
-
+    
 
     
     let films = [];
@@ -222,7 +197,8 @@
   container.querySelectorAll('.search-button').forEach(button => {
     button.addEventListener('click', () => {
   const query = button.getAttribute('data-query');
-  openBotWithQuery(query);
+  searchInBot(query);
+
 });
 
 
@@ -247,6 +223,37 @@
       e.target.blur();
     }
   });
+async function searchInBot(query) {
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    alert("❗️Не вдалося отримати Telegram ID");
+    return;
+  }
+
+  const user_id = user.id;
+  const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";  // ⚠️ Обов’язково заміни на правильний URL бекенду
+
+  console.log("📤 Надсилаємо запит:", { user_id, query });
+
+  const res = await fetch(backendUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ user_id, query })
+  });
+
+  const data = await res.json();
+  console.log("📥 Відповідь від сервера:", data);
+
+  if (data.found && data.videoUrl) {
+    window.open(data.videoUrl, '_blank');
+  } else {
+    alert("Фільм не знайдено 😢");
+  }
+}
 
 
 </script>
