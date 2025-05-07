@@ -16,3 +16,21 @@
 button {
   pointer-events: auto;
 }
+
+.genre-btn {
+  background: #2a2a2a;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 18px;
+  font-size: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.genre-btn:hover {
+  background: #e50914;
+  color: #fff;
+  transform: scale(1.05);
+}
