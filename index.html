@@ -122,7 +122,12 @@
      window.Telegram.WebApp.ready();   // ✅ ОБОВʼЯЗКОВО!
       loadFilms();
     });
-
+function openBotWithQuery(query) {
+  console.log("🔍 Надіслано до бота:", query);
+  const botUsername = "UAKinoTochka_bot";
+  const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
+  window.open(url, '_blank');
+}
 
   
     function switchTab(tabId, btn) {
