@@ -249,8 +249,8 @@ async function searchInBot(query) {
   console.log("📥 Відповідь від сервера:", data);
 
   if (data.found && data.videoUrl) {
-    alert("🎥 Переходимо на відео: " + data.videoUrl);
-    window.location.href = data.videoUrl;  // ⬅️ Новий надійний варіант
+    window.location.href = data.videoUrl;
+
   } else {
     alert("Фільм не знайдено 😢");
   }
