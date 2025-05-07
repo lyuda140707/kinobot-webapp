@@ -1,3 +1,4 @@
+/* Кнопки "За жанром", "Серіали", "Мультики" */
 .genre-main-btn {
   background: linear-gradient(135deg, #e50914, #ff6a00);
   border: none;
@@ -20,7 +21,23 @@
   color: #fff;
 }
 
-/* Кнопки жанрів */
+/* Контейнер для кнопок зверху */
+.genre-main-wrapper {
+  background: #1c1c1c;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  margin-bottom: 20px;
+}
+.genre-main-buttons,
+#genre-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Підкатегорії */
 .genre-btn {
   background: #333;
   border: none;
@@ -38,8 +55,11 @@
   color: #fff;
   transform: scale(1.03);
 }
+.genre-button-container {
+  margin-top: 24px;
+}
 
-/* Горизонтальна прокрутка кнопок */
+/* Горизонтальна прокрутка */
 .genre-scroll {
   display: flex;
   overflow-x: auto;
@@ -53,23 +73,4 @@
 .genre-scroll > .genre-btn {
   scroll-snap-align: start;
   flex: 0 0 auto;
-}
-
-/* Відступ зверху у підкатегорій */
-.genre-button-container {
-  margin-top: 24px;
-}
-.genre-main-wrapper {
-  background: #1b1b1b;
-  padding: 16px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  margin: 10px;
-}
-
-.genre-main-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
 }
