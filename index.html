@@ -220,15 +220,11 @@
 
   // ⬇️ обовʼязково після вставки кнопок
   container.querySelectorAll('.search-button').forEach(button => {
-    <input
-  type="text"
-  id="searchInput"
-  placeholder="Введіть назву або жанр..."
-  style="width:100%;padding:10px;"
->
-<button onclick="searchFilms()" style="margin-top:10px; background:#444; color:#fff; padding:10px 20px; border:none; border-radius:5px;">
-  🔍 Знайти
-</button>
+    button.addEventListener('click', () => {
+  const query = button.getAttribute('data-query');
+  openBotWithQuery(query);
+});
+
 
   });
 }
