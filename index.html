@@ -198,11 +198,20 @@
 
   // ✅ Прив’язка кнопок "За жанром", "Серіали", "Мультики"
   document.querySelectorAll('.genre-main-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const group = btn.dataset.group;
-      openGenreGroup(group);
-    });
+  btn.addEventListener('click', () => {
+    const group = btn.dataset.group;
+
+    // Зняти клас active з усіх
+    document.querySelectorAll('.genre-main-btn').forEach(b => b.classList.remove('active'));
+
+    // Додати активний клас до натиснутої
+    btn.classList.add('active');
+
+    // Показати відповідну групу
+    openGenreGroup(group);
   });
+});
+
 
   // ✅ Прив’язка підкатегорій до фільтра
   document.querySelectorAll('.genre-btn').forEach(btn => {
