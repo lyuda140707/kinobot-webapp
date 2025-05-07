@@ -111,6 +111,18 @@
 
 
   <script>
+    function openBotWithQuery(query) {
+  console.log("Натиснуто:", query); // 🧪 перевірка
+  const botUsername = "UAKinoTochka_bot";
+  const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
+  if (Telegram.WebApp?.openTelegramLink) {
+    Telegram.WebApp.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+    
     let films = [];
   
     async function loadFilms() {
@@ -164,36 +176,41 @@
       container.innerHTML = html;
     }
   
-    function searchFilms() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const results = films.filter(film =>
-        film['Назва'].toLowerCase().includes(query) ||
-        film['Жанр'].toLowerCase().includes(query) ||
-        film['Опис'].toLowerCase().includes(query)
-      );
-  
-      const container = document.getElementById('searchResults');
-      if (results.length === 0) {
-        container.innerHTML = '<p>Нічого не знайдено 😢</p>';
-        return;
-      }
-  
-      container.innerHTML = results.map(film => `
-  <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
-    <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
-    <h3>${film['Назва']}</h3>
-    <p>${film['Опис']}</p>
-    
-   <button onclick="openBotWithQuery('${film['Назва'].replace(/'/g, "\\'")}')"
-  style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
-  ▶️ Пошукати в боті
-</button>
+   function searchFilms() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const results = films.filter(film =>
+    film['Назва'].toLowerCase().includes(query) ||
+    film['Жанр'].toLowerCase().includes(query) ||
+    film['Опис'].toLowerCase().includes(query)
+  );
 
+  const container = document.getElementById('searchResults');
+  if (results.length === 0) {
+    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    return;
+  }
 
-  </div>
-`).join('');
+  container.innerHTML = results.map(film => `
+    <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
+      <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
+      <h3>${film['Назва']}</h3>
+      <p>${film['Опис']}</p>
+      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
+        style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
+        ▶️ Пошукати в боті
+      </button>
+    </div>
+  `).join('');
 
-    }
+  // ⬇️ обовʼязково після вставки кнопок
+  container.querySelectorAll('.search-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const query = button.getAttribute('data-query');
+      openBotWithQuery(query);
+    });
+  });
+}
+
 
       // Ховати клавіатуру при натисканні на будь-що, крім input
   document.addEventListener('click', (e) => {
@@ -213,19 +230,7 @@
     }
   });
 
-function openBotWithQuery(query) {
-  const botUsername = "UAKinoTochka_bot";
-  const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
-  if (window.Telegram?.WebApp?.openTelegramLink) {
-    Telegram.WebApp.openTelegramLink(url);  // ✅ працює в WebApp
-  } else {
-    window.open(url, '_blank');             // ✅ fallback у браузері
-  }
-}
 
-
-
-  
 </script>
   
   
