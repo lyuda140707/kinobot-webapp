@@ -183,10 +183,13 @@
     <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
     <h3>${film['Назва']}</h3>
     <p>${film['Опис']}</p>
-    <button onclick="openBotWithQuery('${film['Назва'].replace(/'/g, "\\'")}')" 
-      style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
-      ▶️ Пошукати в боті
-    </button>
+    
+    <a href="https://t.me/UAKinoTochka_bot?start=${encodeURIComponent(film['Назва'])}" 
+   target="_blank"
+   style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; text-decoration:none; margin-top:10px;">
+   ▶️ Пошукати в боті
+</a>
+
   </div>
 `).join('');
 
