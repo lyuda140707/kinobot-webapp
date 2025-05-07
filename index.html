@@ -211,15 +211,17 @@
   });
 
 function openBotWithQuery(query) {
+  console.log("📤 Виклик openBotWithQuery:", query);
   const botUsername = "UAKinoTochka_bot";
   const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
 
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
-    Telegram.WebApp.openTelegramLink(url); // ✅ працює в Telegram WebApp
+    Telegram.WebApp.openTelegramLink(url);
   } else {
-    window.open(url, '_blank'); // ✅ fallback для браузера
+    window.open(url, '_blank');
   }
 }
+
 
   
 </script>
