@@ -54,3 +54,6 @@
   transform: scale(1.03);
 }
 
+.genre-button-container {
+  margin-top: 24px;
+}
