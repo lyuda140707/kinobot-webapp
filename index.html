@@ -393,7 +393,11 @@ async function searchInBot(query) {
   // Сховати всі групи
   document.getElementById("group-films").style.display = "none";
   document.getElementById("group-series").style.display = "none";
-  document.getElementById("group-cartoons")?.style.display = "none";
+  const cartoonsGroup = document.getElementById("group-cartoons");
+if (cartoonsGroup) {
+  cartoonsGroup.style.display = "none";
+}
+
 
   // Показати активну
   document.getElementById(`group-${group}`).style.display = "flex";
