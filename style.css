@@ -1,40 +1,26 @@
 .genre-main-btn {
-  background: #333;
+  background: linear-gradient(135deg, #e50914, #ff6a00);
   border: none;
   border-radius: 25px;
-  padding: 10px 16px;
+  padding: 12px 18px;
   font-size: 16px;
   font-weight: bold;
   color: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
 }
-
 .genre-main-btn:hover {
-  background: #444;
-  transform: scale(1.03);
+  background: linear-gradient(135deg, #ff1a2a, #ff7a00);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
 }
-
 .genre-main-btn.active {
   background: #e50914;
   color: #fff;
 }
 
-.genre-scroll {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding: 10px 0;
-  scroll-snap-type: x mandatory;
-}
-.genre-scroll::-webkit-scrollbar {
-  display: none; /* ховає прокрутку */
-}
-.genre-scroll > .genre-btn {
-  scroll-snap-align: start;
-  flex: 0 0 auto; /* не дає кнопкам переноситись */
-}
+/* Кнопки жанрів */
 .genre-btn {
   background: #333;
   border: none;
@@ -47,13 +33,29 @@
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
 }
-
 .genre-btn:hover {
   background: #e50914;
   color: #fff;
   transform: scale(1.03);
 }
 
+/* Горизонтальна прокрутка кнопок */
+.genre-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px 0;
+  scroll-snap-type: x mandatory;
+}
+.genre-scroll::-webkit-scrollbar {
+  display: none;
+}
+.genre-scroll > .genre-btn {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+/* Відступ зверху у підкатегорій */
 .genre-button-container {
   margin-top: 24px;
 }
