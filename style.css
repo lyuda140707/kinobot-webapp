@@ -20,3 +20,18 @@
   background: #e50914;
   color: #fff;
 }
+
+.genre-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px 0;
+  scroll-snap-type: x mandatory;
+}
+.genre-scroll::-webkit-scrollbar {
+  display: none; /* ховає прокрутку */
+}
+.genre-scroll > .genre-btn {
+  scroll-snap-align: start;
+  flex: 0 0 auto; /* не дає кнопкам переноситись */
+}
