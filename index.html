@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KinoBot Web App</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
-      background-color: #111;
+      background: #111;
       color: #fff;
+      font-family: sans-serif;
     }
     .section {
       display: none;
@@ -40,307 +39,150 @@
       color: #fff;
       font-weight: bold;
     }
+    .genre-main-btn, .genre-btn {
+      background: #2a2a2a;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      font-size: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      cursor: pointer;
+      transition: 0.2s ease-in-out;
+    }
+    .genre-main-btn:hover, .genre-btn:hover {
+      background: #e50914;
+      transform: scale(1.05);
+    }
+    .genre-button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
   </style>
-  
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 </head>
 <body>
-
-    <div id="home" class="section active" style="padding: 20px;">
-  <h2 style="margin-bottom: 10px;">🎬 Фільм дня</h2>
-  <div style="background-color:#1c1c1c; padding:15px; border-radius:15px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-    <img src="https://upload.wikimedia.org/wikipedia/en/4/4e/Game_plan_ver2.jpg" alt="The Game Plan" style="width:100%; border-radius:10px;">
-    <h3 style="margin:15px 0 5px;">The Game Plan</h3>
-    <p style="margin-bottom:15px;">Зірка футболу дізнається, що у нього є донька.</p>
-    <a href="https://t.me/KinoTochkaUA" target="_blank" style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:bold;">
-      ▶️ Дивитись
-    </a>
-  </div>
-
-  <div style="margin: 25px 0 10px;">
-    <h3>Жанри</h3>
-    <div style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;">
-      <button class="genre-btn" data-genre="Новинки">Новинки</button>
-      <button class="genre-btn" data-genre="Комедії">Комедії</button>
-      <button class="genre-btn" data-genre="Драми">Драми</button>
-      <button class="genre-btn" data-genre="Серіали">Серіали</button>
-      <button class="genre-btn" data-genre="Мультфільми">Мультфільми</button>
+  <div id="category-menu" class="section active">
+    <h2>Категорії</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+      <button class="genre-main-btn" data-type="genre">За жанром 🎯</button>
+      <button class="genre-main-btn" data-type="series">Серіали 📺</button>
+      <button class="genre-main-btn" data-type="cartoons">Мультики 👧</button>
     </div>
   </div>
 
-  <div>
-    <h3>Добірки</h3>
-    <div style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;">
-      <div style="min-width:120px; background:#222; padding:10px; border-radius:10px;">
-        <img src="https://i.postimg.cc/XY1GbWNR/cry.jpg" style="width:100%; border-radius:8px;">
-        <p style="margin-top:5px; font-size:14px;">10 сліз під подушку</p>
-      </div>
-      <div style="min-width:120px; background:#222; padding:10px; border-radius:10px;">
-        <img src="https://i.postimg.cc/L6DGMgMz/daddy.jpg" style="width:100%; border-radius:8px;">
-        <p style="margin-top:5px; font-size:14px;">Батько і дитина</p>
-      </div>
-      <div style="min-width:120px; background:#222; padding:10px; border-radius:10px;">
-        <img src="https://i.postimg.cc/TYwF0mXB/ukr.jpg" style="width:100%; border-radius:8px;">
-        <p style="margin-top:5px; font-size:14px;">Тільки українською</p>
-      </div>
+  <div id="genre-section" class="section">
+    <h3>Жанри фільмів</h3>
+    <div class="genre-button-container">
+      <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
+      <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
+      <button class="genre-btn" data-genre="Детективи">🕵️ Детективи</button>
+      <button class="genre-btn" data-genre="Драма">🎭 Драми</button>
+      <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
+      <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
+      <button class="genre-btn" data-genre="Документальні">📚 Документальні</button>
+      <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
+      <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
+      <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
+      <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінал</button>
+      <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
+      <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
+      <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
+      <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
+      <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
     </div>
-  </div>
-</div>
-
-      </div>
-      
-
- <!-- 🎞️ Категорії -->
-<div id="categories" class="section">
-  <h2>Категорії</h2>
-  <div id="genre-buttons" style="display:flex; flex-wrap:wrap; gap:10px; padding:10px;">
-    <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
-    <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
-    <button class="genre-btn" data-genre="Детективи">🕵️ Детективи</button>
-    <button class="genre-btn" data-genre="Драма">🎭 Драми</button>
-    <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
-    <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
-    <button class="genre-btn" data-genre="Документальні">📚 Документальні</button>
-    <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
-    <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
-    <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
-    <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінал</button>
-    <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
-    <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
-    <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
-    <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
-    <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
-  </div>
-  <div id="genre-results" style="margin-top:20px;"></div>
-</div>
-
-
-
-  <!-- ❤️ Улюблене -->
-  <div id="favorites" class="section">
-    <h2>Улюблене</h2>
-    <p>Список збережених фільмів...</p>
+    <div id="genre-results" style="margin-top:20px;"></div>
   </div>
 
-  <!-- 🔍 Пошук -->
-  <div id="search" class="section">
-    <h2>Пошук</h2>
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="Введіть назву або жанр..."
-      style="width:100%;padding:10px;"
-      oninput="searchFilms()"
-    />
-    <div id="searchResults" style="margin-top: 20px;"></div>
+  <div id="series-section" class="section">
+    <h3>Жанри серіалів</h3>
+    <div class="genre-button-container">
+      <button class="genre-btn" data-genre="Українські">🇺🇦 Українські</button>
+      <button class="genre-btn" data-genre="Детективні">🕵️‍♀️ Детективні</button>
+      <button class="genre-btn" data-genre="Драми">🎭 Драми</button>
+      <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
+      <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
+      <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
+      <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
+      <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
+      <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінальні</button>
+    </div>
+    <div id="genre-results" style="margin-top:20px;"></div>
   </div>
-  
 
-  <!-- Меню навігації -->
+  <div id="cartoon-section" class="section">
+    <h3>Мультфільми</h3>
+    <div class="genre-button-container">
+      <button class="genre-btn" data-genre="Мультфільми">👧 Усі мультфільми</button>
+    </div>
+    <div id="genre-results" style="margin-top:20px;"></div>
+  </div>
+
   <div class="nav">
-    <button class="active" onclick="switchTab('home', this)">Головна</button>
-    <button onclick="switchTab('categories', this)">Категорії</button>
-    <button onclick="switchTab('favorites', this)">Улюблене</button>
-    <button onclick="switchTab('search', this)">Пошук</button>
+    <button class="active" onclick="switchTab('category-menu', this)">Категорії</button>
   </div>
-
-
 
   <script>
-    
-
-    
     let films = [];
-  
     async function loadFilms() {
       const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
       films = await res.json();
     }
-  
-    window.addEventListener('DOMContentLoaded', () => {
-  window.Telegram.WebApp.ready();
-  loadFilms();
 
-  // Прив’язка кнопок жанрів
-  document.querySelectorAll('.genre-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const genre = btn.getAttribute('data-genre');
-      filterByGenre(genre);
-      switchTab('categories', document.querySelector('[onclick*="categories"]'));
-    });
-  });
-});
-
-
-
-  
     function switchTab(tabId, btn) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
-  
-      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-  
-      if (tabId === 'favorites') {
-        showFavorites();
+      if (btn) {
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
       }
-    }
-  
-    function addToFavorites(title, description) {
-      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-      favorites.push({ title, description });
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      alert('Додано в улюблене 💛');
-    }
-  
-    function showFavorites() {
-      const container = document.getElementById('favorites');
-      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-  
-      let html = '<h2>Улюблене</h2>';
-      if (favorites.length === 0) {
-        html += '<p>Нічого не збережено 😢</p>';
-      } else {
-        favorites.forEach(item => {
-          html += `
-            <div style="background:#1c1c1c; padding:10px; margin-bottom:10px; border-radius:8px;">
-              <h3>${item.title}</h3>
-              <p>${item.description}</p>
-            </div>
-          `;
-        });
-      }
-      container.innerHTML = html;
     }
 
     function filterByGenre(genre) {
-  const filtered = films.filter(film =>
-    film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
-  );
+      const filtered = films.filter(film =>
+        film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
+      );
 
-  const container = document.getElementById('genre-results');
-  container.innerHTML = `<h3 style="margin-top:10px;">🎬 ${genre}</h3>`;
+      const container = document.querySelector(`#${document.querySelector('.section.active').id} #genre-results`);
+      container.innerHTML = `<h3 style="margin-top:10px;">🎬 ${genre}</h3>`;
 
-  if (filtered.length === 0) {
-    container.innerHTML += `<p>Нічого не знайдено 😢</p>`;
-    return;
-  }
-
-  container.innerHTML += filtered.map(film => `
-    <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
-      <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-        style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
-        ▶️ Пошукати в боті
-      </button>
-    </div>
-  `).join('');
-
-  // Додаємо слухачі на кнопки
-  container.querySelectorAll('.search-button').forEach(button => {
-    button.addEventListener('click', () => {
-      const query = button.getAttribute('data-query');
-      searchInBot(query);
-    });
-  });
-}
-
-  
-   function searchFilms() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  const results = films.filter(film =>
-    film['Назва'].toLowerCase().includes(query) ||
-    film['Жанр'].toLowerCase().includes(query) ||
-    film['Опис'].toLowerCase().includes(query)
-  );
-
-  const container = document.getElementById('searchResults');
-  if (results.length === 0) {
-    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
-    return;
-  }
-
-  container.innerHTML = results.map(film => `
-    <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
-      <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-        style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
-        ▶️ Пошукати в боті
-      </button>
-    </div>
-  `).join('');
-
-  // ⬇️ обовʼязково після вставки кнопок
-  container.querySelectorAll('.search-button').forEach(button => {
-    button.addEventListener('click', () => {
-  const query = button.getAttribute('data-query');
-  searchInBot(query);
-
-});
-
-
-  });
-}
-
-
-      // Ховати клавіатуру при натисканні на будь-що, крім input
-  document.addEventListener('click', (e) => {
-    if (e.target.tagName !== 'INPUT') {
-      const active = document.activeElement;
-      if (active && typeof active.blur === 'function') {
-        active.blur();
+      if (filtered.length === 0) {
+        container.innerHTML += `<p>Нічого не знайдено 😢</p>`;
+        return;
       }
+
+      container.innerHTML += filtered.map(film => `
+        <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
+          <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
+          <h3>${film['Назва']}</h3>
+          <p>${film['Опис']}</p>
+        </div>
+      `).join('');
     }
-  });
 
-  // Ховати клавіатуру при Enter у полі пошуку
-  document.getElementById('searchInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      e.target.blur();
-    }
-  });
-async function searchInBot(query) {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFilms();
+      window.Telegram.WebApp.ready();
 
-  if (!user) {
-    alert("❗️Не вдалося отримати Telegram ID");
-    return;
-  }
+      document.querySelectorAll('.genre-main-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.type;
+          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
 
-  const user_id = user.id;
-  const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";
+          if (type === 'genre') document.getElementById('genre-section').classList.add('active');
+          else if (type === 'series') document.getElementById('series-section').classList.add('active');
+          else if (type === 'cartoons') document.getElementById('cartoon-section').classList.add('active');
+        });
+      });
 
-  console.log("📤 Надсилаємо запит:", { user_id, query });
-
-  const res = await fetch(backendUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ user_id, query })
-  });
-
-  const data = await res.json();
-  console.log("📥 Відповідь від сервера:", data);
-
-  if (data.found && data.videoUrl) {
-    window.location.href = data.videoUrl;
-
-  } else {
-    alert("Фільм не знайдено 😢");
-  }
-}
-
-
-</script>
-  
-  
+      document.querySelectorAll('.genre-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const genre = btn.dataset.genre;
+          filterByGenre(genre);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
