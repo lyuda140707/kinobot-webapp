@@ -59,3 +59,17 @@
 .genre-button-container {
   margin-top: 24px;
 }
+.genre-main-wrapper {
+  background: #1b1b1b;
+  padding: 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  margin: 10px;
+}
+
+.genre-main-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
