@@ -184,11 +184,11 @@
     <h3>${film['Назва']}</h3>
     <p>${film['Опис']}</p>
     
-    <a href="https://t.me/UAKinoTochka_bot?start=${encodeURIComponent(film['Назва'])}" 
-   target="_blank"
-   style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; text-decoration:none; margin-top:10px;">
-   ▶️ Пошукати в боті
-</a>
+   <button onclick="openBotWithQuery('${film['Назва'].replace(/'/g, "\\'")}')"
+  style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
+  ▶️ Пошукати в боті
+</button>
+
 
   </div>
 `).join('');
@@ -214,16 +214,15 @@
   });
 
 function openBotWithQuery(query) {
-  console.log("📤 Виклик openBotWithQuery:", query);
   const botUsername = "UAKinoTochka_bot";
   const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
-
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
-    Telegram.WebApp.openTelegramLink(url);
+  if (window.Telegram?.WebApp?.openTelegramLink) {
+    Telegram.WebApp.openTelegramLink(url);  // ✅ працює в WebApp
   } else {
-    window.open(url, '_blank');
+    window.open(url, '_blank');             // ✅ fallback у браузері
   }
 }
+
 
 
   
