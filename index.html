@@ -184,7 +184,8 @@
 
           <h3>${film['Назва']}</h3>
           <p>${film['Опис']}</p>
-         <button onclick="searchInBot('${film['Назва']}')"
+         <button onclick="openBotWithQuery('${film['Назва']}')" ...>▶️ Пошукати в боті</button>
+
   style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
   ▶️ Пошукати в боті
 </button>
@@ -214,15 +215,10 @@
 function openBotWithQuery(query) {
   const botUsername = "UAKinoTochka_bot";
   const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
-  location.href = url; // спроба редиректу прямо з WebApp
+  window.open(url, '_blank'); // відкриває бот у новому вікні
 }
 
-function searchInBot(title) {
-  const user = Telegram.WebApp.initDataUnsafe?.user;
-  if (!user) {
-    alert("Не вдалось визначити користувача Telegram.");
-    return;
-  }
+
 
   fetch("https://kinobot-qm9q.onrender.com/telegram-search", {
 
