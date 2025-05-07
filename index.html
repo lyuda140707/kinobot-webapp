@@ -111,16 +111,32 @@
 
 
   <script>
-    function openBotWithQuery(query) {
-  console.log("Натиснуто:", query); // 🧪 перевірка
-  const botUsername = "UAKinoTochka_bot";
-  const url = `https://t.me/${botUsername}?start=${encodeURIComponent(query)}`;
-  if (Telegram.WebApp?.openTelegramLink) {
-    Telegram.WebApp.openTelegramLink(url);
-  } else {
-    window.open(url, '_blank');
+    async function openBotWithQuery(query) {
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    alert("❗️Не вдалося отримати Telegram ID");
+    return;
   }
+
+  const user_id = user.id;
+  const backendUrl = "https://твій-домен.onrender.com/telegram-search"; // ⬅️ ЗАМІНИ!
+
+  console.log("📤 Надсилаємо запит:", { user_id, query });
+
+  const res = await fetch(backendUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ user_id, query })
+  });
+
+  const data = await res.json();
+  console.log("📥 Відповідь від сервера:", data);
 }
+
 
     
     let films = [];
