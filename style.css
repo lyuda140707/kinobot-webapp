@@ -7,10 +7,12 @@
   font-size: 16px;
   font-weight: bold;
   color: #fff;
-  box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
 }
+
+
 .genre-main-btn:hover {
   background: linear-gradient(135deg, #ff1a2a, #ff7a00);
   transform: scale(1.05);
