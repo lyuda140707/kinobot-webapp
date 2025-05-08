@@ -281,12 +281,19 @@
     }
 
     function filterByGenre(genre) {
-  const filtered = films.filter(film =>
-    film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
-  );
-
   const container = document.getElementById('genre-results');
   container.innerHTML = `<h3 style="margin-top:10px;">🎬 ${genre}</h3>`;
+
+  let filtered;
+
+  if (genre === 'Новинки') {
+    // Беремо останні 10 фільмів
+    filtered = films.slice(-10).reverse(); // останні, у зворотному порядку
+  } else {
+    filtered = films.filter(film =>
+      film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
+    );
+  }
 
   if (filtered.length === 0) {
     container.innerHTML += `<p>Нічого не знайдено 😢</p>`;
@@ -294,25 +301,23 @@
   }
 
   container.innerHTML += filtered.map(film => `
-  <div style="
-    background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  ">
-    <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-    <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
-    <p style="opacity:0.85;">${film['Опис']}</p>
-    <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-      style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
-      ▶️ Пошукати в боті
-    </button>
-  </div>
-`).join('');
+    <div style="
+      background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    ">
+      <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+      <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
+      <p style="opacity:0.85;">${film['Опис']}</p>
+      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
+        style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
+        ▶️ Пошукати в боті
+      </button>
+    </div>
+  `).join('');
 
-
-  // Додаємо слухачі на кнопки
   container.querySelectorAll('.search-button').forEach(button => {
     button.addEventListener('click', () => {
       const query = button.getAttribute('data-query');
@@ -320,6 +325,7 @@
     });
   });
 }
+
 
   
    function searchFilms() {
