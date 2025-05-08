@@ -220,22 +220,23 @@
 }
 
 .back-button {
-  background: transparent;
+  background: linear-gradient(135deg, #ff004c, #ff9100);
   color: #fff;
-  border: 2px solid #e50914;
-  border-radius: 8px;
-  padding: 8px 16px;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
   font-weight: bold;
-  font-size: 15px;
+  border-radius: 30px;
   cursor: pointer;
-  margin-bottom: 12px;
-  transition: 0.2s;
+  box-shadow: 0 0 12px rgba(255, 0, 76, 0.6), 0 0 20px rgba(255, 145, 0, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .back-button:hover {
-  background: #e50914;
-  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 0 18px rgba(255, 0, 76, 0.9), 0 0 30px rgba(255, 145, 0, 0.7);
 }
+
 
 
 
