@@ -115,10 +115,58 @@
   </div>
 
   <div id="categories" class="section">
-    <h2>Категорії</h2>
-    <button class="back-button" onclick="switchTab('home', document.querySelector('[data-tab=home]'))">⬅️ Назад</button>
-    <div id="genre-results"></div>
+  <h2>Категорії</h2>
+  <button class="back-button" onclick="switchTab('home', document.querySelector('[data-tab=home]'))">⬅️ Назад</button>
+
+  
+
+    <!-- 🔽 Підкатегорії: За жанром -->
+<div id="group-films" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
+  <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
+  <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
+  <button class="genre-btn" data-genre="Детективи">🕵️ Детективи</button>
+  <button class="genre-btn" data-genre="Драми">🎭 Драми</button>
+  <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
+  <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
+  <button class="genre-btn" data-genre="Документальні">📚 Документальні</button>
+  <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
+  <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
+  <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
+  <button class="genre-btn" data-genre="Кримінал">🚔 Кримінал</button>
+  <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
+  <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
+  <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
+  <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
+  <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
+</div>
+
+<!-- 🔽 Підкатегорії: Серіали -->
+<div id="group-series" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
+  <button class="genre-btn" data-genre="Українські">🇺🇦 Українські</button>
+  <button class="genre-btn" data-genre="Детективні">🕵️‍♀️ Детективні</button>
+  <button class="genre-btn" data-genre="Драматичні">🎭 Драматичні</button>
+  <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
+  <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
+  <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
+  <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
+  <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
+  <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінальні</button>
+</div>
+
+<!-- 🔽 Підкатегорії: Мультики -->
+<div id="group-cartoons" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
+  <button class="genre-btn" data-genre="Дитячі">🧸 Дитячі</button>
+  <button class="genre-btn" data-genre="Сімейні мультфільми">👨‍👩‍👦 Сімейні</button>
+</div>
+
   </div>
+
+  
+
+  
+  <div id="genre-results" style="margin-top:30px;"></div>
+</div>
+
 
   <div id="favorites" class="section">
     <h2>Улюблене</h2>
@@ -229,7 +277,19 @@
         document.getElementById("loading-indicator").style.display = "none";
       });
     }
+    
+    function openGenreGroup(group) {
+  // Ховаємо всі групи
+  document.getElementById("group-films").style.display = "none";
+  document.getElementById("group-series").style.display = "none";
+  document.getElementById("group-cartoons").style.display = "none";
+      
+  // Показуємо тільки потрібну
+  const block = document.getElementById("group-" + group);
+  if (block) block.style.display = "flex";
+}
 
+  
     document.addEventListener('DOMContentLoaded', () => {
       Telegram.WebApp.ready();
       loadFilms();
