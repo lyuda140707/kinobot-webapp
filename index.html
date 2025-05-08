@@ -104,14 +104,17 @@
   <div id="home" class="section active">
     <h2>🎬 Фільм дня</h2>
     <div id="film-of-the-day"></div>
-    <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px;">
-      <span class="loader"></span>
-      <div style="margin-top:8px;">Зачекайте...</div>
-    </div>
+      <div id="home-loading" style="text-align:center; margin-top:30px;">
+    <span class="loader"></span>
+    <div style="margin-top:8px;">Завантаження...</div>
+  </div>
+
+    
     <h3>Жанри</h3>
-    <div id="genres" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+    <div id="genres" style="display:none; flex-wrap:wrap; gap:10px;"></div>
     <h3 style="margin-top:25px">Добірки</h3>
-    <div id="collections" style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;"></div>
+    <div id="collections" style="display:none; overflow-x:auto; gap:10px; padding:10px 0;"></div>
+
   </div>
 
   <div id="categories" class="section">
@@ -130,20 +133,20 @@
    <!-- 🔽 Підкатегорії: За жанром -->
 <div id="group-films" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
   <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
-  <button class="genre-btn" data-genre="Комедія">😂 Комедії</button>
-  <button class="genre-btn" data-genre="Детектив">🕵️ Детективи</button>
-  <button class="genre-btn" data-genre="Драма">🎭 Драми</button>
-  <button class="genre-btn" data-genre="Військовий">🪖 Військові</button>
+  <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
+  <button class="genre-btn" data-genre="Детектив">🕵️ Детектив</button>
+  <button class="genre-btn" data-genre="Драми">🎭 Драми</button>
+  <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
   <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
-  <button class="genre-btn" data-genre="Документальний">📚 Документальні</button>
-  <button class="genre-btn" data-genre="Трилер">😱 Трилери</button>
-  <button class="genre-btn" data-genre="Сімейний">👨‍👩‍👧 Сімейні</button>
-  <button class="genre-btn" data-genre="Мелодрама">💔 Мелодрами</button>
+  <button class="genre-btn" data-genre="Документальний">📚 Документальний</button>
+  <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
+  <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
+  <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
   <button class="genre-btn" data-genre="Кримінал">🚔 Кримінал</button>
   <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
-  <button class="genre-btn" data-genre="Пригода">🌍 Пригоди</button>
-  <button class="genre-btn" data-genre="Історичний">🏰 Історичні</button>
-  <button class="genre-btn" data-genre="Романтичний">💘 Романтичні</button>
+  <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
+  <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
+  <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
   <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
 </div>
 
@@ -197,12 +200,15 @@
     let films = [];
 
     async function loadFilms() {
-      const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
-      films = await res.json();
-      showFilmOfTheDay();
-      showCollections();
-      showGenres();
-    }
+  document.getElementById('home-loading').style.display = 'block';
+  const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
+  films = await res.json();
+  showFilmOfTheDay();
+  showCollections();
+  showGenres();
+  document.getElementById('home-loading').style.display = 'none';
+}
+
 
     function showFilmOfTheDay() {
       const film = films[Math.floor(Math.random() * films.length)];
@@ -217,6 +223,8 @@
     function showGenres() {
       const genres = ['Новинки', 'Комедії', 'Драми', 'Серіали', 'Мультфільми'];
       document.getElementById('genres').innerHTML = genres.map(g => `<button class="genre-btn" onclick="filterByGenre('${g}')">${g}</button>`).join('');
+      document.getElementById('genres').style.display = 'flex';
+
     }
 
     function showCollections() {
@@ -229,6 +237,8 @@
           <p>${name}</p>
         </div>`;
       }).join('');
+      document.getElementById('collections').style.display = 'flex';
+
     }
 
     function switchTab(tabId, btn = null) {
