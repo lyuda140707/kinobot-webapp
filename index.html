@@ -462,7 +462,8 @@ if (cartoonsGroup) {
   container.innerHTML = `
   <img id="film-img" src="${film['Фото']}" alt="${film['Назва']}" />
   <div class="film-title-overlay" id="film-title">${film['Назва']}</div>
-  <a id="film-link" href="${film['Посилання']}" target="_blank" class="film-day-button">▶️ Дивитись</a>
+  <button class="film-day-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+
 `;
 
 }
