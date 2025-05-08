@@ -231,15 +231,17 @@
     function showCollections(collections) {
   const container = document.getElementById('collections');
   container.innerHTML = collections.map(name => {
-    const example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
+    const example = films.find(f => (f['Добірка'] || '').toLowerCase() === name.toLowerCase());
+    const image = example?.Фото || 'https://via.placeholder.com/150';
     return `
       <div class="collection-card" onclick="getFilmsByCollection('${name}')">
-        <img src="${example?.Фото || 'https://via.placeholder.com/150'}" alt="${name}" />
+        <img src="${image}" alt="${name}" />
         <p>${name}</p>
       </div>
     `;
   }).join('');
 }
+
 
     
 
