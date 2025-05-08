@@ -263,16 +263,7 @@
   });
 });
 
-  // Привʼязка жанрів у "Фільм дня" і категоріях
-document.querySelectorAll('.genre-btn').forEach(btn => {
-  const genre = btn.dataset.genre;
-  if (genre) {
-    btn.addEventListener('click', () => {
-      switchTab('categories', document.querySelector('[data-tab="categories"]'));
-      filterByGenre(genre);
-    });
-  }
-});
+ 
       
   // ✅ Прив’язка кнопок нижнього меню
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -482,7 +473,6 @@ if (cartoonsGroup) {
 }
 
     function showFilmOfTheDay() {
-  const container = document.getElementById("film-of-the-day");
   if (!films.length) return;
 
   const todayKey = new Date().toDateString();
@@ -495,6 +485,18 @@ if (cartoonsGroup) {
     film = films[Math.floor(Math.random() * films.length)];
     localStorage.setItem("filmOfTheDay", JSON.stringify({ date: todayKey, film }));
   }
+
+  // ✅ Замість innerHTML — просто оновлюємо існуючі елементи
+  document.getElementById("film-img").src = film['Фото'];
+  document.getElementById("film-img").alt = film['Назва'];
+  document.getElementById("film-title").textContent = film['Назва'];
+
+  const button = document.querySelector(".film-day-button");
+  if (button) {
+    button.setAttribute("onclick", `searchInBot('${film['Назва'].replace(/'/g, "\\'")}')`);
+  }
+}
+
 
   container.innerHTML = `
   <img id="film-img" src="${film['Фото']}" alt="${film['Назва']}" />
