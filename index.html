@@ -231,23 +231,19 @@
     function showCollections(collections) {
   const container = document.getElementById('collections');
   container.innerHTML = collections.map(name => {
-    // Знайти приклад фільму для добірки, у якого є фото та назва
-    const example = films.find(f =>
-      f['Добірка']?.toLowerCase() === name.toLowerCase() &&
-      f['Фото'] && f['Назва']
-    );
-
-    const img = example?.Фото || 'https://via.placeholder.com/300x180?text=No+Image';
-    const title = example?.Назва || name;
-
+    let example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
+    if (!example) {
+      example = films[0]; // Використовуємо перший фільм як заглушку
+    }
     return `
       <div class="collection-card" onclick="getFilmsByCollection('${name}')">
-        <img src="${img}" alt="${title}" />
+        <img src="${example.Фото || 'https://via.placeholder.com/150'}" alt="${name}" />
         <p>${name}</p>
       </div>
     `;
   }).join('');
 }
+
 
 
     
