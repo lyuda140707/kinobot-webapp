@@ -247,17 +247,18 @@
 
 
     
-
-    async function loadFilms() {
+async function loadFilms() {
   const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
   films = await res.json();
 
+  console.log("📥 Отримано фільми:", films); // ➕ ДОДАЙ ЦЕ
   const collections = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
-  showCollections(collections);
-   console.log('🎯 Добірки:', collections); // 🟢 ось тут правильно
+  console.log('🎯 Добірки:', collections);     // вже є, ок
 
+  showCollections(collections);
   showFilmOfTheDay();
 }
+
 
     
     
