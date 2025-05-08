@@ -129,17 +129,11 @@
     </div>
 </div>
 
-  <div style="margin-top: 25px;">
+<div style="margin-top: 25px;">
   <h3>Добірки</h3>
-  <div style="display:flex; flex-wrap:wrap; gap:10px; padding:10px 0;">
-    <button class="genre-btn" onclick="getFilmsByCollection('Сльози')">10 сліз під подушку</button>
-    <button class="genre-btn" onclick="getFilmsByCollection('Батьки і діти')">Батько і дитина</button>
-    <button class="genre-btn" onclick="getFilmsByCollection('Українське')">Тільки українською</button>
-  </div>
+  <div id="collections" style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;"></div>
 </div>
 
-
-      
 
  <!-- 🎞️ Категорії -->
 <div id="categories" class="section">
@@ -234,14 +228,17 @@
     let films = [];
   
     async function loadFilms() {
-      const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
-      films = await res.json();
-      showFilmOfTheDay();
-    }
-    
-    const collections = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
-    showCollections(collections);
+  const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
+  films = await res.json();
 
+  const collections = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
+  showCollections(collections);
+
+  showFilmOfTheDay();
+}
+
+    
+    
    function switchTab(tabId, btn = null) {
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
