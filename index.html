@@ -232,7 +232,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
   window.Telegram.WebApp.ready();
-  loadFilms();
+ 
         // Привʼязка жанрів у "Фільм дня"
   document.querySelectorAll('.genre-btn').forEach(btn => {
     const genre = btn.dataset.genre;
@@ -537,6 +537,9 @@ function goToHome() {
       button.innerHTML = "▶️ Дивитись";
     });
 }
+    
+// ✅ Запускаємо завантаження фільмів після оголошення всіх функцій
+loadFilms();
 
 
 </script>
