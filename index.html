@@ -231,8 +231,14 @@
     function showCollections(collections) {
   const container = document.getElementById('collections');
   container.innerHTML = collections.map(name => {
-    const example = films.find(f => (f['Добірка'] || '').toLowerCase() === name.toLowerCase());
-    const image = example?.Фото || 'https://via.placeholder.com/150';
+    let image = 'https://via.placeholder.com/150';
+    for (const film of films) {
+      const collectionName = film?.['Добірка']?.toLowerCase?.();
+      if (collectionName === name.toLowerCase()) {
+        image = film?.['Фото'] || image;
+        break;
+      }
+    }
     return `
       <div class="collection-card" onclick="getFilmsByCollection('${name}')">
         <img src="${image}" alt="${name}" />
