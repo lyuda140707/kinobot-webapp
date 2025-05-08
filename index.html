@@ -199,6 +199,19 @@
     window.addEventListener('DOMContentLoaded', () => {
   window.Telegram.WebApp.ready();
   loadFilms();
+        // Привʼязка жанрів у "Фільм дня"
+  document.querySelectorAll('.genre-btn').forEach(btn => {
+    const genre = btn.dataset.genre;
+    if (genre) {
+      btn.addEventListener('click', () => {
+        // Переключити на вкладку "Категорії"
+        switchTab('categories', document.querySelector('[data-tab="categories"]'));
+        // Викликати фільтрацію
+        filterByGenre(genre);
+      });
+    }
+  });
+
 
   // ✅ Прив’язка кнопок "За жанром", "Серіали", "Мультики"
   document.querySelectorAll('.genre-main-btn').forEach(btn => {
