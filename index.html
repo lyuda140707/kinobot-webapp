@@ -223,6 +223,7 @@
 </div>
 
 
+
   <script>
  
     let films = [];
@@ -256,63 +257,65 @@
     
     
    function switchTab(tabId, btn = null) {
+  // Ховаємо всі секції
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
 
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-  if (btn) {
-    btn.classList.add('active');
+  // Перевіряємо, чи існує секція
+  const section = document.getElementById(tabId);
+  if (!section) {
+    console.error(`❌ Секція з id="${tabId}" не знайдена`);
+    alert(`⚠️ Помилка: не знайдено секцію з id="${tabId}"`);
+    return;
   }
 
+  // Показуємо потрібну секцію
+  section.classList.add('active');
+
+  // Оновлюємо кнопки
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Оновлюємо улюблене, якщо потрібно
   if (tabId === 'favorites') {
     showFavorites();
   }
 }
 
 
-    window.addEventListener('DOMContentLoaded', () => {
+
+    document.addEventListener('DOMContentLoaded', () => {
   window.Telegram.WebApp.ready();
- 
-        // Привʼязка жанрів у "Фільм дня"
-  document.querySelectorAll('.genre-btn').forEach(btn => {
-  const genre = btn.dataset.genre;
-  if (genre) {
-    btn.addEventListener('click', () => {
-      switchTab('categories', document.querySelector('[data-tab="categories"]'));
-      filterByGenre(genre);
+
+  // Привʼязка жанрів
+  setTimeout(() => {
+    document.querySelectorAll('.genre-btn').forEach(btn => {
+      const genre = btn.dataset.genre;
+      if (genre) {
+        btn.addEventListener('click', () => {
+          switchTab('categories', document.querySelector('[data-tab="categories"]'));
+          filterByGenre(genre);
+        });
+      }
     });
-  }
-});
 
-
-
-  // ✅ Прив’язка кнопок "За жанром", "Серіали", "Мультики"
-  document.querySelectorAll('.genre-main-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const group = btn.dataset.group;
-
-    // Зняти клас active з усіх
-    document.querySelectorAll('.genre-main-btn').forEach(b => b.classList.remove('active'));
-
-    // Додати активний клас до натиснутої
-    btn.classList.add('active');
-
-    // Показати відповідну групу
-    openGenreGroup(group);
-  });
-});
-
- 
-      
-  // ✅ Прив’язка кнопок нижнього меню
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabId = btn.dataset.tab;
-      switchTab(tabId, btn);
+    // Привʼязка груп категорій
+    document.querySelectorAll('.genre-main-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const group = btn.dataset.group;
+        document.querySelectorAll('.genre-main-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        openGenreGroup(group);
+      });
     });
-  });
 
+    // Привʼязка нижнього меню
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        switchTab(tabId, btn);
+      });
+    });
+  }, 100); // невелика затримка, щоб DOM точно був готовий
 });
 
 
@@ -350,126 +353,100 @@
 
 
 
-    function filterByGenre(genre) {
-  const container = document.getElementById('genre-results');
-  container.innerHTML = `<h3 style="margin-top:10px;">🎬 ${genre}</h3>`;
+   function filterByGenre(genre) {
+  // Переключаємо вкладку
+  switchTab('categories', document.querySelector('[data-tab="categories"]'));
 
-  let filtered;
+  setTimeout(() => {
+    const container = document.getElementById('genre-results');
+    container.innerHTML = `<h3 style="margin-top:10px;">🎬 ${genre}</h3>`;
 
-  if (genre === 'Новинки') {
-    // Беремо останні 10 фільмів
-    filtered = films.slice(-10).reverse(); // останні, у зворотному порядку
-  } else {
-    filtered = films.filter(film =>
-      film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
-    );
-  }
+    let filtered;
 
-  if (filtered.length === 0) {
-    container.innerHTML += `<p>Нічого не знайдено 😢</p>`;
-    return;
-  }
+    if (genre === 'Новинки') {
+      filtered = films.slice(-10).reverse();
+    } else {
+      filtered = films.filter(film =>
+        film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
+      );
+    }
 
-  container.innerHTML += filtered.map(film => `
-    <div style="
-      background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    ">
-      <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-      <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
-      <p style="opacity:0.85;">${film['Опис']}</p>
-      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-        style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
-        ▶️ Дивитись
-      </button>
-    </div>
-  `).join('');
+    if (filtered.length === 0) {
+      container.innerHTML += `<p>Нічого не знайдено 😢</p>`;
+      return;
+    }
+
+    container.innerHTML += filtered.map(film => `
+      <div style="
+        background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      ">
+        <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+        <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
+        <p style="opacity:0.85;">${film['Опис']}</p>
+        <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
+          style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
+          ▶️ Дивитись
+        </button>
+      </div>
+    `).join('');
 
     container.querySelectorAll('.search-button').forEach(button => {
-    button.addEventListener('click', () => {
-      const query = button.getAttribute('data-query');
-      handleSearchWithSpinner(button, query);
+      button.addEventListener('click', () => {
+        const query = button.getAttribute('data-query');
+        handleSearchWithSpinner(button, query);
+      });
     });
-  });
+  }, 100);
 }
+
 
 
 function getFilmsByCollection(collectionName) {
-  const container = document.getElementById('genre-results');
-  container.style.display = 'block'; // 🔧 Додаємо показ секції
 
-  container.innerHTML = `<h3 style="margin-top:10px;">🎯 Добірка: ${collectionName}</h3>`;
+  // Після короткої затримки малюємо вміст
+  setTimeout(() => {
+    const container = document.getElementById('genre-results');
+    container.innerHTML = `<h3 style="margin-top:10px;">🎯 Добірка: ${collectionName}</h3>`;
 
-  const filtered = films.filter(film =>
-    film['Добірка']?.toLowerCase().includes(collectionName.toLowerCase())
-  );
+    const filtered = films.filter(film =>
+      film['Добірка']?.toLowerCase().includes(collectionName.toLowerCase())
+    );
 
-  if (filtered.length === 0) {
-    container.innerHTML += '<p>Нічого не знайдено 😢</p>';
-    switchTab('categories', document.querySelector('[data-tab="categories"]'));
-    return;
-  }
+    if (filtered.length === 0) {
+      container.innerHTML += '<p>Нічого не знайдено 😢</p>';
+      return;
+    }
 
-  container.innerHTML += filtered.map(film => `
-    <div style="
-      background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    ">
-      <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-      <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
-      <p style="opacity:0.85;">${film['Опис']}</p>
-      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-        style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
-        ▶️ Дивитись
-      </button>
-    </div>
-  `).join('');
+    container.innerHTML += filtered.map(film => `
+      <div style="
+        background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      ">
+        <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+        <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
+        <p style="opacity:0.85;">${film['Опис']}</p>
+        <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
+          style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
+          ▶️ Дивитись
+        </button>
+      </div>
+    `).join('');
 
-  container.querySelectorAll('.search-button').forEach(button => {
-    button.addEventListener('click', () => {
-      const query = button.getAttribute('data-query');
-      handleSearchWithSpinner(button, query);
+    container.querySelectorAll('.search-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const query = button.getAttribute('data-query');
+        handleSearchWithSpinner(button, query);
+      });
     });
-  });
-
-  switchTab('categories', document.querySelector('[data-tab="categories"]'));
+  }, 100);
 }
-
-
-  container.innerHTML += filtered.map(film => `
-    <div style="
-      background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    ">
-      <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-      <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
-      <p style="opacity:0.85;">${film['Опис']}</p>
-      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-        style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
-        ▶️ Дивитись
-      </button>
-    </div>
-  `).join('');
-
-  // Додати обробку кнопок
-  container.querySelectorAll('.search-button').forEach(button => {
-    button.addEventListener('click', () => {
-      const query = button.getAttribute('data-query');
-      handleSearchWithSpinner(button, query);
-    });
-  });
-
-  // Переходити у вкладку Категорії
-  switchTab('categories', document.querySelector('[data-tab="categories"]'));
 
 
   
