@@ -263,17 +263,17 @@
   });
 });
 
-
-  // ✅ Прив’язка підкатегорій до фільтра
-  document.querySelectorAll('.genre-btn').forEach(btn => {
-    const genre = btn.dataset.genre;
-    if (genre) {
-      btn.addEventListener('click', () => {
-        filterByGenre(genre);
-      });
-    }
-  });
-
+  // Привʼязка жанрів у "Фільм дня" і категоріях
+document.querySelectorAll('.genre-btn').forEach(btn => {
+  const genre = btn.dataset.genre;
+  if (genre) {
+    btn.addEventListener('click', () => {
+      switchTab('categories', document.querySelector('[data-tab="categories"]'));
+      filterByGenre(genre);
+    });
+  }
+});
+      
   // ✅ Прив’язка кнопок нижнього меню
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
