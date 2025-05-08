@@ -41,7 +41,23 @@
       color: #fff;
       font-weight: bold;
     }
-  </style>
+ 
+  .loader {
+    border: 4px solid #444;
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -57,9 +73,11 @@
     <img id="film-img" src="" alt="" />
     <div class="film-title-overlay" id="film-title">Назва</div>
     <button class="film-day-button" onclick="searchInBot('Назва')">▶️ Дивитись</button>
-    <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px;">
-      <span class="loader"></span>
-    </div>
+    <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px; font-size:16px;">
+  <span class="loader"></span>
+  <div style="margin-top:8px;">Зачекайте...</div>
+</div>
+
   </div>
 
 
