@@ -486,7 +486,6 @@ if (cartoonsGroup) {
     localStorage.setItem("filmOfTheDay", JSON.stringify({ date: todayKey, film }));
   }
 
-  // ✅ Замість innerHTML — просто оновлюємо існуючі елементи
   document.getElementById("film-img").src = film['Фото'];
   document.getElementById("film-img").alt = film['Назва'];
   document.getElementById("film-title").textContent = film['Назва'];
@@ -496,7 +495,6 @@ if (cartoonsGroup) {
     button.setAttribute("onclick", `searchInBot('${film['Назва'].replace(/'/g, "\\'")}')`);
   }
 }
-
 
 function goToHome() {
   switchTab('home', document.querySelector('[data-tab="home"]'));
