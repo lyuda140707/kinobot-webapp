@@ -449,15 +449,11 @@ if (cartoonsGroup) {
   }
 
   container.innerHTML = `
-    <img src="${film['Фото']}" alt="${film['Назва']}">
-    <div class="film-day-overlay">
-      <h3 style="margin:0 0 4px;">${film['Назва']}</h3>
-      <p style="margin:0; font-size:14px; opacity:0.85;">${film['Опис']}</p>
-    </div>
-    <a href="${film['Посилання']}" target="_blank">
-      <button class="film-day-button">▶️ Дивитись</button>
-    </a>
-  `;
+  <img id="film-img" src="${film['Фото']}" alt="${film['Назва']}" />
+  <div class="film-title-overlay" id="film-title">${film['Назва']}</div>
+  <a id="film-link" href="${film['Посилання']}" target="_blank" class="film-day-button">▶️ Дивитись</a>
+`;
+
 }
 
 
