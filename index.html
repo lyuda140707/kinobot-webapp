@@ -414,14 +414,12 @@
 
 
 function getFilmsByCollection(collectionName) {
-
-  // Після короткої затримки малюємо вміст
   setTimeout(() => {
     const container = document.getElementById('genre-results');
     container.innerHTML = `<h3 style="margin-top:10px;">🎯 Добірка: ${collectionName}</h3>`;
 
     const filtered = films.filter(film =>
-      film['Добірка']?.toLowerCase().includes(collectionName.toLowerCase())
+      film?.['Добірка']?.toLowerCase?.().includes(collectionName.toLowerCase())
     );
 
     if (filtered.length === 0) {
@@ -429,23 +427,29 @@ function getFilmsByCollection(collectionName) {
       return;
     }
 
-    container.innerHTML += filtered.map(film => `
-      <div style="
-        background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      ">
-        <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-        <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
-        <p style="opacity:0.85;">${film['Опис']}</p>
-        <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-          style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
-          ▶️ Дивитись
-        </button>
-      </div>
-    `).join('');
+    container.innerHTML += filtered.map(film => {
+      const title = film?.['Назва'] || 'Без назви';
+      const description = film?.['Опис'] || 'Опис відсутній';
+      const image = film?.['Фото'] || 'https://via.placeholder.com/300x180?text=No+Image';
+
+      return `
+        <div style="
+          background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
+          padding: 15px;
+          margin-bottom: 20px;
+          border-radius: 15px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        ">
+          <img src="${image}" alt="${title}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+          <h3 style="margin-bottom:5px;">${title}</h3>
+          <p style="opacity:0.85;">${description}</p>
+          <button class="search-button" data-query="${title.replace(/'/g, "\\'")}"
+            style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
+            ▶️ Дивитись
+          </button>
+        </div>
+      `;
+    }).join('');
 
     container.querySelectorAll('.search-button').forEach(button => {
       button.addEventListener('click', () => {
