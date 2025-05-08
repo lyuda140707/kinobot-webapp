@@ -226,13 +226,29 @@
   <script>
  
     let films = [];
-  
+
+    function showCollections(collections) {
+  const container = document.getElementById('collections');
+  container.innerHTML = collections.map(name => {
+    const example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
+    return `
+      <div class="collection-card" onclick="getFilmsByCollection('${name}')">
+        <img src="${example?.Фото || 'https://via.placeholder.com/150'}" alt="${name}" />
+        <p>${name}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+    
+
     async function loadFilms() {
   const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
   films = await res.json();
 
   const collections = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
   showCollections(collections);
+   console.log('🎯 Добірки:', collections); // 🟢 ось тут правильно
 
   showFilmOfTheDay();
 }
@@ -559,18 +575,7 @@ if (cartoonsGroup) {
   }
 }
 
-    function showCollections(collections) {
-  const container = document.getElementById('collections');
-  container.innerHTML = collections.map(name => {
-    const example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
-    return `
-      <div class="collection-card" onclick="getFilmsByCollection('${name}')">
-        <img src="${example?.Фото || 'https://via.placeholder.com/150'}" alt="${name}" />
-        <p>${name}</p>
-      </div>
-    `;
-  }).join('');
-}
+  
 
 function goToHome() {
   switchTab('home', document.querySelector('[data-tab="home"]'));
