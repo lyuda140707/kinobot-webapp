@@ -275,22 +275,23 @@
     <button class="back-button" onclick="goToHome()">⬅️ Назад</button>
   `;
 
-  
-      let html = '<h2>Улюблене</h2>';
-      if (favorites.length === 0) {
-        html += '<p>Нічого не збережено 😢</p>';
-      } else {
-        favorites.forEach(item => {
-          html += `
-            <div style="background:#1c1c1c; padding:10px; margin-bottom:10px; border-radius:8px;">
-              <h3>${item.title}</h3>
-              <p>${item.description}</p>
-            </div>
-          `;
-        });
-      }
-      container.innerHTML = html;
-    }
+  if (favorites.length === 0) {
+    html += '<p>Нічого не збережено 😢</p>';
+  } else {
+    favorites.forEach(item => {
+      html += `
+        <div style="background:#1c1c1c; padding:10px; margin-bottom:10px; border-radius:8px;">
+          <h3>${item.title}</h3>
+          <p>${item.description}</p>
+        </div>
+      `;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+
 
     function filterByGenre(genre) {
   const container = document.getElementById('genre-results');
