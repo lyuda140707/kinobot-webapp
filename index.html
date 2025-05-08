@@ -255,13 +255,14 @@
       const filtered = films.filter(f => f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || f['Добірка']?.toLowerCase() === genre.toLowerCase());
       if (filtered.length === 0) return container.innerHTML = '<p>Нічого не знайдено 😢</p>';
       container.innerHTML = filtered.map(film => `
-        <div style="margin-bottom:20px">
-          <img src="${film['Фото']}" style="width:100%; border-radius:8px;">
-          <h3>${film['Назва']}</h3>
-          <p>${film['Опис']}</p>
-          <button class="search-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-        </div>
-      `).join('');
+  <div class="film-card">
+    <img src="${film['Фото']}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p>${film['Опис']}</p>
+    <button class="search-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+  </div>
+`).join('');
+
     }
 
     function showFavorites() {
@@ -326,18 +327,18 @@
 });
 
       document.getElementById('searchInput').addEventListener('input', () => {
-        const val = document.getElementById('searchInput').value.toLowerCase();
-        const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
-        document.getElementById('searchResults').innerHTML = results.map(f => `
-          <div style="margin-bottom:20px">
-            <img src="${f['Фото']}" style="width:100%; border-radius:8px;">
-            <h3>${f['Назва']}</h3>
-            <p>${f['Опис']}</p>
-            <button class="search-button" onclick="searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-          </div>
-        `).join('');
-      });
-    });
+  const val = document.getElementById('searchInput').value.toLowerCase();
+  const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
+  document.getElementById('searchResults').innerHTML = results.map(f => `
+    <div class="film-card">
+      <img src="${f['Фото']}" alt="${f['Назва']}">
+      <h3>${f['Назва']}</h3>
+      <p>${f['Опис']}</p>
+      <button class="search-button" onclick="searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+    </div>
+  `).join('');
+});
+
   </script>
 </body>
 </html>
