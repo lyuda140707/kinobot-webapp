@@ -267,8 +267,14 @@
     }
   
     function showFavorites() {
-      const container = document.getElementById('favorites');
-      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  const container = document.getElementById('favorites');
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+  let html = `
+    <h2>Улюблене</h2>
+    <button class="back-button" onclick="goToHome()">⬅️ Назад</button>
+  `;
+
   
       let html = '<h2>Улюблене</h2>';
       if (favorites.length === 0) {
@@ -459,7 +465,9 @@ if (cartoonsGroup) {
 `;
 
 }
-
+function goToHome() {
+  switchTab('home', document.querySelector('[data-tab="home"]'));
+}
 
 
 </script>
