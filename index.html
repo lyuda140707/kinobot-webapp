@@ -214,18 +214,21 @@
       showFilmOfTheDay();
     }
 
-    function switchTab(tabId, btn) {
+   function switchTab(tabId, btn = null) {
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
 
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  btn.classList.add('active');
+  if (btn) {
+    btn.classList.add('active');
+  }
 
   if (tabId === 'favorites') {
     showFavorites();
   }
 }
+
 
     window.addEventListener('DOMContentLoaded', () => {
   window.Telegram.WebApp.ready();
