@@ -49,14 +49,15 @@
 
     <div id="home" class="section active" style="padding: 20px;">
   <h2 style="margin-bottom: 10px;">🎬 Фільм дня</h2>
-  <div style="background-color:#1c1c1c; padding:15px; border-radius:15px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-    <img src="https://upload.wikimedia.org/wikipedia/en/4/4e/Game_plan_ver2.jpg" alt="The Game Plan" style="width:100%; border-radius:10px;">
-    <h3 style="margin:15px 0 5px;">The Game Plan</h3>
-    <p style="margin-bottom:15px;">Зірка футболу дізнається, що у нього є донька.</p>
-    <a href="https://t.me/KinoTochkaUA" target="_blank" style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:bold;">
-      ▶️ Дивитись
-    </a>
-  </div>
+<div id="film-of-the-day" style="
+  background-color:#1c1c1c;
+  padding:15px;
+  border-radius:15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+">
+  <p>Завантаження...</p>
+</div>
+
 
   <div style="margin: 25px 0 10px;">
     <h3>Жанри</h3>
@@ -181,6 +182,7 @@
     async function loadFilms() {
       const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
       films = await res.json();
+      showFilmOfTheDay();
     }
 
     function switchTab(tabId, btn) {
@@ -422,7 +424,32 @@ if (cartoonsGroup) {
   // Показати активну
   document.getElementById(`group-${group}`).style.display = "flex";
 }
-  
+
+    function showFilmOfTheDay() {
+  const container = document.getElementById("film-of-the-day");
+  if (!films.length) return;
+
+  const todayKey = new Date().toDateString(); // оновлення раз на день
+  const stored = JSON.parse(localStorage.getItem("filmOfTheDay"));
+
+  let film;
+  if (stored && stored.date === todayKey) {
+    film = stored.film;
+  } else {
+    film = films[Math.floor(Math.random() * films.length)];
+    localStorage.setItem("filmOfTheDay", JSON.stringify({ date: todayKey, film }));
+  }
+
+  container.innerHTML = `
+    <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px;">
+    <h3 style="margin:15px 0 5px;">${film['Назва']}</h3>
+    <p style="margin-bottom:15px;">${film['Опис']}</p>
+    <a href="${film['Посилання']}" target="_blank" style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:bold;">
+      ▶️ Дивитись
+    </a>
+  `;
+}
+
 
 </script>
   
