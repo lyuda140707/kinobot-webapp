@@ -196,5 +196,8 @@
   transform: translateX(-50%) scale(1.05);
   box-shadow: 0 4px 12px rgba(229, 9, 20, 0.6);
 }
+.film-day-overlay h3, .film-day-overlay p {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
 
 
