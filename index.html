@@ -348,14 +348,14 @@
     </div>
   `).join('');
 
-  container.querySelectorAll('.search-button').forEach(button => {
+    container.querySelectorAll('.search-button').forEach(button => {
     button.addEventListener('click', () => {
-  const query = button.getAttribute('data-query');
-  handleSearchWithSpinner(button, query);
-});
-
+      const query = button.getAttribute('data-query');
+      handleSearchWithSpinner(button, query);
+    });
   });
 }
+
 
 
   
