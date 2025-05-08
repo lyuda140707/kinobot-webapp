@@ -589,7 +589,26 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
   
   <!-- 🔝 Кнопка "Вгору" -->
-<button id="scrollToTop" style="display:none; position:fixed; bottom:70px; right:20px; padding:10px 14px; border:none; border-radius:50%; background:#00f7ff; color:#000; font-size:20px; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer; z-index:1000;">🔝</button>
+<button id="scrollToTop" style="
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  background: radial-gradient(circle at 30% 30%, #00f7ff, #008fa0);
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 247, 255, 0.4);
+  z-index: 1000;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+">
+  🔝
+</button>
+
 
 </body>
 </html>
