@@ -63,10 +63,13 @@
 
 .genre-scroll {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;         /* Дозволяє переносити кнопки */
+  justify-content: center; /* Центрує їх */
   gap: 10px;
-  padding: 10px 0;
+  padding: 12px 8px;
+  overflow-x: unset;       /* ВИМИКАЄ горизонтальний скрол */
 }
+
 
 
 .fade-in {
