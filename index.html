@@ -51,18 +51,17 @@
 </head>
 <body>
 
-    <div id="home" class="section active" style="padding: 20px;">
-  <h2 style="margin-bottom: 10px;">🎬 Фільм дня</h2>
-    <div id="home" class="section active" style="padding: 20px;">
-  <h2 style="margin-bottom: 10px;">🎬 Фільм дня</h2>
-<div id="film-of-the-day" class="film-day-card">
-  <img id="film-img" src="" alt="" />
-  <div class="film-title-overlay" id="film-title">Назва</div>
-  <a id="film-link" href="#" target="_blank" class="film-day-button">▶️ Дивитись</a>
-<div id="loading-indicator" style="display: none; text-align: center; margin-top: 10px;">
-  <span class="loader"></span>
-</div>
-</div>
+   <div id="home" class="section active" style="padding: 20px;">
+  <h2 style="margin-bottom: 10px;">🎬 Фільм дня</h2>  
+  <div id="film-of-the-day" class="film-day-card">
+    <img id="film-img" src="" alt="" />
+    <div class="film-title-overlay" id="film-title">Назва</div>
+    <button class="film-day-button" onclick="searchInBot('Назва')">▶️ Дивитись</button>
+    <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px;">
+      <span class="loader"></span>
+    </div>
+  </div>
+
 
 
 
@@ -415,26 +414,33 @@ async function searchInBot(query) {
   const user_id = user.id;
   const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";
 
-  console.log("📤 Надсилаємо запит:", { user_id, query });
+  // 🔽 ПОКАЗАТИ СПІНЕР
+  document.getElementById("loading-indicator").style.display = "block";
 
-  const res = await fetch(backendUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ user_id, query })
-  });
+  try {
+    const res = await fetch(backendUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, query }),
+    });
 
-  const data = await res.json();
-  console.log("📥 Відповідь від сервера:", data);
+    const data = await res.json();
+    console.log("📥 Відповідь від сервера:", data);
 
-  if (data.found && data.videoUrl) {
-    window.location.href = data.videoUrl;
-
-  } else {
-    alert("Фільм не знайдено 😢");
+    if (data.found && data.videoUrl) {
+      window.location.href = data.videoUrl;
+    } else {
+      alert("Фільм не знайдено 😢");
+    }
+  } catch (err) {
+    alert("Сталася помилка 😢");
+    console.error(err);
+  } finally {
+    // 🔽 СХОВАТИ СПІНЕР
+    document.getElementById("loading-indicator").style.display = "none";
   }
 }
+
 
   function openGenreGroup(group) {
   // Сховати всі групи
@@ -469,8 +475,11 @@ if (cartoonsGroup) {
   <img id="film-img" src="${film['Фото']}" alt="${film['Назва']}" />
   <div class="film-title-overlay" id="film-title">${film['Назва']}</div>
   <button class="film-day-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-
+  <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px;">
+    <span class="loader"></span>
+  </div>
 `;
+
 
 }
 function goToHome() {
