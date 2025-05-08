@@ -431,7 +431,7 @@ if (cartoonsGroup) {
   const container = document.getElementById("film-of-the-day");
   if (!films.length) return;
 
-  const todayKey = new Date().toDateString(); // оновлення раз на день
+  const todayKey = new Date().toDateString();
   const stored = JSON.parse(localStorage.getItem("filmOfTheDay"));
 
   let film;
@@ -442,18 +442,18 @@ if (cartoonsGroup) {
     localStorage.setItem("filmOfTheDay", JSON.stringify({ date: todayKey, film }));
   }
 
-    container.innerHTML = `
+  container.innerHTML = `
     <img src="${film['Фото']}" alt="${film['Назва']}">
     <div class="film-day-overlay">
-      <h3 style="margin:0 0 5px 0;">${film['Назва']}</h3>
-      <p style="margin:0;">${film['Опис']}</p>
+      <h3 style="margin:0 0 4px;">${film['Назва']}</h3>
+      <p style="margin:0; font-size:14px; opacity:0.85;">${film['Опис']}</p>
     </div>
     <a href="${film['Посилання']}" target="_blank">
       <button class="film-day-button">▶️ Дивитись</button>
     </a>
   `;
-
 }
+
 
 
 </script>
