@@ -635,24 +635,52 @@ function goToHome() {
     });
 }
     
-// ✅ Запускаємо завантаження фільмів після оголошення всіх функцій
-loadFilms();
-
 document.addEventListener("DOMContentLoaded", () => {
+  window.Telegram.WebApp.ready();
+  loadFilms(); // ✅ Тепер тут
+
   const scrollBtn = document.getElementById("scrollToTop");
 
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 200) {
-      scrollBtn.style.display = "block";
-    } else {
-      scrollBtn.style.display = "none";
-    }
+    scrollBtn.style.display = window.scrollY > 200 ? "block" : "none";
   });
 
   scrollBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+
+  // Привʼязка жанрів
+  setTimeout(() => {
+    document.querySelectorAll('.genre-btn').forEach(btn => {
+      const genre = btn.dataset.genre;
+      if (genre) {
+        btn.addEventListener('click', () => {
+          switchTab('categories', document.querySelector('[data-tab="categories"]'));
+          filterByGenre(genre);
+        });
+      }
+    });
+
+    // Привʼязка груп категорій
+    document.querySelectorAll('.genre-main-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const group = btn.dataset.group;
+        document.querySelectorAll('.genre-main-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        openGenreGroup(group);
+      });
+    });
+
+    // Привʼязка нижнього меню
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        switchTab(tabId, btn);
+      });
+    });
+  }, 100);
 });
+
 
 </script>
   
