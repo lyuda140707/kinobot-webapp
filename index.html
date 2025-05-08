@@ -356,9 +356,10 @@
 
   container.querySelectorAll('.search-button').forEach(button => {
     button.addEventListener('click', () => {
-      const query = button.getAttribute('data-query');
-      searchInBot(query);
-    });
+  const query = button.getAttribute('data-query');
+  handleSearchWithSpinner(button, query);
+});
+
   });
 }
 
@@ -395,7 +396,9 @@
   container.querySelectorAll('.search-button').forEach(button => {
     button.addEventListener('click', () => {
   const query = button.getAttribute('data-query');
-  searchInBot(query);
+  handleSearchWithSpinner(button, query);
+});
+
 
 });
 
@@ -503,6 +506,44 @@ if (cartoonsGroup) {
 }
 function goToHome() {
   switchTab('home', document.querySelector('[data-tab="home"]'));
+}
+
+    function handleSearchWithSpinner(button, query) {
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    alert("❗️Не вдалося отримати Telegram ID");
+    return;
+  }
+
+  const user_id = user.id;
+  const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";
+
+  button.disabled = true;
+  button.innerHTML = `<span class="spinner"></span> Завантаження...`;
+
+  fetch(backendUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id, query }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.found && data.videoUrl) {
+        window.location.href = data.videoUrl;
+      } else {
+        alert("Фільм не знайдено 😢");
+      }
+    })
+    .catch(err => {
+      alert("Сталася помилка 😢");
+      console.error(err);
+    })
+    .finally(() => {
+      button.disabled = false;
+      button.innerHTML = "▶️ Дивитись";
+    });
 }
 
 
