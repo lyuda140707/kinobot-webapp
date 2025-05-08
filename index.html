@@ -310,12 +310,21 @@
     document.addEventListener('DOMContentLoaded', () => {
       Telegram.WebApp.ready();
       loadFilms();
+      
       document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const tab = btn.getAttribute('data-tab');
           switchTab(tab, btn);
         });
       });
+
+      document.querySelectorAll('.genre-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    const genre = button.getAttribute('data-genre');
+    filterByGenre(genre);
+  });
+});
+
       document.getElementById('searchInput').addEventListener('input', () => {
         const val = document.getElementById('searchInput').value.toLowerCase();
         const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
