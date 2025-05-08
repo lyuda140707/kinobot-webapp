@@ -231,17 +231,18 @@
     function showCollections(collections) {
   const container = document.getElementById('collections');
   container.innerHTML = collections.map(name => {
-    let image = 'https://via.placeholder.com/150';
-    for (const film of films) {
-      const collectionName = film?.['Добірка']?.toLowerCase?.();
-      if (collectionName === name.toLowerCase()) {
-        image = film?.['Фото'] || image;
-        break;
-      }
-    }
+    // Знайти приклад фільму для добірки, у якого є фото та назва
+    const example = films.find(f =>
+      f['Добірка']?.toLowerCase() === name.toLowerCase() &&
+      f['Фото'] && f['Назва']
+    );
+
+    const img = example?.Фото || 'https://via.placeholder.com/300x180?text=No+Image';
+    const title = example?.Назва || name;
+
     return `
       <div class="collection-card" onclick="getFilmsByCollection('${name}')">
-        <img src="${image}" alt="${name}" />
+        <img src="${img}" alt="${title}" />
         <p>${name}</p>
       </div>
     `;
