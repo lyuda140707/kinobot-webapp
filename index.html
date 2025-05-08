@@ -420,7 +420,8 @@ function getFilmsByCollection(collectionName) {
     container.innerHTML = `<h3 style="margin-top:10px;">🎯 Добірка: ${collectionName}</h3>`;
 
     const filtered = films.filter(film =>
-      film?.['Добірка']?.toLowerCase?.().includes(collectionName.toLowerCase())
+      String(film?.['Добірка'] || '').toLowerCase().includes(collectionName.toLowerCase())
+
     );
 
     if (filtered.length === 0) {
