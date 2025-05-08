@@ -151,5 +151,50 @@
   cursor: pointer;
   font-size: 16px;
 }
+#film-of-the-day {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+#film-of-the-day img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.film-day-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: #fff;
+}
+
+.film-day-button {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e50914;
+  color: #fff;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease-in-out;
+}
+
+.film-day-button:hover {
+  background: #ff1a2a;
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.6);
+}
 
 
