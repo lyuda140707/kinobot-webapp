@@ -31,13 +31,21 @@
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
   margin-bottom: 20px;
 }
-.genre-main-buttons,
-#genre-buttons {
+.genre-main-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
 }
+
+#genre-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+  padding: 12px 0;
+}
+
 
 /* Підкатегорії */
 .genre-btn {
@@ -87,3 +95,14 @@
   }
 }
 
+@media (max-width: 480px) {
+  .genre-main-btn, .genre-btn {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+}
+
+.genre-btn.active {
+  background: #e50914;
+  color: #fff;
+}
