@@ -230,18 +230,21 @@
 
     function showCollections(collections) {
   const container = document.getElementById('collections');
-  container.innerHTML = collections.map(name => {
-    let example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
-    if (!example) {
-      example = films[0]; // Використовуємо перший фільм як заглушку
-    }
-    return `
-      <div class="collection-card" onclick="getFilmsByCollection('${name}')">
-        <img src="${example.Фото || 'https://via.placeholder.com/150'}" alt="${name}" />
-        <p>${name}</p>
+  container.innerHTML = '';
+
+  collections.forEach(name => {
+    const example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
+
+    const image = example?.Фото || 'https://via.placeholder.com/300x180?text=No+Image';
+    const safeName = name || 'Без назви';
+
+    container.innerHTML += `
+      <div class="collection-card" onclick="getFilmsByCollection('${safeName}')">
+        <img src="${image}" alt="${safeName}" />
+        <p>${safeName}</p>
       </div>
     `;
-  }).join('');
+  });
 }
 
 
