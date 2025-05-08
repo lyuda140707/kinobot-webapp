@@ -119,9 +119,10 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
-.film-day-card img {
+..film-day-card img {
   width: 100%;
-  height: auto;
+  height: 180px; /* було auto */
+  object-fit: cover; /* обрізає зайве, але без спотворення */
   display: block;
 }
 
