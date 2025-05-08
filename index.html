@@ -399,6 +399,8 @@
 
 function getFilmsByCollection(collectionName) {
   const container = document.getElementById('genre-results');
+  container.style.display = 'block'; // 🔧 Додаємо показ секції
+
   container.innerHTML = `<h3 style="margin-top:10px;">🎯 Добірка: ${collectionName}</h3>`;
 
   const filtered = films.filter(film =>
@@ -410,6 +412,35 @@ function getFilmsByCollection(collectionName) {
     switchTab('categories', document.querySelector('[data-tab="categories"]'));
     return;
   }
+
+  container.innerHTML += filtered.map(film => `
+    <div style="
+      background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    ">
+      <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+      <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
+      <p style="opacity:0.85;">${film['Опис']}</p>
+      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
+        style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
+        ▶️ Дивитись
+      </button>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.search-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const query = button.getAttribute('data-query');
+      handleSearchWithSpinner(button, query);
+    });
+  });
+
+  switchTab('categories', document.querySelector('[data-tab="categories"]'));
+}
+
 
   container.innerHTML += filtered.map(film => `
     <div style="
