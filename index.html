@@ -238,6 +238,9 @@
       films = await res.json();
       showFilmOfTheDay();
     }
+    
+    const collections = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
+    showCollections(collections);
 
    function switchTab(tabId, btn = null) {
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
@@ -557,6 +560,19 @@ if (cartoonsGroup) {
   if (button) {
     button.setAttribute("onclick", `searchInBot('${film['Назва'].replace(/'/g, "\\'")}')`);
   }
+}
+
+    function showCollections(collections) {
+  const container = document.getElementById('collections');
+  container.innerHTML = collections.map(name => {
+    const example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
+    return `
+      <div class="collection-card" onclick="getFilmsByCollection('${name}')">
+        <img src="${example?.Фото || 'https://via.placeholder.com/150'}" alt="${name}" />
+        <p>${name}</p>
+      </div>
+    `;
+  }).join('');
 }
 
 function goToHome() {
