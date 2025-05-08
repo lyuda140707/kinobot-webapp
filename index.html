@@ -16,7 +16,7 @@
     .section {
       display: none;
       padding: 20px;
-      padding-bottom: 100px; /* ✅ Щоб не перекривало нижнє меню */
+      
     }
     .active {
       display: block;
@@ -570,19 +570,20 @@ function goToHome() {
 // ✅ Запускаємо завантаження фільмів після оголошення всіх функцій
 loadFilms();
 
-// 🔝 Кнопка "вгору"
-const scrollBtn = document.getElementById("scrollToTop");
+document.addEventListener("DOMContentLoaded", () => {
+  const scrollBtn = document.getElementById("scrollToTop");
 
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 200) {
-    scrollBtn.style.display = "block";
-  } else {
-    scrollBtn.style.display = "none";
-  }
-});
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 200) {
+      scrollBtn.style.display = "block";
+    } else {
+      scrollBtn.style.display = "none";
+    }
+  });
 
-scrollBtn.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  scrollBtn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 });
 
 </script>
