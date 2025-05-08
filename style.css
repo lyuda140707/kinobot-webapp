@@ -112,4 +112,44 @@
   transform: scale(1.04);
   color: #fff;
 }
+.film-day-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.film-day-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.film-day-overlay {
+  position: absolute;
+  bottom: 70px;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: #fff;
+  padding: 20px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.film-day-button {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e50914;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 16px;
+}
+
 
