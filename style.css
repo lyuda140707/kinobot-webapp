@@ -285,6 +285,24 @@ body {
   padding-bottom: 100px; /* Щоб точно був простір під меню */
 }
 
+.collection-card {
+  min-width: 120px;
+  background: #222;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.collection-card img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+.collection-card p {
+  font-size: 14px;
+}
+
 
 
 
