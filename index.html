@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KinoBot Web App</title>
-
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
@@ -16,701 +15,220 @@
     .section {
       display: none;
       padding: 20px;
-      
     }
     .active {
       display: block;
     }
     .nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: linear-gradient(to right, #0f2027, #203a43, #2c5364); /* градієнт */
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0 6px;
-  border-top: 1px solid #333;
-  z-index: 999;
-  box-shadow: 0 -2px 10px rgba(0, 255, 255, 0.15);
-}
-
-.nav button {
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 10px;
-  transition: all 0.2s ease-in-out;
-  position: relative;
-}
-
-.nav button span {
-  margin-top: 4px;
-  font-size: 14px;
-}
-
-
-.nav button.active {
-  color: #00f7ff;
-  text-shadow: 0 0 6px #00f7ff;
-  transform: scale(1.1);
-}
-
-.nav button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36%;
-  height: 3px;
-  border-radius: 3px;
-  background: #00f7ff;
-  box-shadow: 0 0 8px #00f7ff;
-}
-
-
- 
-  .loader {
-    border: 4px solid #444;
-    border-top: 4px solid #fff;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-</style>
-
-  
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 6px;
+      border-top: 1px solid #333;
+      z-index: 999;
+      box-shadow: 0 -2px 10px rgba(0, 255, 255, 0.15);
+    }
+    .nav button {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 10px;
+      transition: all 0.2s ease-in-out;
+      position: relative;
+    }
+    .nav button span {
+      margin-top: 4px;
+      font-size: 14px;
+    }
+    .nav button.active {
+      color: #00f7ff;
+      text-shadow: 0 0 6px #00f7ff;
+      transform: scale(1.1);
+    }
+    .nav button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36%;
+      height: 3px;
+      border-radius: 3px;
+      background: #00f7ff;
+      box-shadow: 0 0 8px #00f7ff;
+    }
+    .loader {
+      border: 4px solid #444;
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
-
-
 </head>
 <body>
-
-   <div id="home" class="section active" style="padding: 20px;">
-  <h2 style="margin-bottom: 10px;">🎬 Фільм дня</h2>  
-  <div id="film-of-the-day" class="film-day-card">
-    <img id="film-img" src="" alt="" />
-    <div class="film-title-overlay" id="film-title">Назва</div>
-    <button class="film-day-button" onclick="searchInBot('Назва')">▶️ Дивитись</button>
-    <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px; font-size:16px;">
-  <span class="loader"></span>
-  <div style="margin-top:8px;">Зачекайте...</div>
-</div>
-
-  </div>
-
-
-
-
-
-
-  <div style="margin: 25px 0 10px;">
+  <div id="home" class="section active">
+    <h2>🎬 Фільм дня</h2>
+    <div id="film-of-the-day"></div>
+    <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px;">
+      <span class="loader"></span>
+      <div style="margin-top:8px;">Зачекайте...</div>
+    </div>
     <h3>Жанри</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:10px; padding:10px 0;">
-      <button class="genre-btn" data-genre="Новинки">Новинки</button>
-      <button class="genre-btn" data-genre="Комедії">Комедії</button>
-      <button class="genre-btn" data-genre="Драми">Драми</button>
-      <button class="genre-btn" data-genre="Серіали">Серіали</button>
-      <button class="genre-btn" data-genre="Мультфільми">Мультфільми</button>
-    </div>
-</div>
-
-<div style="margin-top: 25px;">
-  <h3>Добірки</h3>
-  <div id="collections" style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;"></div>
-</div>
-
-
- <!-- 🎞️ Категорії -->
-<div id="categories" class="section">
-  <h2>Категорії</h2>
-  <button class="back-button" onclick="goToHome()">⬅️ Назад</button>
-
-  <div class="genre-main-wrapper">
-    <div id="genre-main-buttons" class="genre-main-buttons">
-      <button class="genre-main-btn fade-in" data-group="films">🎯 За жанром</button>
-      <button class="genre-main-btn fade-in" data-group="series">📺 Серіали</button>
-      <button class="genre-main-btn fade-in" data-group="cartoons">👧 Мультики</button>
-
-    </div>
+    <div id="genres"></div>
+    <h3 style="margin-top:25px">Добірки</h3>
+    <div id="collections" style="display:flex; overflow-x:auto; gap:10px; padding:10px 0;"></div>
   </div>
-  
-<!-- 🔽 Підкатегорії: За жанром -->
-<div id="group-films" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
-  <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
-  <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
-  <button class="genre-btn" data-genre="Детективи">🕵️ Детективи</button>
-  <button class="genre-btn" data-genre="Драми">🎭 Драми</button>
-  <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
-  <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
-  <button class="genre-btn" data-genre="Документальні">📚 Документальні</button>
-  <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
-  <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
-  <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
-  <button class="genre-btn" data-genre="Кримінал">🚔 Кримінал</button>
-  <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
-  <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
-  <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
-  <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
-  <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
-</div>
 
-<!-- 🔽 Підкатегорії: Серіали -->
-<div id="group-series" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
-  <button class="genre-btn" data-genre="Українські">🇺🇦 Українські</button>
-  <button class="genre-btn" data-genre="Детективні">🕵️‍♀️ Детективні</button>
-  <button class="genre-btn" data-genre="Драматичні">🎭 Драматичні</button>
-  <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
-  <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
-  <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
-  <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
-  <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
-  <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінальні</button>
-</div>
+  <div id="categories" class="section">
+    <h2>Категорії</h2>
+    <div id="genre-results"></div>
+  </div>
 
-<!-- 🔽 Підкатегорії: Мультики -->
-<div id="group-cartoons" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
-  
-</div>
+  <div id="favorites" class="section">
+    <h2>Улюблене</h2>
+    <div id="fav-list"></div>
+  </div>
 
-  <div id="genre-results" style="margin-top:20px;"></div>
-</div>
-
-
-
-  <!-- ❤️ Улюблене -->
-<div id="favorites" class="section">
-  <h2>Улюблене</h2>
-  <button class="back-button" onclick="goToHome()">⬅️ Назад</button>
-  <p>Список збережених фільмів...</p>
-</div>
-
-  <!-- 🔍 Пошук -->
   <div id="search" class="section">
-  <h2>Пошук</h2>
-  <button class="back-button" onclick="goToHome()">⬅️ Назад</button>
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="Введіть назву або жанр..."
-      style="width:100%;padding:10px;"
-      oninput="searchFilms()"
-    />
+    <h2>Пошук</h2>
+    <input type="text" id="searchInput" placeholder="Введіть назву або жанр..." style="width:100%;padding:10px;">
     <div id="searchResults" style="margin-top: 20px;"></div>
   </div>
-  
 
-  <!-- Меню навігації -->
-<div class="nav">
-  <button class="nav-btn active" data-tab="home">🏠<span>Головна</span></button>
-  <button class="nav-btn" data-tab="categories">🎞️<span>Категорії</span></button>
-  <button class="nav-btn" data-tab="favorites">💛<span>Улюблене</span></button>
-  <button class="nav-btn" data-tab="search">🔍<span>Пошук</span></button>
-</div>
-
-
+  <div class="nav">
+    <button class="nav-btn active" data-tab="home">🏠<span>Головна</span></button>
+    <button class="nav-btn" data-tab="categories">🎞️<span>Категорії</span></button>
+    <button class="nav-btn" data-tab="favorites">💛<span>Улюблене</span></button>
+    <button class="nav-btn" data-tab="search">🔍<span>Пошук</span></button>
+  </div>
 
   <script>
- 
     let films = [];
 
-    function showCollections(collections) {
-  const container = document.getElementById('collections');
-  container.innerHTML = '';
-
-  collections.forEach(name => {
-    const example = films.find(f => f['Добірка']?.toLowerCase() === name.toLowerCase());
-
-    const image = example?.Фото || 'https://via.placeholder.com/300x180?text=No+Image';
-    const safeName = name || 'Без назви';
-
-    container.innerHTML += `
-      <div class="collection-card" onclick="getFilmsByCollection('${safeName}')">
-        <img src="${image}" alt="${safeName}" />
-        <p>${safeName}</p>
-      </div>
-    `;
-  });
-}
-
-
-
-    
-async function loadFilms() {
-  const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
-  films = await res.json();
-
-  console.log("📥 Отримано фільми:", films); // ➕ ДОДАЙ ЦЕ
-  const collections = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
-  console.log('🎯 Добірки:', collections);     // вже є, ок
-
-  showCollections(collections);
-  showFilmOfTheDay();
-}
-
-
-    
-    
-   function switchTab(tabId, btn = null) {
-  // Ховаємо всі секції
-  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-
-  // Перевіряємо, чи існує секція
-  const section = document.getElementById(tabId);
-  if (!section) {
-    console.error(`❌ Секція з id="${tabId}" не знайдена`);
-    alert(`⚠️ Помилка: не знайдено секцію з id="${tabId}"`);
-    return;
-  }
-
-  // Показуємо потрібну секцію
-  section.classList.add('active');
-
-  // Оновлюємо кнопки
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-
-  // Оновлюємо улюблене, якщо потрібно
-  if (tabId === 'favorites') {
-    showFavorites();
-  }
-}
-
-
-
-    window.addEventListener('DOMContentLoaded', () => {
-     Telegram.WebApp.ready();
-
-
-  // Привʼязка жанрів
-  setTimeout(() => {
-    document.querySelectorAll('.genre-btn').forEach(btn => {
-      const genre = btn.dataset.genre;
-      if (genre) {
-        btn.addEventListener('click', () => {
-          switchTab('categories', document.querySelector('[data-tab="categories"]'));
-          filterByGenre(genre);
-        });
-      }
-    });
-
-    // Привʼязка груп категорій
-    document.querySelectorAll('.genre-main-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const group = btn.dataset.group;
-        document.querySelectorAll('.genre-main-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        openGenreGroup(group);
-      });
-    });
-
-    // Привʼязка нижнього меню
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabId = btn.dataset.tab;
-        switchTab(tabId, btn);
-      });
-    });
-  }, 100); // невелика затримка, щоб DOM точно був готовий
-});
-
-
-    function addToFavorites(title, description) {
-      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-      favorites.push({ title, description });
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      alert('Додано в улюблене 💛');
+    async function loadFilms() {
+      const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
+      films = await res.json();
+      showFilmOfTheDay();
+      showCollections();
+      showGenres();
     }
-  
-    function showFavorites() {
-  const container = document.getElementById('favorites');
-  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-
-  let html = `
-    <h2>Улюблене</h2>
-    <button class="back-button" onclick="goToHome()">⬅️ Назад</button>
-  `;
-
-  if (favorites.length === 0) {
-    html += '<p>Нічого не збережено 😢</p>';
-  } else {
-    favorites.forEach(item => {
-      html += `
-        <div style="background:#1c1c1c; padding:10px; margin-bottom:10px; border-radius:8px;">
-          <h3>${item.title}</h3>
-          <p>${item.description}</p>
-        </div>
-      `;
-    });
-  }
-
-  container.innerHTML = html;
-}
-
-
-
-   function filterByGenre(genre) {
-  // Переключаємо вкладку
-  switchTab('categories', document.querySelector('[data-tab="categories"]'));
-
-  setTimeout(() => {
-    const container = document.getElementById('genre-results');
-    container.innerHTML = `<h3 style="margin-top:10px;">🎬 ${genre}</h3>`;
-
-    let filtered;
-
-    if (genre === 'Новинки') {
-      filtered = films.slice(-10).reverse();
-    } else {
-      filtered = films.filter(film =>
-        film['Жанр']?.toLowerCase().includes(genre.toLowerCase())
-      );
-    }
-
-    if (filtered.length === 0) {
-      container.innerHTML += `<p>Нічого не знайдено 😢</p>`;
-      return;
-    }
-
-    container.innerHTML += filtered.map(film => `
-      <div style="
-        background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      ">
-        <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-        <h3 style="margin-bottom:5px;">${film['Назва']}</h3>
-        <p style="opacity:0.85;">${film['Опис']}</p>
-        <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-          style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
-          ▶️ Дивитись
-        </button>
-      </div>
-    `).join('');
-
-    container.querySelectorAll('.search-button').forEach(button => {
-      button.addEventListener('click', () => {
-        const query = button.getAttribute('data-query');
-        handleSearchWithSpinner(button, query);
-      });
-    });
-  }, 100);
-}
-
-
-
-function getFilmsByCollection(collectionName) {
-  setTimeout(() => {
-    const container = document.getElementById('genre-results');
-    container.innerHTML = `<h3 style="margin-top:10px;">🎯 Добірка: ${collectionName}</h3>`;
-
-    const filtered = films.filter(film =>
-      String(film?.['Добірка'] || '').toLowerCase().includes(collectionName.toLowerCase())
-
-    );
-
-    if (filtered.length === 0) {
-      container.innerHTML += '<p>Нічого не знайдено 😢</p>';
-      return;
-    }
-
-    container.innerHTML += filtered.map(film => {
-      const title = film?.['Назва'] || 'Без назви';
-      const description = film?.['Опис'] || 'Опис відсутній';
-      const image = film?.['Фото'] || 'https://via.placeholder.com/300x180?text=No+Image';
-
-      return `
-        <div style="
-          background: linear-gradient(145deg, #1c1c1c, #2c2c2c);
-          padding: 15px;
-          margin-bottom: 20px;
-          border-radius: 15px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-        ">
-          <img src="${image}" alt="${title}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-          <h3 style="margin-bottom:5px;">${title}</h3>
-          <p style="opacity:0.85;">${description}</p>
-          <button class="search-button" data-query="${title.replace(/'/g, "\\'")}"
-            style="margin-top:12px; background:#e50914; color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">
-            ▶️ Дивитись
-          </button>
-        </div>
-      `;
-    }).join('');
-
-    container.querySelectorAll('.search-button').forEach(button => {
-      button.addEventListener('click', () => {
-        const query = button.getAttribute('data-query');
-        handleSearchWithSpinner(button, query);
-      });
-    });
-  }, 100);
-}
-
-
-  
-   function searchFilms() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  const results = films.filter(film =>
-    film['Назва'].toLowerCase().includes(query) ||
-    film['Жанр'].toLowerCase().includes(query) ||
-    film['Опис'].toLowerCase().includes(query)
-  );
-
-  const container = document.getElementById('searchResults');
-  if (results.length === 0) {
-    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
-    return;
-  }
-
-  container.innerHTML = results.map(film => `
-    <div style="background:#1c1c1c; padding:10px; margin-bottom:20px; border-radius:10px;">
-      <img src="${film['Фото']}" alt="${film['Назва']}" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:10px;">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <button class="search-button" data-query="${film['Назва'].replace(/'/g, "\\'")}"
-        style="display:inline-block; background:#e50914; color:#fff; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; margin-top:10px;">
-        ▶️ Дивитись
-      
-      </button>
-    </div>
-  `).join('');
-
-  // ⬇️ обовʼязково після вставки кнопок
-  container.querySelectorAll('.search-button').forEach(button => {
-    button.addEventListener('click', () => {
-      const query = button.getAttribute('data-query');
-      handleSearchWithSpinner(button, query);
-    });
-  });
-}
-
-
-      // Ховати клавіатуру при натисканні на будь-що, крім input
-  document.addEventListener('click', (e) => {
-    if (e.target.tagName !== 'INPUT') {
-      const active = document.activeElement;
-      if (active && typeof active.blur === 'function') {
-        active.blur();
-      }
-    }
-  });
-
-  // Ховати клавіатуру при Enter у полі пошуку
-  document.getElementById('searchInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      e.target.blur();
-    }
-  });
-async function searchInBot(query) {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-
-  if (!user) {
-    alert("❗️Не вдалося отримати Telegram ID");
-    return;
-  }
-
-  const user_id = user.id;
-  const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";
-
-  // 🔽 ПОКАЗАТИ СПІНЕР
-  document.getElementById("loading-indicator").style.display = "block";
-
-  try {
-    const res = await fetch(backendUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id, query }),
-    });
-
-    const data = await res.json();
-    console.log("📥 Відповідь від сервера:", data);
-
-    if (data.found && data.videoUrl) {
-      window.location.href = data.videoUrl;
-    } else {
-      alert("Фільм не знайдено 😢");
-    }
-  } catch (err) {
-    alert("Сталася помилка 😢");
-    console.error(err);
-  } finally {
-    // 🔽 СХОВАТИ СПІНЕР
-    document.getElementById("loading-indicator").style.display = "none";
-  }
-}
-
-
-  function openGenreGroup(group) {
-  // Сховати всі групи
-  document.getElementById("group-films").style.display = "none";
-  document.getElementById("group-series").style.display = "none";
-  const cartoonsGroup = document.getElementById("group-cartoons");
-if (cartoonsGroup) {
-  cartoonsGroup.style.display = "none";
-}
-
-
-  // Показати активну
-  document.getElementById(`group-${group}`).style.display = "flex";
-}
 
     function showFilmOfTheDay() {
-  if (!films.length) return;
+      const film = films[Math.floor(Math.random() * films.length)];
+      document.getElementById('film-of-the-day').innerHTML = `
+        <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px;">
+        <h3>${film['Назва']}</h3>
+        <p>${film['Опис']}</p>
+        <button onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+      `;
+    }
 
-  const todayKey = new Date().toDateString();
-  const stored = JSON.parse(localStorage.getItem("filmOfTheDay"));
+    function showGenres() {
+      const genres = ['Новинки', 'Комедії', 'Драми', 'Серіали', 'Мультфільми'];
+      document.getElementById('genres').innerHTML = genres.map(g => `<button onclick="filterByGenre('${g}')">${g}</button>`).join(' ');
+    }
 
-  let film;
-  if (stored && stored.date === todayKey) {
-    film = stored.film;
-  } else {
-    film = films[Math.floor(Math.random() * films.length)];
-    localStorage.setItem("filmOfTheDay", JSON.stringify({ date: todayKey, film }));
-  }
+    function showCollections() {
+      const container = document.getElementById('collections');
+      const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
+      container.innerHTML = names.map(name => {
+        const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
+        return `<div onclick="filterByGenre('${name}')">
+          <img src="${img}" style="width:120px; border-radius:8px;">
+          <p>${name}</p>
+        </div>`;
+      }).join('');
+    }
 
-  document.getElementById("film-img").src = film['Фото'];
-  document.getElementById("film-img").alt = film['Назва'];
-  document.getElementById("film-title").textContent = film['Назва'];
+    function switchTab(tabId, btn = null) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      if (tabId === 'favorites') showFavorites();
+    }
 
-  const button = document.querySelector(".film-day-button");
-  if (button) {
-    button.setAttribute("onclick", `searchInBot('${film['Назва'].replace(/'/g, "\\'")}')`);
-  }
-}
+    function filterByGenre(genre) {
+      switchTab('categories');
+      const container = document.getElementById('genre-results');
+      const filtered = films.filter(f => f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || f['Добірка']?.toLowerCase() === genre.toLowerCase());
+      if (filtered.length === 0) return container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+      container.innerHTML = filtered.map(film => `
+        <div>
+          <img src="${film['Фото']}" style="width:100%; border-radius:8px;">
+          <h3>${film['Назва']}</h3>
+          <p>${film['Опис']}</p>
+          <button onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        </div>
+      `).join('');
+    }
 
-  
+    function showFavorites() {
+      const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+      const container = document.getElementById('fav-list');
+      container.innerHTML = favs.length ? favs.map(f => `
+        <div>
+          <h3>${f.title}</h3>
+          <p>${f.description}</p>
+        </div>
+      `).join('') : '<p>Немає улюблених</p>';
+    }
 
-function goToHome() {
-  switchTab('home', document.querySelector('[data-tab="home"]'));
-}
+    function searchInBot(query) {
+      const tg = window.Telegram.WebApp;
+      const user = tg.initDataUnsafe?.user;
+      if (!user) return alert("❗️Не вдалося отримати Telegram ID");
+      fetch('https://kinobot-qm9q.onrender.com/search-in-bot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, query })
+      }).then(r => r.json()).then(d => {
+        if (d.found && d.videoUrl) {
+          window.location.href = d.videoUrl;
+        } else {
+          alert("Фільм не знайдено 😢");
+        }
+      });
+    }
 
-    function handleSearchWithSpinner(button, query) {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-
-  if (!user) {
-    alert("❗️Не вдалося отримати Telegram ID");
-    return;
-  }
-
-  const user_id = user.id;
-  const backendUrl = "https://kinobot-qm9q.onrender.com/search-in-bot";
-
-  button.disabled = true;
-  button.innerHTML = `<span class="spinner"></span> Завантаження...`;
-
-  fetch(backendUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id, query }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.found && data.videoUrl) {
-        window.location.href = data.videoUrl;
-      } else {
-        alert("Фільм не знайдено 😢");
-      }
-    })
-    .catch(err => {
-      alert("Сталася помилка 😢");
-      console.error(err);
-    })
-    .finally(() => {
-      button.disabled = false;
-      button.innerHTML = "▶️ Дивитись";
-    });
-}
-    
-document.addEventListener("DOMContentLoaded", () => {
-  window.Telegram.WebApp.ready();
-  loadFilms(); // ✅ Тепер тут
-
-  const scrollBtn = document.getElementById("scrollToTop");
-
-  window.addEventListener("scroll", () => {
-    scrollBtn.style.display = window.scrollY > 200 ? "block" : "none";
-  });
-
-  scrollBtn.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  // Привʼязка жанрів
-  setTimeout(() => {
-    document.querySelectorAll('.genre-btn').forEach(btn => {
-      const genre = btn.dataset.genre;
-      if (genre) {
+    document.addEventListener('DOMContentLoaded', () => {
+      Telegram.WebApp.ready();
+      loadFilms();
+      document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          switchTab('categories', document.querySelector('[data-tab="categories"]'));
-          filterByGenre(genre);
+          const tab = btn.getAttribute('data-tab');
+          switchTab(tab, btn);
         });
-      }
-    });
-
-    // Привʼязка груп категорій
-    document.querySelectorAll('.genre-main-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const group = btn.dataset.group;
-        document.querySelectorAll('.genre-main-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        openGenreGroup(group);
+      });
+      document.getElementById('searchInput').addEventListener('input', () => {
+        const val = document.getElementById('searchInput').value.toLowerCase();
+        const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
+        document.getElementById('searchResults').innerHTML = results.map(f => `
+          <div>
+            <img src="${f['Фото']}" style="width:100%; border-radius:8px;">
+            <h3>${f['Назва']}</h3>
+            <p>${f['Опис']}</p>
+            <button onclick="searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+          </div>
+        `).join('');
       });
     });
-
-    // Привʼязка нижнього меню
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabId = btn.dataset.tab;
-        switchTab(tabId, btn);
-      });
-    });
-  }, 100);
-});
-
-
-</script>
-  
-  <!-- 🔝 Кнопка "Вгору" -->
-<button id="scrollToTop" style="
-  display: none;
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  width: 52px;
-  height: 52px;
-  background: radial-gradient(circle at 30% 30%, #00f7ff, #008fa0);
-  border: none;
-  border-radius: 50%;
-  font-size: 24px;
-  color: #000;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(0, 247, 255, 0.4);
-  z-index: 1000;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-">
-  🔝
-</button>
-
-
+  </script>
 </body>
 </html>
