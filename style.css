@@ -106,3 +106,10 @@
   background: #e50914;
   color: #fff;
 }
+.genre-main-btn.active {
+  background: linear-gradient(135deg, #ff3c00, #ff9900);
+  box-shadow: 0 0 10px rgba(255, 100, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.08);
+  transform: scale(1.04);
+  color: #fff;
+}
+
