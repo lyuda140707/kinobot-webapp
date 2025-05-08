@@ -93,23 +93,6 @@
       animation: spin 1s linear infinite;
       display: inline-block;
     }
-    #scrollToTop {
-      display: none;
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      width: 52px;
-      height: 52px;
-      background: radial-gradient(circle at 30% 30%, #00f7ff, #008fa0);
-      border: none;
-      border-radius: 50%;
-      font-size: 24px;
-      color: #000;
-      cursor: pointer;
-      box-shadow: 0 6px 16px rgba(0, 247, 255, 0.4);
-      z-index: 1000;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -136,43 +119,15 @@
     <button class="back-button" onclick="switchTab('home', document.querySelector('[data-tab=home]'))">⬅️ Назад</button>
     <div class="genre-main-wrapper">
       <div id="genre-main-buttons" class="genre-main-buttons">
-        <button class="genre-main-btn" onclick="showSubGenres('group-films')">🎯 За жанром</button>
-        <button class="genre-main-btn" onclick="showSubGenres('group-series')">📺 Серіали</button>
-        <button class="genre-main-btn" onclick="showSubGenres('group-cartoons')">👧 Мультики</button>
-      </div>
-      <div id="group-films" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
-        <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
-        <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
-        <button class="genre-btn" data-genre="Детективи">🕵️ Детективи</button>
-        <button class="genre-btn" data-genre="Драми">🎭 Драми</button>
-        <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
-        <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
-        <button class="genre-btn" data-genre="Документальні">📚 Документальні</button>
-        <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
-        <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
-        <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
-        <button class="genre-btn" data-genre="Кримінал">🚔 Кримінал</button>
-        <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
-        <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
-        <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
-        <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
-        <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
-      </div>
-      <div id="group-series" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
-        <button class="genre-btn" data-genre="Українські">🇺🇦 Українські</button>
-        <button class="genre-btn" data-genre="Детективні">🕵️‍♀️ Детективні</button>
-        <button class="genre-btn" data-genre="Драматичні">🎭 Драматичні</button>
-        <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
-        <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
-        <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
-        <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
-        <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
-        <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінальні</button>
-      </div>
-      <div id="group-cartoons" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
-        <button class="genre-btn" data-genre="Мультфільми">🎨 Всі мультики</button>
+        <button class="genre-main-btn" onclick="toggleGenreGroup('films')">🎯 За жанром</button>
+        <button class="genre-main-btn" onclick="toggleGenreGroup('series')">📺 Серіали</button>
+        <button class="genre-main-btn" onclick="toggleGenreGroup('cartoons')">👧 Мультики</button>
       </div>
     </div>
+
+    <div id="group-films" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;"></div>
+    <div id="group-series" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;"></div>
+    <div id="group-cartoons" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;"></div>
     <div id="genre-results" style="margin-top:20px;"></div>
   </div>
 
@@ -194,6 +149,24 @@
     <button class="nav-btn" data-tab="search">🔍<span>Пошук</span></button>
   </div>
 
-  <button id="scrollToTop">🔝</button>
+  <button id="scrollToTop" style="display:none; position:fixed; bottom:80px; right:20px; width:52px; height:52px; background: radial-gradient(circle at 30% 30%, #00f7ff, #008fa0); border:none; border-radius:50%; font-size:24px; color:#000; cursor:pointer; box-shadow:0 6px 16px rgba(0, 247, 255, 0.4); z-index:1000; transition: transform 0.3s ease, box-shadow 0.3s ease;">🔝</button>
+
+  <script>
+    document.getElementById('scrollToTop').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    window.addEventListener('scroll', () => {
+      document.getElementById('scrollToTop').style.display = window.scrollY > 200 ? 'block' : 'none';
+    });
+
+    function toggleGenreGroup(group) {
+      ['films', 'series', 'cartoons'].forEach(id => {
+        document.getElementById(`group-${id}`).style.display = 'none';
+      });
+      document.getElementById(`group-${group}`).style.display = 'flex';
+    }
+
+    // Додай сюди JavaScript код для заповнення підкатегорій
+  </script>
 </body>
 </html>
