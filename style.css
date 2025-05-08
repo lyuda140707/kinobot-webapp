@@ -61,21 +61,13 @@
   margin-top: 24px;
 }
 
-/* Горизонтальна прокрутка */
 .genre-scroll {
   display: flex;
-  overflow-x: auto;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 10px 0;
-  scroll-snap-type: x mandatory;
 }
-.genre-scroll::-webkit-scrollbar {
-  display: none;
-}
-.genre-scroll > .genre-btn {
-  scroll-snap-align: start;
-  flex: 0 0 auto;
-}
+
 
 .fade-in {
   animation: fadeInUp 0.6s ease-in-out;
