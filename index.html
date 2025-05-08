@@ -498,17 +498,6 @@ if (cartoonsGroup) {
 }
 
 
-  container.innerHTML = `
-  <img id="film-img" src="${film['Фото']}" alt="${film['Назва']}" />
-  <div class="film-title-overlay" id="film-title">${film['Назва']}</div>
-  <button class="film-day-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-  <div id="loading-indicator" style="display:none; text-align:center; margin-top:10px;">
-    <span class="loader"></span>
-  </div>
-`;
-
-
-}
 function goToHome() {
   switchTab('home', document.querySelector('[data-tab="home"]'));
 }
