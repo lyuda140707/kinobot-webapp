@@ -74,3 +74,19 @@
   scroll-snap-align: start;
   flex: 0 0 auto;
 }
+
+.fade-in {
+  animation: fadeInUp 0.6s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
