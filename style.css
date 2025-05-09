@@ -130,7 +130,11 @@
 
 .image-wrapper {
   position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 8px;
 }
+
 
 .film-day-card:hover {
   box-shadow:
@@ -313,28 +317,29 @@ body {
 /* Назва поверх фото */
 .film-title-overlay {
   position: absolute;
-  bottom: 8px;
+  bottom: 12px;
   left: 0;
   right: 0;
-  padding: 6px 10px;
-  font-size: 18px;
-  font-weight: bold;
+  text-align: center;
   color: #fff;
   font-family: 'Russo One', sans-serif;
-  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
   text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
   z-index: 2;
 }
 
 
+
 #film-day-img {
   width: 100%;
-  height: 200px;
-  object-fit: cover; /* Обрізає зображення зверху/знизу */
-  border-radius: 8px;
+  height: 100%;
+  object-fit: contain; /* ← щоб не обрізалось */
   display: block;
+  background-color: #000;
 }
+
 
 
 
