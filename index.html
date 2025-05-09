@@ -218,11 +218,13 @@
 }
 
 
-    function showFilmOfTheDay() {
+  function showFilmOfTheDay() {
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
   document.getElementById('film-day-button').onclick = () => searchInBot(film['Назва']);
+  document.getElementById('film-title').textContent = film['Назва']; // ⬅️ ДОДАЙ ЦЕ
 }
+
 
 
 
