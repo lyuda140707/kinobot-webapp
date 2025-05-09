@@ -348,33 +348,39 @@ function removeFromFavorites(index) {
 
 
     function searchInBot(query) {
-      const tg = window.Telegram.WebApp;
-      const user = tg.initDataUnsafe?.user;
-      if (!user) return alert("❗️Не вдалося отримати Telegram ID");
-      document.getElementById("loading-indicator").style.display = "block";
-      fetch('https://kinobot-qm9q.onrender.com/search-in-bot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, query })
-      }).then(r => r.json()).then(d => {
-        if (d.found && d.videoUrl) {
-          const existing = JSON.parse(localStorage.getItem('history') || '[]');
-if (!existing.find(f => f.title === query)) {
-  const film = films.find(f => f['Назва'] === query);
-  if (film) {
-    existing.unshift({ title: film['Назва'], description: film['Опис'] });
-    if (existing.length > 20) existing.pop(); // обмеження — останні 20
-    localStorage.setItem('history', JSON.stringify(existing));
-  }
-}
-          window.location.href = d.videoUrl;
-        } else {
-          alert("Фільм не знайдено 😢");
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+  if (!user) return alert("❗️Не вдалося отримати Telegram ID");
+  document.getElementById("loading-indicator").style.display = "block";
+
+  // ✅ Очищаємо пошукові дані перед переходом
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+
+  fetch('https://kinobot-qm9q.onrender.com/search-in-bot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: user.id, query })
+  }).then(r => r.json()).then(d => {
+    if (d.found && d.videoUrl) {
+      const existing = JSON.parse(localStorage.getItem('history') || '[]');
+      if (!existing.find(f => f.title === query)) {
+        const film = films.find(f => f['Назва'] === query);
+        if (film) {
+          existing.unshift({ title: film['Назва'], description: film['Опис'] });
+          if (existing.length > 20) existing.pop();
+          localStorage.setItem('history', JSON.stringify(existing));
         }
-      }).catch(console.error).finally(() => {
-        document.getElementById("loading-indicator").style.display = "none";
-      });
+      }
+      window.location.href = d.videoUrl;
+    } else {
+      alert("Фільм не знайдено 😢");
     }
+  }).catch(console.error).finally(() => {
+    document.getElementById("loading-indicator").style.display = "none";
+  });
+}
+
     
     function openGenreGroup(group) {
   // Ховаємо всі групи
