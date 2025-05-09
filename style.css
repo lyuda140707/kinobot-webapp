@@ -118,12 +118,16 @@ color: #fff;
   max-width: 320px;
   margin: auto;
   padding: 14px;
+
+  /* 💥 МАКСИМАЛЬНА НЕОН ПІДСВІТКА */
   box-shadow:
-    0 0 18px rgba(0, 255, 255, 0.6),
-    0 0 32px rgba(0, 255, 255, 0.4),
-    0 0 44px rgba(0, 255, 255, 0.2);
+    0 0 25px rgba(0, 255, 255, 0.9),
+    0 0 50px rgba(0, 255, 255, 0.7),
+    0 0 80px rgba(0, 255, 255, 0.5);
+
   transition: box-shadow 0.3s ease;
 }
+
 
 
 .film-day-card\:hover {
