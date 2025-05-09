@@ -313,8 +313,7 @@
 }
 
 
-    function showFavorites() {
-  // 🔹 Сховати всі фільм-листи
+   function showFavorites() {
   document.querySelectorAll('.film-list').forEach(el => el.style.display = 'none');
 
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
@@ -332,8 +331,9 @@
     `).join('');
   }
 
-  container.style.display = 'block'; // 🔹 Показати лише улюблені
+  container.style.display = 'block'; // 🔹 Важливо!
 }
+
 
     
 
@@ -389,22 +389,30 @@ if (!existing.find(f => f.title === query)) {
 }
 
   function switchTab(tabId, btn) {
+  // ❌ Ховаємо всі секції
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+  // ❌ Знімаємо активні вкладки
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
+  // ✅ Активуємо потрібну секцію і кнопку
   const target = document.getElementById(tabId);
   if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
 
+  // ✅ Ховаємо всі списки карток при перемиканні табів
+  document.querySelectorAll('.film-list').forEach(el => el.style.display = 'none');
+
+  // ✅ Якщо це "Улюблене" — показати
   if (tabId === 'favorites') {
     showFavorites();
   }
 
-  // ⬇️ Додаємо автопрокрутку вгору для аккаунта
+  // ✅ Якщо "Акаунт" — прокрутити вгору
   if (tabId === 'account') {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
+
 
 
 
@@ -508,7 +516,7 @@ function showHistory() {
     }).join('');
   }
 
-  container.style.display = 'block'; // 🔹 Показати лише історію
+  container.style.display = 'block';
 }
 
 
