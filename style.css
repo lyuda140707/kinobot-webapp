@@ -572,3 +572,46 @@ justify-content: center;
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* 🌞 Світла тема */
+.light-theme {
+  background-color: #fff;
+  color: #000;
+}
+
+.light-theme .section {
+  background-color: #fff;
+  color: #000;
+}
+
+.light-theme .nav {
+  background: #eee;
+  border-top: 1px solid #ccc;
+}
+
+.light-theme .nav button {
+  color: #333;
+}
+
+.light-theme .nav button.active {
+  color: #007BFF;
+  text-shadow: none;
+}
+
+.light-theme .film-card {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+.light-theme .back-button,
+.light-theme .btn-secondary {
+  background-color: #ddd;
+  color: #000;
+}
+
+.light-theme .search-button,
+.light-theme .fav-button {
+  background-color: #007BFF;
+  color: #fff;
+}
+
