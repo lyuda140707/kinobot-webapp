@@ -475,10 +475,6 @@ function showHistory() {
     container.innerHTML = '<p>Немає переглянутих фільмів</p>';
     return;
   }
-function rate(title, stars) {
-  localStorage.setItem(`rating_${title}`, stars);
-  showHistory(); // оновлює рейтинг одразу після кліку
-}
 
   container.innerHTML = history.map(f => {
     const rating = localStorage.getItem(`rating_${f.title}`) || 0;
@@ -495,6 +491,13 @@ function rate(title, stars) {
     `;
   }).join('');
 }
+
+// ✅ ВИНЕСИ окремо функцію rate() після showHistory
+function rate(title, stars) {
+  localStorage.setItem(`rating_${title}`, stars);
+  showHistory();
+}
+
 
 function clearHistory() {
   localStorage.removeItem('history');
