@@ -183,15 +183,28 @@
   <button class="genre-btn" data-genre="Дитячі">🧸 Дитячі</button>
   <button class="genre-btn" data-genre="Сімейні мультфільми">👨‍👩‍👦 Сімейні</button>
 </div>
-    <!-- 🔍 Фільтр за країною та роком -->
-<details id="filter-details" style="margin-top: 20px; margin-bottom: 20px;">
-  <summary style="font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">🔎 Фільтри</summary>
-  <div style="padding: 10px 0;">
-    <h4 style="margin: 10px 0 5px;">🌍 Країна</h4>
-    <div id="country-filters" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;"></div>
+   <!-- 🔍 Фільтр за країною та роком -->
+<details id="filter-details" style="margin-top: 20px; margin-bottom: 20px; background: #1c1c1c; border-radius: 10px; padding: 10px 15px;">
+  <summary style="font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; color: #00f7ff;">🔎 Фільтри</summary>
+  <div style="padding-top: 10px;">
+    <h4 style="margin: 10px 0 5px; color: #ccc;">🌍 Країна</h4>
+    <div id="country-filters" style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+    "></div>
 
-    <h4 style="margin: 10px 0 5px;">📅 Рік</h4>
-    <div id="year-filters" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+    <h4 style="margin: 10px 0 5px; color: #ccc;">📅 Рік</h4>
+    <div id="year-filters" style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+    "></div>
   </div>
 </details>
 
