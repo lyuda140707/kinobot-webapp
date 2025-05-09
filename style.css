@@ -12,7 +12,7 @@ cursor: pointer;
 transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
 }
 
-.genre-main-btn\:hover {
+.genre-main-btn:hover
 background: linear-gradient(135deg, #ff1a2a, #ff7a00);
 transform: scale(1.05);
 box-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
@@ -173,7 +173,7 @@ box-shadow: 0 0 14px rgba(0, 229, 255, 0.5);
 transition: all 0.3s ease-in-out;
 }
 
-.back-button\:hover {
+.genre-main-btn:hover {
 transform: scale(1.05);
 box-shadow: 0 0 20px rgba(0, 229, 255, 0.7);
 }
@@ -318,7 +318,7 @@ box-shadow:
 transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.watch-btn\:hover {
+.watch-btn:hover {
 background-color: #ff1a1a;
 transform: scale(1.04);
 box-shadow:
@@ -558,4 +558,24 @@ justify-content: center;
   padding: 10px;
   box-shadow: 0 0 10px rgba(0,255,255,0.1);
 }
+#loading-indicator {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.7);
+  padding: 20px 30px;
+  border-radius: 12px;
+  z-index: 9999;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,255,255,0.5);
+}
+.loader {
+  margin-bottom: 10px;
+}
+
+
+
 
