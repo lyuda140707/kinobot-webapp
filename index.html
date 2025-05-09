@@ -260,14 +260,16 @@
       const container = document.getElementById('genre-results');
       const filtered = films.filter(f => f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || f['Добірка']?.toLowerCase() === genre.toLowerCase());
       if (filtered.length === 0) return container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+      
       container.innerHTML = filtered.map(film => `
-  <div class="film-card">
+  <div class="film-card" onclick="this.classList.toggle('expanded')">
     <img src="${film['Фото']}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
-    <p>${film['Опис']}</p>
-    <button class="search-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+    <p class="film-desc">${film['Опис']}</p>
+    <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
   </div>
 `).join('');
+
 
     }
 
