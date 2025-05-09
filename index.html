@@ -219,14 +219,13 @@
 
 
     function showFilmOfTheDay() {
-      const film = films[Math.floor(Math.random() * films.length)];
-      document.getElementById('film-of-the-day').innerHTML = `
-        <img src="${film['Фото']}" alt="${film['Назва']}" style="width:100%; border-radius:10px;">
-        <h3>${film['Назва']}</h3>
-        <p>${film['Опис']}</p>
-        <button class="search-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-      `;
-    }
+  const film = films[Math.floor(Math.random() * films.length)];
+  document.getElementById('film-day-img').src = film['Фото'];
+  document.getElementById('film-day-title').textContent = film['Назва'];
+  document.getElementById('film-day-desc').textContent = film['Опис'];
+  document.getElementById('film-day-button').onclick = () => searchInBot(film['Назва']);
+}
+
 
     function showGenres() {
       const genres = ['Новинки', 'Комедії', 'Драми', 'Серіали', 'Мультфільми'];
