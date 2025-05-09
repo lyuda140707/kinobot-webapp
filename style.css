@@ -418,6 +418,25 @@ justify-content: center;
     0 0 12px rgba(255, 26, 26, 0.8),
     0 0 24px rgba(255, 26, 26, 0.6);
 }
+.fav-button {
+  background: #00bcd4;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow:
+    0 0 10px rgba(0, 229, 255, 0.6),
+    0 0 20px rgba(0, 229, 255, 0.4);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.fav-button:hover {
+  background: #00e5ff;
+  transform: scale(1.04);
+}
+
 
 
 
