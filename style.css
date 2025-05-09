@@ -114,17 +114,6 @@
 }
 
 .film-day-card {
-  position: relative;
-  background: #1a1a1a;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 18px rgba(0, 229, 255, 0.5); /* яскравіша бірюзова підсвітка */
-  text-align: center;
-  max-width: 320px;
-  margin: auto;
-  padding: 14px 14px 18px;
-  transition: box-shadow 0.3s ease;
-}
 
 
 .image-wrapper {
@@ -134,12 +123,13 @@
   border-radius: 8px;
 }
 
-
 .film-day-card:hover {
   box-shadow:
-    0 0 14px rgba(0, 229, 255, 0.09),
-    0 0 26px rgba(0, 229, 255, 0.1);
+    0 0 18px rgba(0, 229, 255, 0.8),
+    0 0 38px rgba(0, 229, 255, 0.6),
+    0 0 54px rgba(0, 229, 255, 0.4);
 }
+
 
 
 .film-day-overlay p {
