@@ -126,14 +126,7 @@
   display: block;
 }
 
-.film-day-overlay {
-  position: absolute;
-  bottom: 0;
-  background: linear-gradient(to top, #000 70%, transparent);
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-}
+
 
 .film-day-overlay h3 {
   margin: 0;
@@ -147,15 +140,7 @@
   color: #ccc;
 }
 
-.film-day-btn {
-  background: #c62828;
-  border: none;
-  color: #fff;
-  padding: 10px 20px;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-}
+
 
 
 #film-of-the-day img {
@@ -378,6 +363,22 @@ body {
   font-size: 14px;
 }
 
+.watch-btn {
+  background-color: #e50914;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  padding: 12px 30px;
+  font-size: 1.1em;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: all 0.3s ease;
+}
+
+.watch-btn:hover {
+  background-color: #ff1a1a;
+  transform: scale(1.05);
+}
 
 
 
