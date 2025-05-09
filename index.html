@@ -200,13 +200,27 @@
     <input type="text" id="searchInput" placeholder="Введіть назву або жанр..." style="width:100%;padding:10px;">
     <div id="searchResults" style="margin-top: 20px;"></div>
   </div>
+<!-- ✅ Секція Акаунт -->
+<section id="account" class="section">
+  <h2>👤 Акаунт</h2>
+
+  <button id="lucky-button" class="btn-lucky">🎲 Мені пощастить</button>
+  <button class="btn-secondary" onclick="showFavorites()">🧡 Улюблене</button>
+
+  <hr style="margin: 20px 0; border-color: #444;">
+
+  <h3>🤝 Підтримати проєкт</h3>
+  <a href="https://send.monobank.ua/jar/ТВОЄ_ID" target="_blank" class="btn-donate">☕ На каву адміну</a>
+</section>
 
   <div class="nav">
+    <button onclick="showSection('account')">👤 Акаунт</button>
     <button class="nav-btn active" data-tab="home">🏠<span>Головна</span></button>
     <button class="nav-btn" data-tab="categories">🎞️<span>Категорії</span></button>
     <button class="nav-btn" data-tab="favorites">💛<span>Улюблене</span></button>
     <button class="nav-btn" data-tab="search">🔍<span>Пошук</span></button>
   </div>
+  
 
   <script>
     let films = [];
