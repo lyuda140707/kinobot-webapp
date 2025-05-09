@@ -334,6 +334,21 @@ container.innerHTML = filtered.map(film => `
     document.addEventListener('DOMContentLoaded', () => {
       Telegram.WebApp.ready();
       loadFilms();
+
+      const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 300) {
+    scrollTopBtn.classList.add('show');
+  } else {
+    scrollTopBtn.classList.remove('show');
+  }
+});
+
+scrollTopBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
       
       document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
