@@ -248,8 +248,6 @@
   <button onclick="loadFacts()" style="margin-top:10px; padding:6px 12px; border:none; background:#00f7ff; color:#000; border-radius:6px; cursor:pointer;">🔁 Інший факт</button>
 </div>
 
-<button onclick="loadFacts()" style="margin-bottom:15px;">🔁 Інший факт</button>
-
 
 
 <div style="margin: 20px 0;">
@@ -688,7 +686,7 @@ function showHistory() {
     const res = await fetch("https://opensheet.vercel.app/1K4RYcbUqoA96E2ZkXgkj0836x3H5aleHpz9YDql3Yik/Sheet1");
     const facts = await res.json();
     const randomFact = facts[Math.floor(Math.random() * facts.length)];
-    document.getElementById('fact-box').innerText = `🎬 ${randomFact['Факт']}`;
+    document.getElementById('fact-text').innerText = `🎬 ${randomFact['Факт']}`;
   } catch (error) {
     document.getElementById('fact-box').innerText = '⚠️ Не вдалося завантажити факт.';
   }
