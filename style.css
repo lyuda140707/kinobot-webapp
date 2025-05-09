@@ -45,7 +45,7 @@ justify-content: flex-start;
 padding: 12px 0;
 }
 
-/\* Підкатегорії \*/
+/* Підкатегорії */
 .genre-btn {
   background: #333;
   border: none;
@@ -56,8 +56,6 @@ padding: 12px 0;
   color: #fff;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
-
-  /* 🆕 ДОБАВЛЕНО: мʼяка стандартна тінь */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -67,13 +65,6 @@ padding: 12px 0;
   box-shadow: 0 6px 16px rgba(229, 9, 20, 0.5);
 }
 
-
-
-.genre-btn\:hover {
-background: #e50914;
-color: #fff;
-transform: scale(1.03);
-}
 .genre-button-container {
 margin-top: 24px;
 }
