@@ -263,52 +263,43 @@ padding-bottom: 100px;
 
 .film-card {
   background: #1a1a1a;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 8px;
-  margin-bottom: 12px;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.1);
 }
 
 .film-card img {
   width: 100%;
-  height: 160px; /* зменшено висоту */
+  height: 140px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 6px;
   margin-bottom: 6px;
 }
 
 .film-card h3 {
-  font-size: 14px; /* менший розмір */
-  margin: 4px 0 2px;
-  text-align: center;
+  font-size: 14px;
+  margin: 6px 0 2px;
+  line-height: 1.2;
 }
 
 .film-card p {
-  font-size: 12px; /* менший розмір */
-  margin: 0 0 8px;
-  color: #aaa;
-  text-align: center;
-  line-height: 1.3;
+  font-size: 13px;
+  color: #ccc;
+  margin: 0 0 6px;
+
+  /* ✂️ обмеження опису до 3 рядків */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .film-card .search-button {
-  padding: 6px 14px;
   font-size: 13px;
-  border-radius: 18px;
-  background-color: #e50914;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s ease;
+  padding: 6px 10px;
 }
 
-.film-card .search-button:hover {
-  background-color: #ff1a1a;
-  transform: scale(1.05);
-}
 
 .watch-btn {
 background-color: #e50914;
@@ -384,6 +375,12 @@ justify-content: center;
 #collections::-webkit-scrollbar-thumb {
   background: rgba(0, 255, 255, 0.4);
   border-radius: 4px;
+}
+
+#genre-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
 }
 
 
