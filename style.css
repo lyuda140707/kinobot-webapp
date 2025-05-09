@@ -531,3 +531,18 @@ justify-content: center;
   padding-top: 10px;
 }
 
+.rating {
+  margin-top: 8px;
+}
+
+.rating .star {
+  font-size: 20px;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s;
+}
+
+.rating .star.filled {
+  color: gold;
+}
+
