@@ -306,13 +306,20 @@ body {
 
 /* Назва поверх фото */
 .film-title-overlay {
-  margin-top: 10px;
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  padding: 6px 10px;
   font-size: 18px;
   font-weight: bold;
   color: #fff;
   font-family: 'Russo One', sans-serif;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
 }
+
 
 #film-day-img {
   width: 100%;
