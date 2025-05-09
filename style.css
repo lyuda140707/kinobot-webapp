@@ -508,23 +508,48 @@ justify-content: center;
 
 .btn-donate {
   background: #f50057;
-  box-shadow: 0 0 10px rgba(245, 0, 87, 0.5);
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
   display: block;
   width: 100%;
   max-width: 100%;
-  text-align: center;
-  white-space: normal;
-  border-radius: 12px;
   padding: 12px 16px;
+  border-radius: 12px;
   font-size: 15px;
-  font-weight: bold;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+
+  /* 💡 Неонова підсвітка */
+  box-shadow:
+    0 0 8px rgba(245, 0, 87, 0.5),
+    0 0 14px rgba(245, 0, 87, 0.6),
+    0 0 20px rgba(245, 0, 87, 0.3);
+
+  animation: flicker 2s infinite;
+  transition: transform 0.2s ease;
 }
 
-
-.btn-donate:hover,
-.btn-secondary:hover {
-  transform: scale(1.03);
+.btn-donate:hover {
+  transform: scale(1.04);
 }
+
+/* ✨ Анімація мерехтіння */
+@keyframes flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    box-shadow:
+      0 0 8px rgba(245, 0, 87, 0.5),
+      0 0 14px rgba(245, 0, 87, 0.6),
+      0 0 20px rgba(245, 0, 87, 0.3);
+  }
+  20%, 24%, 55% {
+    box-shadow:
+      0 0 4px rgba(245, 0, 87, 0.2),
+      0 0 8px rgba(245, 0, 87, 0.3);
+  }
+}
+
 #history-list {
   margin-top: 20px;
   border-top: 1px solid #333;
