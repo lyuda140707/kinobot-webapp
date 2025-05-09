@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KinoBot Web App</title>
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <style>
     body {
@@ -256,29 +256,35 @@
 
 
     function filterByGenre(genre) {
-      switchTab('categories');
-      const container = document.getElementById('genre-results');
-const filtered = films.filter(f => f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || f['Добірка']?.toLowerCase() === genre.toLowerCase());
+  switchTab('categories');
+  const container = document.getElementById('genre-results');
 
-if (filtered.length === 0) {
-  container.innerHTML = '<p>Нічого не знайдено 😢</p>';
-  return;
+  const filtered = films.filter(f =>
+    f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) ||
+    f['Добірка']?.toLowerCase() === genre.toLowerCase()
+  );
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(film => `
+    <div class="film-card">
+      <img src="${film['Фото']}" alt="${film['Назва']}">
+      <h3>${film['Назва']}</h3>
+      <p class="film-desc">${film['Опис']}</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+      </div>
+    </div>
+  `).join('');
+
+  // 🔽 Прокручуємо вниз до фільмів
+  container.scrollIntoView({ behavior: 'smooth' });
 }
 
-container.innerHTML = filtered.map(film => `
-  <div class="film-card">
-    <img src="${film['Фото']}" alt="${film['Назва']}">
-    <h3>${film['Назва']}</h3>
-    <p class="film-desc">${film['Опис']}</p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
-    </div>
-  </div>
-`).join('');
-
-
-    }
 
     function showFavorites() {
       const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
