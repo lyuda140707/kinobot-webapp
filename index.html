@@ -349,6 +349,11 @@ function removeFromFavorites(index) {
 
 
     function searchInBot(query) {
+      // 🧹 Повне очищення залишків
+document.getElementById('history-list').innerHTML = '';
+document.getElementById('searchResults').innerHTML = '';
+document.querySelectorAll('.film-card').forEach(card => card.remove());
+
   // ❗️Спочатку ховаємо всі секції (прибирає візуальний "перекіс")
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
