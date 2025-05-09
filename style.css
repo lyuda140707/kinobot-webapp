@@ -419,24 +419,25 @@ justify-content: center;
     0 0 24px rgba(255, 26, 26, 0.6);
 }
 .fav-button {
-  background: #018b9f; /* було #00bcd4 */
+  background: #0097a7; /* темніший бірюзовий */
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   color: white;
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   box-shadow:
-    0 0 6px rgba(0, 229, 255, 0.3),   /* було 0.6 */
-    0 0 12px rgba(0, 229, 255, 0.2);  /* було 0.4 */
+    0 0 6px rgba(0, 183, 255, 0.3),
+    0 0 12px rgba(0, 183, 255, 0.15);
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .fav-button:hover {
-  background: #00bcd4; /* мʼякший, не отруйний */
+  background: #00bcd4; /* світліший при наведенні */
   transform: scale(1.04);
 }
+
 
 .scroll-top-btn {
   position: fixed;
