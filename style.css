@@ -114,10 +114,49 @@
 }
 .film-day-card {
   position: relative;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.05);
 }
+
+.film-day-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.film-day-overlay {
+  position: absolute;
+  bottom: 0;
+  background: linear-gradient(to top, #000 70%, transparent);
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.film-day-overlay h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.film-day-overlay p {
+  margin: 6px 0 12px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.film-day-btn {
+  background: #c62828;
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 
 #film-of-the-day img {
   width: 100%;
