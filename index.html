@@ -436,6 +436,15 @@ document.addEventListener('click', (e) => {
   localStorage.setItem('favorites', JSON.stringify(favs));
   alert('Додано в улюблене!');
 }
+document.getElementById("lucky-button").addEventListener("click", () => {
+  if (!films.length) {
+    alert("⏳ Фільми ще не завантажились");
+    return;
+  }
+
+  const randomFilm = films[Math.floor(Math.random() * films.length)];
+  alert(`🎬 ${randomFilm['Назва']}\n\n${randomFilm['Опис'] || ''}`);
+});
 
 
   </script>
