@@ -545,4 +545,17 @@ justify-content: center;
 .rating .star.filled {
   color: gold;
 }
+.film-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.film-list .film-card {
+  background: #1b1b1b;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0,255,255,0.1);
+}
 
