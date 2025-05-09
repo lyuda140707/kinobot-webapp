@@ -365,11 +365,18 @@ function removeFromFavorites(index) {
 
   const target = document.getElementById(tabId);
   if (target) target.classList.add('active');
-  if (btn) btn.classList.add('active');// ⬇️ ДОДАЙ ЦЕ
+  if (btn) btn.classList.add('active');
+
   if (tabId === 'favorites') {
     showFavorites();
   }
+
+  // ⬇️ Додаємо автопрокрутку вгору для аккаунта
+  if (tabId === 'account') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
+
 
 
     document.addEventListener('DOMContentLoaded', () => {
