@@ -384,4 +384,16 @@ justify-content: center;
   gap: 12px;
 }
 
+.film-desc {
+  max-height: 40px; /* показує тільки кілька рядків */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: max-height 0.3s ease;
+}
+
+.film-card.expanded .film-desc {
+  max-height: 500px; /* повна висота при розгортанні */
+  overflow: visible;
+}
+
 
