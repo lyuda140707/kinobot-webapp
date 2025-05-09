@@ -614,4 +614,23 @@ justify-content: center;
   background-color: #007BFF;
   color: #fff;
 }
+.account-button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 247, 255, 0.2);
+  text-align: center;
+}
+.account-button:hover {
+  background: #333;
+}
+
 
