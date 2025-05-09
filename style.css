@@ -221,16 +221,6 @@ font-size: 14px;
 }
 
 .collection-card {
-  background: #1a1a1a;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow:
-    0 0 14px rgba(0, 255, 255, 0.5),
-    0 0 24px rgba(0, 255, 255, 0.3),
-    0 0 34px rgba(0, 255, 255, 0.15); /* 👈 як у film-day-card */
-}
 
 
 .collection-card:hover {
