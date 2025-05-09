@@ -221,14 +221,20 @@ font-size: 14px;
 }
 
 .collection-card {
-min-width: 140px;
-background: #222;
-border-radius: 10px;
-overflow: hidden;
-cursor: pointer;
-box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-width: 140px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  /* ✨ Підсвітка як у #film-of-the-day */
+  box-shadow:
+    0 0 14px rgba(0, 255, 255, 0.6),
+    0 0 26px rgba(0, 255, 255, 0.4),
+    0 0 36px rgba(0, 255, 255, 0.2);
 }
+
 .collection-card\:hover {
 transform: scale(1.05);
 box-shadow: 0 4px 16px rgba(0,255,255,0.4);
