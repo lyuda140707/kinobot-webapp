@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KinoBot Web App</title>
   <link rel="icon" href="https://example.com/my-favicon.ico">
-  <link rel="stylesheet" href="style.css?v=15" />
+  <link rel="stylesheet" href="style.css?v=16" />
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <style>
     body {
@@ -116,6 +116,12 @@
     
     <h3>Жанри</h3>
     <div id="genres" style="display:none; flex-wrap:wrap; gap:10px;"></div>
+    <h3>Фільтр за країною</h3>
+<div id="country-filters" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;"></div>
+
+<h3>Фільтр за роком</h3>
+<div id="year-filters" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;"></div>
+
     <h3 style="margin-top:25px">Добірки</h3>
   <div id="collections" style="
   display: flex;
@@ -270,6 +276,24 @@
       document.getElementById('genres').style.display = 'flex';
 
     }
+    function showCountryFilters() {
+  const countries = [...new Set(films.map(f => f['Країна']).filter(Boolean))];
+  const container = document.getElementById('country-filters');
+  container.innerHTML = countries.map(country => `
+    <button class="genre-btn" onclick="filterByCountry('${country}')">${country}</button>
+  `).join('');
+  container.style.display = 'flex';
+}
+
+function showYearFilters() {
+  const years = [...new Set(films.map(f => f['Рік']).filter(Boolean))];
+  const container = document.getElementById('year-filters');
+  container.innerHTML = years.map(year => `
+    <button class="genre-btn" onclick="filterByYear('${year}')">${year}</button>
+  `).join('');
+  container.style.display = 'flex';
+}
+
 
     function showCollections() {
   const container = document.getElementById('collections');
@@ -316,6 +340,54 @@
   // 🔽 Прокручуємо вниз до фільмів
   container.scrollIntoView({ behavior: 'smooth' });
 }
+    function filterByCountry(country) {
+  switchTab('categories');
+  const container = document.getElementById('genre-results');
+
+  const filtered = films.filter(f => f['Країна'] === country);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(film => `
+    <div class="film-card">
+      <img src="${film['Фото']}" alt="${film['Назва']}">
+      <h3>${film['Назва']}</h3>
+      <p>${film['Опис']}</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterByYear(year) {
+  switchTab('categories');
+  const container = document.getElementById('genre-results');
+
+  const filtered = films.filter(f => f['Рік']?.toString() === year.toString());
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(film => `
+    <div class="film-card">
+      <img src="${film['Фото']}" alt="${film['Назва']}">
+      <h3>${film['Назва']}</h3>
+      <p>${film['Опис']}</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+      </div>
+    </div>
+  `).join('');
+}
+
 
 
    function showFavorites() {
@@ -465,6 +537,9 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
       loadFilms();
 
       const scrollTopBtn = document.getElementById('scrollTopBtn');
+      showCountryFilters();
+      showYearFilters();
+
 
 window.addEventListener('scroll', () => {
   if (window.scrollY > 300) {
