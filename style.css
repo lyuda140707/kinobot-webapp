@@ -54,10 +54,11 @@ padding: 12px 0;
   font-size: 15px;
   font-weight: bold;
   color: #fff;
-  box-shadow: 0 4px 12px rgbargba(50, 50, 50, 0.4); /* мʼякша, природна тінь */
+  box-shadow: 0 4px 12px rgba(50, 50, 50, 0.4); /* 🟢 правильна тінь */
   cursor: pointer;
   transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
 }
+
 
 .genre-btn\:hover {
 background: #e50914;
