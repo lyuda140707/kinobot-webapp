@@ -221,7 +221,7 @@ font-size: 14px;
 }
 
 .collection-card {
-  width: 180px;
+  width: 140px;
   background: #1a1a1a;
   border-radius: 12px;
   overflow: hidden;
@@ -346,7 +346,7 @@ justify-content: center;
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
-  gap: 16px;
+  gap: 12px;
   padding: 10px 0;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
