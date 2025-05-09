@@ -139,12 +139,22 @@ font-size: 14px;
 color: #ccc;
 }
 
-\#film-of-the-day {
-position: relative;
-border-radius: 15px;
-overflow: hidden;
-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+#film-of-the-day {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  padding: 0;
+  margin: auto;
+  max-width: 320px;
+
+  /* ✅ Неонова тінь */
+  box-shadow:
+    0 0 18px rgba(0, 255, 255, 0.6),
+    0 0 32px rgba(0, 255, 255, 0.4),
+    0 0 44px rgba(0, 255, 255, 0.2);
+  transition: box-shadow 0.3s ease;
 }
+
 
 .back-button {
 background: linear-gradient(135deg, #00e5ff, #00bcd4);
@@ -291,7 +301,7 @@ justify-content: center;
 
 .film-title-overlay {
   position: absolute;
-  bottom: 12px;
+  bottom: 8px;
   left: 0;
   right: 0;
   text-align: center;
@@ -305,12 +315,14 @@ justify-content: center;
 }
 
 
+
 #film-day-img {
   width: 100%;
-  height: 200px;             /* Трохи обрізає зверху/знизу */
-  object-fit: cover;         /* Не підлаштовує під блок */
+  height: 200px;
+  object-fit: cover; /* ✅ Обрізає зверху і знизу, не стискає */
   display: block;
-  background-color: #000;
   border-radius: 8px;
+  background-color: #000;
 }
+
 
