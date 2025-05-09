@@ -475,14 +475,27 @@ function showHistory() {
     container.innerHTML = '<p>Немає переглянутих фільмів</p>';
     return;
   }
-
-  container.innerHTML = history.map((f, i) => `
-    <div class="film-card">
-      <h3>${f.title}</h3>
-      <p>${f.description}</p>
-    </div>
-  `).join('');
+function rate(title, stars) {
+  localStorage.setItem(`rating_${title}`, stars);
+  showHistory(); // оновлює рейтинг одразу після кліку
 }
+
+  container.innerHTML = history.map(f => {
+    const rating = localStorage.getItem(`rating_${f.title}`) || 0;
+    return `
+      <div class="film-card">
+        <h3>${f.title}</h3>
+        <p>${f.description}</p>
+        <div class="rating" data-title="${f.title}">
+          ${[1,2,3,4,5].map(i => `
+            <span class="star ${i <= rating ? 'filled' : ''}" onclick="rate('${f.title}', ${i})">★</span>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function clearHistory() {
   localStorage.removeItem('history');
   showHistory(); // одразу оновлює вивід
