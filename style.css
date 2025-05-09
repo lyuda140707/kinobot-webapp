@@ -119,8 +119,9 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow:
-    0 0 10px rgba(0, 229, 255, 0.15),
-    0 0 20px rgba(0, 229, 255, 0.15); /* Бірюзова підсвітка */
+  box-shadow:
+  0 0 16px rgba(0, 229, 255, 0.4),
+  0 0 32px rgba(0, 229, 255, 0.3);
   text-align: center;
   max-width: 320px;
   margin: auto;
@@ -327,8 +328,8 @@ body {
 
 #film-day-img {
   width: 100%;
-  height: 200px;
-  object-fit: cover; /* ⬅️ Залишає фото цілим по ширині, обрізає трохи зверху/знизу */
+  height: 180px;
+  object-fit: cover; /* залишає повну ширину, обрізає трохи зверху/знизу */
   border-radius: 8px;
   background-color: #000;
   display: block;
