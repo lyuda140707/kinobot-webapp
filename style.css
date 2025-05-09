@@ -483,3 +483,46 @@ justify-content: center;
   transform: scale(1.05);
 }
 
+.btn-lucky {
+  background: #00bcd4;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 10px auto;
+  display: block;
+  box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+  transition: transform 0.2s ease;
+}
+.btn-lucky:hover {
+  transform: scale(1.05);
+}
+
+.btn-secondary, .btn-donate {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.btn-donate {
+  background: #f50057;
+  box-shadow: 0 0 10px rgba(245, 0, 87, 0.5);
+}
+.btn-donate:hover,
+.btn-secondary:hover {
+  transform: scale(1.03);
+}
+
