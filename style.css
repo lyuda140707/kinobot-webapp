@@ -116,12 +116,14 @@
   background: #1a1a1a;
   border-radius: 12px;
   overflow: hidden;
-  padding: 14px 14px 18px;
-  box-shadow: 0 0 14px rgba(0, 229, 255, 0.5); /* як у кнопки */
+  padding: 14px;
+  box-shadow:
+    0 0 12px rgba(0, 229, 255, 0.15),
+    0 0 24px rgba(0, 229, 255, 0.2);
+  transition: box-shadow 0.3s ease;
   text-align: center;
   max-width: 340px;
   margin: auto;
-  transition: box-shadow 0.3s ease;
 }
 
 
@@ -301,13 +303,15 @@ body {
     0 0 12px rgba(0, 255, 255, 0.08),
     0 0 25px rgba(0, 255, 255, 0.05);
 }
+
 .film-day-card img {
   width: 100%;
   height: auto;
-  max-height: 100%;
-  object-fit: contain;
+  object-fit: cover; /* або прибери зовсім, якщо постери вертикальні */
   border-radius: 8px;
   margin-bottom: 12px;
+
 }
+
 
 
