@@ -512,8 +512,8 @@ justify-content: center;
   font-weight: bold;
   text-align: center;
   display: block;
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% - 32px); /* майже весь екран */
+  margin: 0 auto 10px; /* вирівнювання по центру */
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 15px;
@@ -521,12 +521,11 @@ justify-content: center;
   border: none;
   cursor: pointer;
 
-  /* 💡 Неонова підсвітка */
+  /* 💡 Неонова підсвітка + анімація */
   box-shadow:
     0 0 8px rgba(245, 0, 87, 0.5),
     0 0 14px rgba(245, 0, 87, 0.6),
     0 0 20px rgba(245, 0, 87, 0.3);
-
   animation: flicker 2s infinite;
   transition: transform 0.2s ease;
 }
@@ -535,7 +534,6 @@ justify-content: center;
   transform: scale(1.04);
 }
 
-/* ✨ Анімація мерехтіння */
 @keyframes flicker {
   0%, 18%, 22%, 25%, 53%, 57%, 100% {
     box-shadow:
@@ -549,6 +547,7 @@ justify-content: center;
       0 0 8px rgba(245, 0, 87, 0.3);
   }
 }
+
 
 #history-list {
   margin-top: 20px;
