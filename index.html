@@ -266,7 +266,11 @@
     <img src="${film['Фото']}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
     <p class="film-desc">${film['Опис']}</p>
-    <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+  <button class="search-button" onclick="searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+  <button class="fav-button" onclick="addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+</div>
+
   </div>
 `).join('');
 
