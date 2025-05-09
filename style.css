@@ -504,7 +504,12 @@ justify-content: center;
 .btn-donate {
   background: #f50057;
   box-shadow: 0 0 10px rgba(245, 0, 87, 0.5);
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  white-space: nowrap;
 }
+
 .btn-donate:hover,
 .btn-secondary:hover {
   transform: scale(1.03);
