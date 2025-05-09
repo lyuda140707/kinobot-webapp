@@ -116,17 +116,7 @@
     
     <h3>Жанри</h3>
     <div id="genres" style="display:none; flex-wrap:wrap; gap:10px;"></div>
-    <details id="filter-details" style="margin-bottom: 20px;">
-  <summary style="font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">🔎 Фільтри</summary>
-  <div style="padding: 10px 0;">
-    <h4 style="margin: 10px 0 5px;">🌍 Країна</h4>
-    <div id="country-filters" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;"></div>
-
-    <h4 style="margin: 10px 0 5px;">📅 Рік</h4>
-    <div id="year-filters" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
-  </div>
-</details>
-
+    
 
     <h3 style="margin-top:25px">Добірки</h3>
   <div id="collections" style="
@@ -519,6 +509,10 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
   }
 
   // ✅ Якщо "Акаунт" — прокрутити вгору
+  if (tabId === 'categories') {
+  document.getElementById('filter-details')?.removeAttribute('open');
+}
+
   if (tabId === 'account') {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
