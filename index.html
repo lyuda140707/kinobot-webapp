@@ -321,7 +321,15 @@
   if (block) block.style.display = "flex";
 }
 
-  
+  function switchTab(tabId, btn) {
+  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
     document.addEventListener('DOMContentLoaded', () => {
       Telegram.WebApp.ready();
       loadFilms();
