@@ -208,6 +208,11 @@
   <button class="btn-secondary" onclick="showFavorites()">🧡 Улюблене</button>
 
   <hr style="margin: 20px 0; border-color: #444;">
+  <button class="btn-secondary" onclick="showHistory()">📽 Історія переглядів</button>
+<div id="history-list"></div>
+  <button class="btn-secondary" onclick="clearHistory()">🧹 Очистити історію</button>
+
+
 
   <h3>🤝 Підтримати проєкт</h3>
   <a href="https://send.monobank.ua/jar/ТВОЄ_ID" target="_blank" class="btn-donate">☕ На каву адміну</a>
@@ -339,6 +344,15 @@ function removeFromFavorites(index) {
         body: JSON.stringify({ user_id: user.id, query })
       }).then(r => r.json()).then(d => {
         if (d.found && d.videoUrl) {
+          const existing = JSON.parse(localStorage.getItem('history') || '[]');
+if (!existing.find(f => f.title === query)) {
+  const film = films.find(f => f['Назва'] === query);
+  if (film) {
+    existing.unshift({ title: film['Назва'], description: film['Опис'] });
+    if (existing.length > 20) existing.pop(); // обмеження — останні 20
+    localStorage.setItem('history', JSON.stringify(existing));
+  }
+}
           window.location.href = d.videoUrl;
         } else {
           alert("Фільм не знайдено 😢");
@@ -453,7 +467,26 @@ document.getElementById("lucky-button").addEventListener("click", () => {
   alert(`🎬 ${randomFilm['Назва']}\n\n${randomFilm['Опис'] || ''}`);
 });
 
+function showHistory() {
+  const history = JSON.parse(localStorage.getItem('history') || '[]');
+  const container = document.getElementById('history-list');
 
+  if (history.length === 0) {
+    container.innerHTML = '<p>Немає переглянутих фільмів</p>';
+    return;
+  }
+
+  container.innerHTML = history.map((f, i) => `
+    <div class="film-card">
+      <h3>${f.title}</h3>
+      <p>${f.description}</p>
+    </div>
+  `).join('');
+}
+function clearHistory() {
+  localStorage.removeItem('history');
+  showHistory(); // одразу оновлює вивід
+}
   </script>
   
   <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
