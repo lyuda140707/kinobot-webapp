@@ -220,10 +220,9 @@
     function showFilmOfTheDay() {
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
-  document.getElementById('film-day-title').textContent = film['Назва'];
-  document.getElementById('film-day-desc').textContent = film['Опис'];
   document.getElementById('film-day-button').onclick = () => searchInBot(film['Назва']);
 }
+
 
 
     function showGenres() {
