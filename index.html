@@ -239,8 +239,15 @@
 
 </div>
   <button class="btn-secondary" onclick="clearHistory()">🧹 Очистити історію</button>
-  <h3>🎞 Цікавий факт про кіно</h3>
-<div id="fact-box" style="margin-bottom:15px; color:#ccc;"></div>
+  <h3 onclick="toggleFact()" style="cursor:pointer; display:flex; align-items:center; gap:10px;">
+  🎬 Цікавий факт про кіно
+  <span id="fact-arrow">⬇️</span>
+</h3>
+<div id="fact-box" style="display:none; margin-bottom:15px; background:#1a1a1a; padding:12px 16px; border-left:4px solid #00f7ff; border-radius:8px; color:#ccc;">
+  <div id="fact-text">Завантаження...</div>
+  <button onclick="loadFacts()" style="margin-top:10px; padding:6px 12px; border:none; background:#00f7ff; color:#000; border-radius:6px; cursor:pointer;">🔁 Інший факт</button>
+</div>
+
 <button onclick="loadFacts()" style="margin-bottom:15px;">🔁 Інший факт</button>
 
 
@@ -709,6 +716,14 @@ function clearHistory() {
   localStorage.removeItem('history');
   showHistory(); // одразу оновлює вивід
 }
+    function toggleFact() {
+  const box = document.getElementById('fact-box');
+  const arrow = document.getElementById('fact-arrow');
+  const isVisible = box.style.display === 'block';
+  box.style.display = isVisible ? 'none' : 'block';
+  arrow.textContent = isVisible ? '⬇️' : '⬆️';
+}
+
   </script>
   
   <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
