@@ -239,6 +239,11 @@
 
 </div>
   <button class="btn-secondary" onclick="clearHistory()">🧹 Очистити історію</button>
+  <h3>🎞 Цікавий факт про кіно</h3>
+<div id="fact-box" style="margin-bottom:15px; color:#ccc;"></div>
+<button onclick="loadFacts()" style="margin-bottom:15px;">🔁 Інший факт</button>
+
+
 
 <div style="margin: 20px 0;">
   <label for="theme-toggle" style="font-weight: bold;">🌙 Темна тема</label>
@@ -563,6 +568,8 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
   });
 
       loadFilms();
+      loadFacts();
+
 
       const scrollTopBtn = document.getElementById('scrollTopBtn');
       showCountryFilters();
@@ -667,6 +674,17 @@ function showHistory() {
   }
 
   container.style.display = 'block';
+}
+
+    async function loadFacts() {
+  try {
+    const res = await fetch("https://opensheet.vercel.app/1K4RYcbUqoA96E2ZkXgkj0836x3H5aleHpz9YDql3Yik/Sheet1");
+    const facts = await res.json();
+    const randomFact = facts[Math.floor(Math.random() * facts.length)];
+    document.getElementById('fact-box').innerText = `🎬 ${randomFact['Факт']}`;
+  } catch (error) {
+    document.getElementById('fact-box').innerText = '⚠️ Не вдалося завантажити факт.';
+  }
 }
 
     function toggleHistory() {
