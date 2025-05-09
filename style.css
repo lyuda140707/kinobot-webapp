@@ -47,17 +47,18 @@ padding: 12px 0;
 
 /\* Підкатегорії \*/
 .genre-btn {
-background: #333;
-border: none;
-border-radius: 25px;
-padding: 10px 16px;
-font-size: 15px;
-font-weight: bold;
-color: #fff;
-box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-cursor: pointer;
-transition: background 0.3s, transform 0.2s;
+  background: #333;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35); /* мʼякша, природна тінь */
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
 }
+
 .genre-btn\:hover {
 background: #e50914;
 color: #fff;
