@@ -239,26 +239,20 @@
     }
 
     function showCollections() {
-      const container = document.getElementById('collections');
-      const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
-      container.innerHTML = names.map(name => {
-        const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
-        return `<div onclick="filterByGenre('${name}')">
-          <img src="${img}" style="width:120px; border-radius:8px;">
-          <p>${name}</p>
-        </div>`;
-      }).join('');
-      document.getElementById('collections').style.display = 'flex';
+  const container = document.getElementById('collections');
+  const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
+  container.innerHTML = names.map(name => {
+    const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
+    return `
+      <div class="collection-card" onclick="filterByGenre('${name}')">
+        <img src="${img}" alt="${name}">
+        <p>${name}</p>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('collections').style.display = 'flex';
+}
 
-    }
-
-    function switchTab(tabId, btn = null) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      if (tabId === 'favorites') showFavorites();
-    }
 
     function filterByGenre(genre) {
       switchTab('categories');
