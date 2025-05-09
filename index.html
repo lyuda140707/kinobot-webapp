@@ -207,7 +207,7 @@
   <button id="lucky-button" class="btn-lucky">🎲 Мені пощастить</button>
   <button class="btn-secondary" onclick="switchTab('favorites', document.querySelector('[data-tab=favorites]'))">🧡 Улюблене</button>
   <hr style="margin: 20px 0; border-color: #444;">
-  <button class="btn-secondary" onclick="showHistory()">📽 Історія переглядів</button>
+  <button class="btn-secondary" onclick="switchTab('account', document.querySelector('[data-tab=account]')); showHistory()">📽 Історія переглядів</button>
 <div id="history-wrapper" style="margin-top: 10px;">
   <div id="history-list" class="film-list"></div>
 </div>
