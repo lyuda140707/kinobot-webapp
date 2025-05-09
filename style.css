@@ -221,27 +221,32 @@ font-size: 14px;
 }
 
 .collection-card {
-  min-width: 140px;
+  position: relative;
   background: #1a1a1a;
   border-radius: 12px;
   overflow: hidden;
+  text-align: center;
+  max-width: 320px;
+  margin: auto;
+  padding: 14px;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
-  /* 🎯 ПРИГЛУШЕНА, але виразна підсвітка */
+  /* ✨ Точна копія підсвітки з film-day-card */
   box-shadow:
-    0 0 8px rgba(0, 255, 255, 0.4),
-    0 0 12px rgba(0, 255, 255, 0.25),
-    0 0 16px rgba(0, 255, 255, 0.1);
+    0 0 14px rgba(0, 255, 255, 0.5),
+    0 0 24px rgba(0, 255, 255, 0.3),
+    0 0 34px rgba(0, 255, 255, 0.15);
 }
 
 .collection-card:hover {
   transform: scale(1.05);
   box-shadow:
-    0 0 10px rgba(0, 255, 255, 0.6),
-    0 0 16px rgba(0, 255, 255, 0.4),
-    0 0 22px rgba(0, 255, 255, 0.2);
+    0 0 18px rgba(0, 255, 255, 0.8),
+    0 0 38px rgba(0, 255, 255, 0.6),
+    0 0 54px rgba(0, 255, 255, 0.4);
 }
+
 
 .collection-card img {
 width: 100%;
