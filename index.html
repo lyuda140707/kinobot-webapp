@@ -103,7 +103,15 @@
 <body>
   <div id="home" class="section active">
     <h2>🎬 Фільм дня</h2>
-    <div id="film-of-the-day"></div>
+    <div id="film-of-the-day" class="film-day-card">
+  <img id="film-day-img" src="" alt="Фільм дня">
+  <div class="film-day-overlay">
+    <h3 id="film-day-title">Назва</h3>
+    <p id="film-day-desc">Опис</p>
+    <button id="film-day-button" class="film-day-btn">Дивитись</button>
+  </div>
+</div>
+
       <div id="home-loading" style="text-align:center; margin-top:30px;">
     <span class="loader"></span>
     <div style="margin-top:8px;">Завантаження...</div>
