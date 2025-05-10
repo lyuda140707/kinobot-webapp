@@ -360,7 +360,12 @@ function confirmOpen() {
   const modal = document.getElementById('confirm-modal');
   modal.classList.remove('show');
   setTimeout(() => {
-    window.open(pendingLink, '_blank');
+    if (window.Telegram && window.Telegram.WebApp) {
+  window.Telegram.WebApp.openLink(pendingLink);
+} else {
+  window.open(pendingLink, '_blank');
+}
+
     pendingLink = "";
   }, 200); // чекаємо трошки перед відкриттям
 }
