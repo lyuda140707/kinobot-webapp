@@ -617,6 +617,14 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 }
 
 
+function showSkeletonCollections() {
+  const container = document.getElementById('collections');
+  container.innerHTML = `
+    <div class="film-card skeleton" style="height:200px; width:130px; border-radius:12px;"></div>
+    <div class="film-card skeleton" style="height:200px; width:130px; border-radius:12px;"></div>
+    <div class="film-card skeleton" style="height:200px; width:130px; border-radius:12px;"></div>
+  `;
+}
 
 
   document.addEventListener('DOMContentLoaded', () => {
