@@ -300,7 +300,12 @@
   function showFilmOfTheDay() {
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
-  document.getElementById('film-day-button').onclick = () => searchInBot(film['Назва']);
+  document.getElementById('film-day-button').onclick = () => {
+  // Передаємо не тільки назву та опис, але й URL відео
+  const videoUrl = film['videoUrl']; // отримуєте URL з фільму
+  addToFavorites(film['Назва'], film['Опис'], videoUrl);
+};
+
   document.getElementById('film-title').textContent = film['Назва']; // ⬅️ ДОДАЙ ЦЕ
 }
 
@@ -428,12 +433,9 @@ function filterByYear(year) {
 
 
    function showFavorites() {
-  // 🔥 Видалити всі старі картки фільмів з інших секцій
   document.querySelectorAll('.film-card').forEach(el => el.remove());
 
   const container = document.getElementById('fav-list');
-
-  // 🧹 Спочатку очищаємо контейнер:
   container.innerHTML = '';
 
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
@@ -441,17 +443,20 @@ function filterByYear(year) {
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
-    container.innerHTML = favs.map((f, i) => `
+    container.innerHTML = favs.map(f => `
       <div class="film-card">
         <h3>${f.title}</h3>
         <p>${f.description}</p>
-        <button class="remove-fav-btn" onclick="removeFromFavorites(${i})">🗑️ Видалити</button>
+        <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
+        <!-- Додаємо кнопку для перегляду відео -->
+        <a href="${f.videoUrl}" target="_blank" class="watch-btn">🎬 Дивитись</a>
       </div>
     `).join('');
   }
 
   container.style.display = 'block';
 }
+
 
 
 
@@ -672,17 +677,29 @@ document.addEventListener('click', (e) => {
  });
 
 
-    function addToFavorites(title, description) {
+  function addToFavorites(title, description, videoUrl) {
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  
   if (favs.find(f => f.title === title)) {
     alert('Вже в улюбленому 💛');
     return;
   }
-  favs.push({ title, description });
+
+  // Зберігаємо фільм з URL
+  favs.push({ title, description, videoUrl });
+
+  // Зберігаємо оновлений список у LocalStorage
   localStorage.setItem('favorites', JSON.stringify(favs));
-  showFavorites(); // ✅ одразу оновлюємо відображення
+
+  // Оновлюємо список "Улюблених"
+  showFavorites(); 
+
+  // Показуємо повідомлення
   alert('Додано в улюблене!');
 }
+
+
+  
 
 document.getElementById("lucky-button").addEventListener("click", () => {
   if (!films.length) {
