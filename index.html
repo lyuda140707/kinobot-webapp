@@ -626,16 +626,17 @@ scrollTopBtn.addEventListener('click', () => {
   const val = document.getElementById('searchInput').value.toLowerCase();
   const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
   document.getElementById('searchResults').innerHTML = results.map(f => `
-  <div class="film-card">
-    <img src="${f['Фото']}" alt="${f['Назва']}">
-    <h3>${f['Назва']}</h3>
-    <p class="film-desc">${f['Опис']}</p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="search-button" onclick="event.stopPropagation(); searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
+    <div class="film-card fade-in">
+      <img src="${f['Фото']}" alt="${f['Назва']}">
+      <h3>${f['Назва']}</h3>
+      <p class="film-desc">${f['Опис']}</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
+      </div>
     </div>
-  </div>
-`).join('');
+  `).join('');
+});
 
  });
 });      
