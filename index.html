@@ -335,18 +335,24 @@ async function fetchAndUpdateFilms() {
 
 function openVideo(link) {
   document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+  
   const videoOverlay = document.getElementById('video-overlay');
   const videoPlayer = document.getElementById('video-player');
   const openExternalButton = document.getElementById('open-external-button');
 
+  // Показуємо фільм в боті
   videoPlayer.src = link;
-  videoOverlay.style.display = 'flex'; // Показуємо затемнення
-  videoOverlay.style.opacity = '1';    // Плавна поява
+  videoOverlay.style.display = 'flex';
+  videoOverlay.style.opacity = '1';
+
+  // Створюємо посилання для відкриття в новій вкладці
+  let realLink = link.replace('/preview', '/view');
 
   openExternalButton.onclick = function() {
-    window.open(link, '_blank'); // Відкриває в браузері нову вкладку
+    window.open(realLink, '_blank');
   };
 }
+
 
 
 
