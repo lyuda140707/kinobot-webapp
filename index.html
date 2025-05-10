@@ -427,9 +427,12 @@ function filterByYear(year) {
 
 
    function showFavorites() {
+  // 🔥 Видалити всі старі картки фільмів з інших секцій
+  document.querySelectorAll('.film-card').forEach(el => el.remove());
+
   const container = document.getElementById('fav-list');
 
-  // 🧹 Спочатку повністю очищаємо контейнер:
+  // 🧹 Спочатку очищаємо контейнер:
   container.innerHTML = '';
 
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
@@ -448,6 +451,7 @@ function filterByYear(year) {
 
   container.style.display = 'block';
 }
+
 
 
 
