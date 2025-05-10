@@ -611,9 +611,17 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 });
 
 
-scrollTopBtn.addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+document.addEventListener('DOMContentLoaded', () => {
+  const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+  // Перевіряємо, чи елемент існує на сторінці
+  if (scrollTopBtn) {
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 });
+
 
       
       document.querySelectorAll('.nav-btn').forEach(btn => {
