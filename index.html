@@ -283,17 +283,44 @@
   <script>
     let films = [];
 
-    async function loadFilms() {
-  document.getElementById('home-loading').style.display = 'block';
-  const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
-  films = await res.json();
-  showFilmOfTheDay();
-  showCollections();
-  showGenres();
-  showCountryFilters();   // ← тут
-  showYearFilters();      // ← тут
-  document.getElementById('home-loading').style.display = 'none';
+  async function loadFilms() {
+  const cachedFilms = localStorage.getItem('films');
+
+  if (cachedFilms) {
+    films = JSON.parse(cachedFilms);
+    console.log('Фільми завантажені з кешу');
+    showFilmOfTheDay();
+    showCollections();
+    showGenres();
+    showCountryFilters();
+    showYearFilters();
+    fetchAndUpdateFilms(); // фонове оновлення
+    return;
+  }
+
+  await fetchAndUpdateFilms();
 }
+
+async function fetchAndUpdateFilms() {
+  try {
+    document.getElementById('home-loading').style.display = 'block';
+
+    const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
+    films = await res.json();
+
+    localStorage.setItem('films', JSON.stringify(films));
+    showFilmOfTheDay();
+    showCollections();
+    showGenres();
+    showCountryFilters();
+    showYearFilters();
+  } catch (error) {
+    console.error('Помилка завантаження фільмів:', error);
+  } finally {
+    document.getElementById('home-loading').style.display = 'none';
+  }
+}
+
 
 
 
@@ -571,24 +598,34 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
 
 
-    document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
   Telegram.WebApp.ready();
+  
+  // 🧹 Очищаємо кеш раз на добу
+  const lastClear = localStorage.getItem('lastClear');
+  const now = Date.now();
+  if (!lastClear || now - lastClear > 1000 * 60 * 60 * 24) { // 24 години
+    localStorage.removeItem('films');
+    localStorage.setItem('lastClear', now);
+  }
 
-  // Завантажуємо фільми одразу після завантаження сторінки
+  // Завантажуємо фільми з кешу або з сервера
   loadFilms();
 
-  // Оновлюємо фільми кожні 1 хвилина 
-  setInterval(loadFilms, 60000);  // 60000 мс = 60 секунд
+  // Завантажуємо факти
+  loadFacts();
+
+  // Показуємо країни і роки
+  showCountryFilters();
+  showYearFilters();
 
   // Обробник для зміни теми
   const toggle = document.getElementById('theme-toggle');
   const savedTheme = localStorage.getItem('theme');
-
   if (savedTheme === 'light') {
     document.body.classList.add('light-theme');
     toggle.checked = true;
   }
-
   toggle.addEventListener('change', () => {
     if (toggle.checked) {
       document.body.classList.add('light-theme');
@@ -599,33 +636,23 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
     }
   });
 
-  // Завантажуємо факти
-  loadFacts();
-
+  // Кнопка прокрутки догори
   const scrollTopBtn = document.getElementById('scrollTopBtn');
-  showCountryFilters();
-  showYearFilters();
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 300) {
-      scrollTopBtn.classList.add('show');
-    } else {
-      scrollTopBtn.classList.remove('show');
-    }
-  });
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const scrollTopBtn = document.getElementById('scrollTopBtn');
-
-  // Перевіряємо, чи елемент існує на сторінці
   if (scrollTopBtn) {
     scrollTopBtn.addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        scrollTopBtn.classList.add('show');
+      } else {
+        scrollTopBtn.classList.remove('show');
+      }
+    });
   }
 });
+
 
 
       
