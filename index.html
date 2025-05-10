@@ -283,6 +283,16 @@
   <script>
     let films = [];
 
+
+    function clearSearchResults() {
+    document.getElementById('searchResults').innerHTML = ''; // Очищаємо результати пошуку
+}
+
+    function clearFilmDisplay() {
+    document.querySelectorAll('.film-card').forEach(card => card.remove()); // Видаляємо всі карти фільмів
+}
+
+
     async function loadFilms() {
   document.getElementById('home-loading').style.display = 'block';
   const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
@@ -427,23 +437,22 @@ function filterByYear(year) {
 
 
 
-   function showFavorites() {
-  const container = document.getElementById('fav-list');
-  const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  function showFavorites() {
+    const container = document.getElementById('fav-list');
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-  if (favs.length === 0) {
-    container.innerHTML = '<p>Немає улюблених</p>';
-  } else {
-    container.innerHTML = favs.map((f, i) => `
-  <div class="film-card">
-    <h3>${f.title}</h3>
-    <p>${f.description}</p>
-    <button class="remove-fav-btn" onclick="removeFromFavorites(${i})">🗑️ Видалити</button>
-  </div>
-`).join('');
-  }
+    if (favs.length === 0) {
+        container.innerHTML = '<p>Немає улюблених</p>';
+    } else {
+        container.innerHTML = favs.map((f, i) => `
+        <div class="film-card">
+            <h3>${f.title}</h3>
+            <p>${f.description}</p>
+            <button class="remove-fav-btn" onclick="removeFromFavorites(${i})">🗑️ Видалити</button>
+        </div>`).join('');
+    }
 
-  container.style.display = 'block'; // Показати список улюблених
+    container.style.display = 'block'; // Показуємо список улюблених
 }
 
 
@@ -452,61 +461,65 @@ function filterByYear(year) {
   
 // ⬇️ Сюди вставляєш нову функцію
 function removeFromFavorites(index) {
-  const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  favs.splice(index, 1);  // Видаляємо елемент за індексом
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  showFavorites(); // Оновлення списку улюблених
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+    favs.splice(index, 1);  // Видаляємо фільм за індексом
+    localStorage.setItem('favorites', JSON.stringify(favs));
+    showFavorites(); // Оновлюємо список улюблених
+    clearSearchResults();  // Очищаємо результати пошуку, якщо вони є
 }
+
 
 
 
     function searchInBot(query) {
-      // 🧹 Повне очищення залишків
-document.getElementById('history-list').innerHTML = '';
-document.getElementById('searchResults').innerHTML = '';
-document.querySelectorAll('.film-card').forEach(card => card.remove());
+    // Очищення результатів пошуку
+    clearSearchResults(); // Очищаємо результати пошуку
 
-  // ❗️Спочатку ховаємо всі секції (прибирає візуальний "перекіс")
-  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    // 🧹 Повне очищення залишків від старих карток
+    clearFilmDisplay();
 
-  // ✅ Повертаємось на головну
-  document.getElementById('home').classList.add('active');
-  document.querySelector('[data-tab=home]')?.classList.add('active');
+    // ❗️ Спочатку ховаємо всі секції (прибирає візуальний "перекіс")
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-  if (!user) return alert("❗️Не вдалося отримати Telegram ID");
+    // ✅ Повертаємось на головну
+    document.getElementById('home').classList.add('active');
+    document.querySelector('[data-tab=home]')?.classList.add('active');
 
-  document.getElementById("loading-indicator").style.display = "block";
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user;
+    if (!user) return alert("❗️Не вдалося отримати Telegram ID");
 
-  // Очищаємо пошук
-  document.getElementById('searchInput').value = '';
-  document.getElementById('searchResults').innerHTML = '';
+    document.getElementById("loading-indicator").style.display = "block";
 
-  fetch('https://kinobot-qm9q.onrender.com/search-in-bot', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: user.id, query })
-  }).then(r => r.json()).then(d => {
-    if (d.found && d.videoUrl) {
-      const existing = JSON.parse(localStorage.getItem('history') || '[]');
-      if (!existing.find(f => f.title === query)) {
-        const film = films.find(f => f['Назва'] === query);
-        if (film) {
-          existing.unshift({ title: film['Назва'], description: film['Опис'] });
-          if (existing.length > 20) existing.pop();
-          localStorage.setItem('history', JSON.stringify(existing));
+    // Очищаємо пошук
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+
+    fetch('https://kinobot-qm9q.onrender.com/search-in-bot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, query })
+    }).then(r => r.json()).then(d => {
+        if (d.found && d.videoUrl) {
+            const existing = JSON.parse(localStorage.getItem('history') || '[]');
+            if (!existing.find(f => f.title === query)) {
+                const film = films.find(f => f['Назва'] === query);
+                if (film) {
+                    existing.unshift({ title: film['Назва'], description: film['Опис'] });
+                    if (existing.length > 20) existing.pop(); // Обмежуємо кількість історії
+                    localStorage.setItem('history', JSON.stringify(existing));
+                }
+            }
+            window.location.href = d.videoUrl;
+        } else {
+            alert("Фільм не знайдено 😢");
         }
-      }
-      window.location.href = d.videoUrl;
-    } else {
-      alert("Фільм не знайдено 😢");
-    }
-  }).catch(console.error).finally(() => {
-    document.getElementById("loading-indicator").style.display = "none";
-  });
+    }).catch(console.error).finally(() => {
+        document.getElementById("loading-indicator").style.display = "none";
+    });
 }
+
 
 
     
@@ -648,19 +661,18 @@ document.addEventListener('click', (e) => {
 });
 
     function addToFavorites(title, description) {
-  console.log('Додати в Улюблене:', title); // Логування
-  const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  
-  if (favs.find(f => f.title === title)) {
-    alert('Вже в улюбленому 💛');
-    return;
-  }
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+    if (favs.find(f => f.title === title)) {
+        alert('Вже в улюбленому 💛');
+        return;
+    }
 
-  favs.push({ title, description });
-  localStorage.setItem('favorites', JSON.stringify(favs)); // Збереження в localStorage
-  showFavorites(); // Оновити відображення улюблених
-  alert('Додано в улюблене!');
+    favs.push({ title, description });
+    localStorage.setItem('favorites', JSON.stringify(favs)); 
+    showFavorites();  // Оновлюємо список улюблених
+    alert('Додано в улюблене!');
 }
+
 
 
 
