@@ -428,19 +428,16 @@ function filterByYear(year) {
 
 
    function showFavorites() {
-  // 🔥 Видалити всі старі картки фільмів з інших секцій
+  // Спочатку очищаємо контейнер
   document.querySelectorAll('.film-card').forEach(el => el.remove());
 
   const container = document.getElementById('fav-list');
-
-  // 🧹 Спочатку очищаємо контейнер:
-  container.innerHTML = '';
-
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
 
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
+    // Виводимо улюблені фільми
     container.innerHTML = favs.map((f, i) => `
       <div class="film-card">
         <h3>${f.title}</h3>
@@ -452,6 +449,7 @@ function filterByYear(year) {
 
   container.style.display = 'block';
 }
+
 
 
 
@@ -657,16 +655,21 @@ document.addEventListener('click', (e) => {
 });
 
     function addToFavorites(title, description) {
+  console.log('Додати в Улюблене:', title); // Логування
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  
   if (favs.find(f => f.title === title)) {
     alert('Вже в улюбленому 💛');
     return;
   }
+
   favs.push({ title, description });
   localStorage.setItem('favorites', JSON.stringify(favs));
-  showFavorites(); // ✅ одразу оновлюємо відображення
+  showFavorites();
   alert('Додано в улюблене!');
 }
+
+
 
 document.getElementById("lucky-button").addEventListener("click", () => {
   if (!films.length) {
