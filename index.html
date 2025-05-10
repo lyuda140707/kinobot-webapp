@@ -334,42 +334,10 @@ async function fetchAndUpdateFilms() {
 }
 
 function openVideo(link) {
-  document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-
-  const videoOverlay = document.getElementById('video-overlay');
-  const videoWrapper = document.getElementById('video-wrapper');
-
-  videoOverlay.style.display = 'flex';
-  videoOverlay.style.opacity = '1';
-
-  // Переробляємо лінк на правильний формат для вбудовування
-  const match = link.match(/\/d\/([^/]+)/);
-  let embedLink = link;
-  if (match && match[1]) {
-    embedLink = `https://drive.google.com/uc?id=${match[1]}`;
-  }
-
-  // Показуємо лоадер
-  videoWrapper.innerHTML = `
-    <div style="color: #00f7ff; font-size: 18px; text-align: center; margin-top: 50px;">
-      ⏳ Завантаження фільму...
-    </div>
-  `;
-
-  setTimeout(() => {
-  videoWrapper.innerHTML = `
-    <video controls autoplay style="width: 100%; max-height: 80vh; border-radius:12px;">
-      <source src="${embedLink}" type="video/mp4">
-      Ваш браузер не підтримує відтворення відео.
-    </video>
-    <div style="margin-top:15px; display: flex; justify-content: center;">
-      <button onclick="closeVideo()" style="padding:8px 16px; background:#00f7ff; border:none; border-radius:8px; cursor:pointer;">⬅️ Назад</button>
-    </div>
-  `;
-}, 800);
+  window.open(link, '_blank');
+}
 
 
-};
 
 
 
