@@ -726,12 +726,12 @@ justify-content: center;
   background-color: #4fc3f7; /* ніжно-голубий */
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 8px 16px;
-  font-size: 14px;
+  border-radius: 10px;
+  padding: 6px 12px; /* зробив менший відступ */
+  font-size: 13px; /* трошки менший шрифт */
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(79, 195, 247, 0.5);
+  box-shadow: 0 0 5px rgba(79, 195, 247, 0.5);
   transition: background-color 0.3s, transform 0.2s;
   display: inline-block;
   text-align: center;
@@ -740,7 +740,7 @@ justify-content: center;
 
 .favorite-watch-btn:hover {
   background-color: #29b6f6;
-  transform: scale(1.03);
+  transform: scale(1.05); /* при наведенні трохи збільшується */
 }
 
 
