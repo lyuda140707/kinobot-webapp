@@ -342,14 +342,14 @@ function openVideo(link) {
   videoOverlay.style.display = 'flex';
   videoOverlay.style.opacity = '1';
 
-  // Створюємо правильний лінк для повного екрану
+  // Переробляємо лінк на правильний формат для вбудовування
   const match = link.match(/\/d\/([^/]+)/);
-  let realLink = link;
+  let embedLink = link;
   if (match && match[1]) {
-    realLink = `https://drive.google.com/uc?id=${match[1]}`;
+    embedLink = `https://drive.google.com/uc?id=${match[1]}`;
   }
 
-  // Показати спочатку завантаження
+  // Показуємо лоадер
   videoWrapper.innerHTML = `
     <div style="color: #00f7ff; font-size: 18px; text-align: center; margin-top: 50px;">
       ⏳ Завантаження фільму...
@@ -358,14 +358,15 @@ function openVideo(link) {
 
   setTimeout(() => {
     videoWrapper.innerHTML = `
-      <iframe id="video-player" src="${link}" width="100%" height="450" allow="autoplay" allowfullscreen style="border-radius:12px; max-height:80vh; border:none;"></iframe>
+      <iframe id="video-player" src="${embedLink}" width="100%" height="450" allow="autoplay" allowfullscreen style="border-radius:12px; max-height:80vh; border:none;"></iframe>
       <div style="margin-top:15px; display: flex; gap:10px; justify-content: center; flex-wrap: wrap;">
         <button onclick="closeVideo()" style="padding:8px 16px; background:#00f7ff; border:none; border-radius:8px; cursor:pointer;">⬅️ Назад</button>
-        <button onclick="window.open('${realLink}', '_blank')" style="padding:8px 16px; background:#00f7ff; border:none; border-radius:8px; cursor:pointer;">🔗 Відкрити на весь екран</button>
+        <a href="${embedLink}" target="_blank" style="padding:8px 16px; background:#00f7ff; border:none; border-radius:8px; text-decoration:none; color:black;">🔗 Відкрити окремо</a>
       </div>
     `;
-  }, 800); // невелика затримка щоб красиво підвантажилось
+  }, 800);
 }
+
 
 
 
