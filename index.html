@@ -625,20 +625,27 @@ scrollTopBtn.addEventListener('click', () => {
       document.getElementById('searchInput').addEventListener('input', () => {
   const val = document.getElementById('searchInput').value.toLowerCase();
   const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
-  document.getElementById('searchResults').innerHTML = results.map(f => `
-    <div class="film-card fade-in">
-      <img src="${f['Фото']}" alt="${f['Назва']}">
-      <h3>${f['Назва']}</h3>
-      <p class="film-desc">${f['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
+  
+  if (results.length === 0) {
+    document.getElementById('searchResults').innerHTML = `
+      <p>Фільм не знайдено 😢</p>
+      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити фільм для додавання</button>
+    `;
+  } else {
+    document.getElementById('searchResults').innerHTML = results.map(f => `
+      <div class="film-card fade-in">
+        <img src="${f['Фото']}" alt="${f['Назва']}">
+        <h3>${f['Назва']}</h3>
+        <p class="film-desc">${f['Опис']}</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="search-button" onclick="event.stopPropagation(); searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `).join('');
+  }
 });
 
- });
     
     
 document.addEventListener('click', (e) => {
@@ -669,6 +676,33 @@ document.getElementById("lucky-button").addEventListener("click", () => {
   const randomFilm = films[Math.floor(Math.random() * films.length)];
   alert(`🎬 ${randomFilm['Назва']}\n\n${randomFilm['Опис'] || ''}`);
 });
+
+      function suggestFilm() {
+  const val = document.getElementById('searchInput').value.trim();
+  if (!val) {
+    alert("Спочатку введіть назву фільму!");
+    return;
+  }
+
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    alert("❗️Не вдалося отримати ваш Telegram ID");
+    return;
+  }
+
+  fetch('https://kinobot-qm9q.onrender.com/request-film', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: user.id, film_name: val })
+  }).then(() => {
+    alert('✅ Запит на додавання фільму надіслано!');
+  }).catch((error) => {
+    console.error(error);
+    alert('❗️ Сталася помилка при надсиланні запиту.');
+  });
+}
 
 function showHistory() {
   // 🔧 Прибираємо фільм, що "завис" поверх
