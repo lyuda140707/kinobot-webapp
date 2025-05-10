@@ -351,10 +351,16 @@ async function fetchAndUpdateFilms() {
 let pendingLink = "";
 
 function openVideo(link) {
+  if (!link) {
+    alert('⛔ Посилання на фільм не знайдено!');
+    return;
+  }
+
   pendingLink = link;
   const modal = document.getElementById('confirm-modal');
   modal.classList.add('show');
 }
+
 
 function confirmOpen() {
   const modal = document.getElementById('confirm-modal');
