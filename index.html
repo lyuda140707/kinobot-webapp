@@ -101,6 +101,17 @@
   50% { opacity: 1; }
   100% { opacity: 0.6; }
 }
+    /* Для анімації появи модалки */
+#confirm-modal {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#confirm-modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
 
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -333,11 +344,32 @@ async function fetchAndUpdateFilms() {
   }
 }
 
+
+
+
+
+let pendingLink = "";
+
 function openVideo(link) {
-  window.open(link, '_blank');
+  pendingLink = link;
+  const modal = document.getElementById('confirm-modal');
+  modal.classList.add('show');
 }
 
+function confirmOpen() {
+  const modal = document.getElementById('confirm-modal');
+  modal.classList.remove('show');
+  setTimeout(() => {
+    window.open(pendingLink, '_blank');
+    pendingLink = "";
+  }, 200); // чекаємо трошки перед відкриттям
+}
 
+function cancelOpen() {
+  const modal = document.getElementById('confirm-modal');
+  modal.classList.remove('show');
+  pendingLink = "";
+}
 
 
 
@@ -904,6 +936,15 @@ function clearHistory() {
   </div>
 </div>
 
+<div id="confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:#1a1a1a; padding:20px; border-radius:12px; max-width:300px; text-align:center; box-shadow:0 0 20px #00f7ff;">
+    <p style="color:#00f7ff; font-size:18px; margin-bottom:20px;">🎬 Бажаєте відкрити фільм?</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button onclick="confirmOpen()" style="padding:8px 16px; background:#00f7ff; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Так</button>
+      <button onclick="cancelOpen()" style="padding:8px 16px; background:#444; border:none; border-radius:8px; cursor:pointer; color:#fff;">Ні</button>
+    </div>
+  </div>
+</div>
 
 
 
