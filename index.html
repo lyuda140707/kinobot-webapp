@@ -434,17 +434,18 @@ function filterByYear(year) {
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
-    container.innerHTML = favs.map(f => `
-      <div class="film-card">
-        <h3>${f.title}</h3>
-        <p>${f.description}</p>
-        <button class="remove-fav-btn" onclick="removeFromFavorites(${f.title})">🗑️ Видалити</button>
-      </div>
-    `).join('');
+    container.innerHTML = favs.map((f, i) => `
+  <div class="film-card">
+    <h3>${f.title}</h3>
+    <p>${f.description}</p>
+    <button class="remove-fav-btn" onclick="removeFromFavorites(${i})">🗑️ Видалити</button>
+  </div>
+`).join('');
   }
 
   container.style.display = 'block'; // Показати список улюблених
 }
+
 
     
 
@@ -452,9 +453,9 @@ function filterByYear(year) {
 // ⬇️ Сюди вставляєш нову функцію
 function removeFromFavorites(index) {
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  favs.splice(index, 1);
+  favs.splice(index, 1);  // Видаляємо елемент за індексом
   localStorage.setItem('favorites', JSON.stringify(favs));
-  showFavorites(); // оновити список
+  showFavorites(); // Оновлення списку улюблених
 }
 
 
@@ -656,10 +657,11 @@ document.addEventListener('click', (e) => {
   }
 
   favs.push({ title, description });
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  showFavorites();
+  localStorage.setItem('favorites', JSON.stringify(favs)); // Збереження в localStorage
+  showFavorites(); // Оновити відображення улюблених
   alert('Додано в улюблене!');
 }
+
 
 
 
