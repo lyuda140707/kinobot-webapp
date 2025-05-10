@@ -427,10 +427,12 @@ function filterByYear(year) {
 
 
    function showFavorites() {
-  document.querySelectorAll('.film-list').forEach(el => el.style.display = 'none');
+  const container = document.getElementById('fav-list');
+
+  // 🧹 Спочатку повністю очищаємо контейнер:
+  container.innerHTML = '';
 
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  const container = document.getElementById('fav-list');
 
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
@@ -444,8 +446,9 @@ function filterByYear(year) {
     `).join('');
   }
 
-  container.style.display = 'block'; // 🔹 Важливо!
+  container.style.display = 'block';
 }
+
 
 
     
@@ -643,8 +646,10 @@ document.addEventListener('click', (e) => {
   }
   favs.push({ title, description });
   localStorage.setItem('favorites', JSON.stringify(favs));
+  showFavorites(); // ✅ одразу оновлюємо відображення
   alert('Додано в улюблене!');
 }
+
 document.getElementById("lucky-button").addEventListener("click", () => {
   if (!films.length) {
     alert("⏳ Фільми ще не завантажились");
