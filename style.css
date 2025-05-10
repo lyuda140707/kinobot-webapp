@@ -681,3 +681,11 @@ justify-content: center;
     0 0 35px rgba(0, 247, 255, 0.4);
 }
 
+#searchResults {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+
