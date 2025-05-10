@@ -376,15 +376,16 @@ function openVideo(link) {
 
 function closeVideo() {
   const videoOverlay = document.getElementById('video-overlay');
-  const videoPlayer = document.getElementById('video-player');
+  const videoWrapper = document.getElementById('video-wrapper');
 
-  videoPlayer.src = '';
+  videoWrapper.innerHTML = ''; // очищаємо відео
   videoOverlay.style.opacity = '0';
   setTimeout(() => {
     videoOverlay.style.display = 'none';
     switchTab('home', document.querySelector('[data-tab=home]'));
-  }, 400); // Після плавного зникнення
+  }, 400);
 }
+
 
 
 
@@ -928,15 +929,12 @@ function clearHistory() {
 
 <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
 
- <!-- Блок затемнення з відео -->
 <div id="video-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; justify-content:center; align-items:center; transition: opacity 0.4s ease;">
   <div id="video-wrapper" style="background:#000; padding:20px; border-radius:12px; max-width:800px; width:90%; text-align:center; box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);">
-    <iframe id="video-player" width="100%" height="450" allow="autoplay" allowfullscreen style="border-radius:12px; max-height:80vh; border:none;"></iframe>
-    
-      
-    </div>
+    <!-- Тут JS вставлятиме або loader, або відео через innerHTML -->
   </div>
 </div>
+
 
 
 
