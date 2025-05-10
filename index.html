@@ -334,19 +334,39 @@ async function fetchAndUpdateFilms() {
 }
 
 function openVideo(link) {
-  document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-  const videoOverlay = document.getElementById('video-overlay');
-  const videoPlayer = document.getElementById('video-player');
-  const openExternalButton = document.getElementById('open-external-button');
+  // Створюємо елемент повідомлення
+  const loadingMessage = document.createElement('div');
+  loadingMessage.textContent = "🎬 Відкриваємо фільм...";
+  loadingMessage.style.position = 'fixed';
+  loadingMessage.style.top = '50%';
+  loadingMessage.style.left = '50%';
+  loadingMessage.style.transform = 'translate(-50%, -50%)';
+  loadingMessage.style.background = '#00f7ff';
+  loadingMessage.style.color = '#000';
+  loadingMessage.style.padding = '15px 25px';
+  loadingMessage.style.borderRadius = '10px';
+  loadingMessage.style.fontSize = '18px';
+  loadingMessage.style.zIndex = '1000';
+  loadingMessage.style.opacity = '0'; /* Початкова прозорість */
+  loadingMessage.style.transition = 'opacity 0.5s ease'; /* Плавний перехід */
+  document.body.appendChild(loadingMessage);
 
-  videoPlayer.src = link;
-  videoOverlay.style.display = 'flex'; // Тепер flex для центрування
-  videoOverlay.style.opacity = '1';    // Плавна поява
+  // Плавна поява
+  setTimeout(() => {
+    loadingMessage.style.opacity = '1';
+  }, 50);
 
-  openExternalButton.onclick = function() {
+  // Через 1 секунду відкриваємо відео і прибираємо повідомлення
+  setTimeout(() => {
     window.open(link, '_blank');
-  };
+    loadingMessage.style.opacity = '0';
+    setTimeout(() => {
+      document.body.removeChild(loadingMessage);
+    }, 400); // Після анімації зникнення
+  }, 1000);
 }
+
+
 
 
 
