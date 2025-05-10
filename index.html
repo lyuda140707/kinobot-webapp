@@ -428,31 +428,23 @@ function filterByYear(year) {
 
 
    function showFavorites() {
-  // Спочатку очищаємо контейнер
-  document.querySelectorAll('.film-card').forEach(el => el.remove());
-
   const container = document.getElementById('fav-list');
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
 
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
-    // Виводимо улюблені фільми
-    container.innerHTML = favs.map((f, i) => `
+    container.innerHTML = favs.map(f => `
       <div class="film-card">
         <h3>${f.title}</h3>
         <p>${f.description}</p>
-        <button class="remove-fav-btn" onclick="removeFromFavorites(${i})">🗑️ Видалити</button>
+        <button class="remove-fav-btn" onclick="removeFromFavorites(${f.title})">🗑️ Видалити</button>
       </div>
     `).join('');
   }
 
-  container.style.display = 'block';
+  container.style.display = 'block'; // Показати список улюблених
 }
-
-
-
-
 
     
 
