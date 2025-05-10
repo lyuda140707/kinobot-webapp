@@ -534,7 +534,7 @@ function removeFromFavorites(index) {
   if (block) block.style.display = "flex";
 }
 
-  function switchTab(tabId, btn) {
+function switchTab(tabId, btn) {
   // ❌ Ховаємо всі секції
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   // ❌ Знімаємо активні вкладки
@@ -544,8 +544,8 @@ function removeFromFavorites(index) {
   const target = document.getElementById(tabId);
   if (target) target.classList.add('active');
   if (tabId === 'home') {
-  document.getElementById('filter-details')?.removeAttribute('open'); // згорнути фільтр
-}
+    document.getElementById('filter-details')?.removeAttribute('open'); // згорнути фільтр
+  }
 
   if (btn) btn.classList.add('active');
 
@@ -554,13 +554,14 @@ function removeFromFavorites(index) {
 
   // ✅ Якщо це "Улюблене" — показати
   if (tabId === 'favorites') {
-    showFavorites();
+    showFavorites();  // Оновлюємо улюблені фільми
+    clearSearchResults();  // Очищаємо результати пошуку, якщо вони є
   }
 
   // ✅ Якщо "Акаунт" — прокрутити вгору
   if (tabId === 'categories') {
-  document.getElementById('filter-details')?.removeAttribute('open');
-}
+    document.getElementById('filter-details')?.removeAttribute('open');
+  }
 
   if (tabId === 'account') {
     window.scrollTo({ top: 0, behavior: 'smooth' });
