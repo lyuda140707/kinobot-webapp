@@ -567,8 +567,16 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
 
     document.addEventListener('DOMContentLoaded', () => {
-      Telegram.WebApp.ready();
-        const toggle = document.getElementById('theme-toggle');
+  Telegram.WebApp.ready();
+
+  // Завантажуємо фільми одразу після завантаження сторінки
+  loadFilms();
+
+  // Оновлюємо фільми кожні 1 хвилина 
+  setInterval(loadFilms, 60000);  // 60000 мс = 60 секунд
+
+  // Обробник для зміни теми
+  const toggle = document.getElementById('theme-toggle');
   const savedTheme = localStorage.getItem('theme');
 
   if (savedTheme === 'light') {
@@ -586,22 +594,22 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
     }
   });
 
-      loadFilms();
-      loadFacts();
+  // Завантажуємо факти
+  loadFacts();
 
+  const scrollTopBtn = document.getElementById('scrollTopBtn');
+  showCountryFilters();
+  showYearFilters();
 
-      const scrollTopBtn = document.getElementById('scrollTopBtn');
-      showCountryFilters();
-      showYearFilters();
-
-
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 300) {
-    scrollTopBtn.classList.add('show');
-  } else {
-    scrollTopBtn.classList.remove('show');
-  }
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+      scrollTopBtn.classList.add('show');
+    } else {
+      scrollTopBtn.classList.remove('show');
+    }
+  });
 });
+
 
 scrollTopBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
