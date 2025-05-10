@@ -769,17 +769,17 @@ function clearHistory() {
   localStorage.removeItem('history');
   showHistory(); // одразу оновлює вивід
 }
-    function toggleFact() {
+      
+ function toggleFact() {
   const box = document.getElementById('fact-box');
   const arrow = document.getElementById('fact-arrow');
   const isVisible = box.style.display === 'block';
   box.style.display = isVisible ? 'none' : 'block';
   arrow.textContent = isVisible ? '⬇️' : '⬆️';
 }
+</script>
 
-  </script>
-  
-  <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
-
+<button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
 </body>
 </html>
+
