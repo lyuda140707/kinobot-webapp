@@ -333,23 +333,42 @@ async function fetchAndUpdateFilms() {
   }
 }
 
+function openVideo(link) {
+  document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none'); // Ховаємо всі секції
+  const videoWrapper = document.getElementById('video-wrapper');
+  const videoPlayer = document.getElementById('video-player');
+
+  videoPlayer.src = link; // Підставляємо посилання
+  videoWrapper.style.display = 'block'; // Показуємо відео
+}
+
+function closeVideo() {
+  const videoWrapper = document.getElementById('video-wrapper');
+  const videoPlayer = document.getElementById('video-player');
+
+  videoPlayer.pause();
+  videoPlayer.src = '';
+  videoWrapper.style.display = 'none';
+  switchTab('home', document.querySelector('[data-tab=home]')); // Повертаємось на Головну
+}
 
 
 
-  function showFilmOfTheDay() {
- document.getElementById('film-day-img').classList.remove('skeleton');
- document.getElementById('film-day-img').style.background = 'none';
+function showFilmOfTheDay() {
+  document.getElementById('film-day-img').classList.remove('skeleton');
+  document.getElementById('film-day-img').style.background = 'none';
 
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
-  document.getElementById('film-day-button').onclick = () => {
-  // Передаємо не тільки назву та опис, але й URL відео
-  const videoUrl = film['videoUrl']; // отримуєте URL з фільму
-  addToFavorites(film['Назва'], film['Опис'], videoUrl);
-};
 
-  document.getElementById('film-title').textContent = film['Назва']; // ⬅️ ДОДАЙ ЦЕ
+  document.getElementById('film-day-button').onclick = () => {
+    const videoUrl = film['Посилання']; // ⬅️ тут тепер 'Посилання'
+    openVideo(videoUrl); // ⬅️ відкриваємо
+  };
+
+  document.getElementById('film-title').textContent = film['Назва'];
 }
+
 
     function showSkeletonFilmOfTheDay() {
   document.getElementById('film-day-img').style.background = '#333';
@@ -421,7 +440,7 @@ function showYearFilters() {
       <h3>${film['Назва']}</h3>
       <p class="film-desc">${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -447,7 +466,7 @@ function showYearFilters() {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -471,7 +490,7 @@ function filterByYear(year) {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); searchInBot('${film['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -497,7 +516,7 @@ function filterByYear(year) {
         <p>${f.description}</p>
         <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
         <!-- Додаємо кнопку для перегляду відео -->
-        <button class="favorite-watch-btn" onclick="event.stopPropagation(); searchInBot('${f.title.replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+        <button class="search-button" onclick="event.stopPropagation(); openVideo('${f.videoUrl}')">▶️ Дивитись</button>
       </div>
     `).join('');
   }
@@ -716,7 +735,7 @@ function showSkeletonCollections() {
           <h3>${f['Назва']}</h3>
           <p class="film-desc">${f['Опис']}</p>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="search-button" onclick="event.stopPropagation(); searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+            <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
             <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
           </div>
         </div>
@@ -734,15 +753,6 @@ function showSkeletonCollections() {
 
 });
 
-
-    
-    
-document.addEventListener('click', (e) => {
-  const card = e.target.closest('.film-card');
-  if (card && !e.target.closest('button')) {
-    card.classList.toggle('expanded');
-  }
- });
 
 
   function addToFavorites(title, description, videoUrl) {
@@ -882,5 +892,14 @@ function clearHistory() {
 </script>
 
 <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
+
+  <!-- Блок для відтворення відео -->
+<div id="video-wrapper" style="display:none; text-align:center; padding:20px;">
+  <video id="video-player" controls width="100%" style="border-radius:12px; max-height:80vh;"></video>
+  <div style="margin-top:15px;">
+    <button onclick="closeVideo()" style="padding:8px 16px; background:#00f7ff; border:none; border-radius:8px; cursor:pointer;">⬅️ Назад</button>
+  </div>
+</div>
+
 </body>
 </html>
