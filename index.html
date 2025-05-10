@@ -449,7 +449,7 @@ function filterByYear(year) {
         <p>${f.description}</p>
         <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
         <!-- Додаємо кнопку для перегляду відео -->
-        <a href="${f.videoUrl}" target="_blank" class="favorite-watch-btn">🎬 Дивитись</a>
+        <button class="favorite-watch-btn" onclick="event.stopPropagation(); searchInBot('${f.title.replace(/'/g, "\\'")}')">▶️ Дивитись</button>
       </div>
     `).join('');
   }
