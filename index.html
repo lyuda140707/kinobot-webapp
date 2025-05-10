@@ -90,6 +90,18 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .skeleton {
+  background-color: #333;
+  border-radius: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -325,6 +337,9 @@ async function fetchAndUpdateFilms() {
 
 
   function showFilmOfTheDay() {
+ document.getElementById('film-day-img').classList.remove('skeleton');
+ document.getElementById('film-day-img').style.background = 'none';
+
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
   document.getElementById('film-day-button').onclick = () => {
@@ -334,6 +349,12 @@ async function fetchAndUpdateFilms() {
 };
 
   document.getElementById('film-title').textContent = film['Назва']; // ⬅️ ДОДАЙ ЦЕ
+}
+
+    function showSkeletonFilmOfTheDay() {
+  document.getElementById('film-day-img').style.background = '#333';
+  document.getElementById('film-day-img').classList.add('skeleton');
+  document.getElementById('film-title').textContent = '';
 }
 
 
@@ -600,26 +621,28 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
   document.addEventListener('DOMContentLoaded', () => {
   Telegram.WebApp.ready();
-  
-  // 🧹 Очищаємо кеш раз на добу
+
+  // Очищення кешу раз на добу
   const lastClear = localStorage.getItem('lastClear');
   const now = Date.now();
-  if (!lastClear || now - lastClear > 1000 * 60 * 60 * 24) { // 24 години
+  if (!lastClear || now - lastClear > 1000 * 60 * 60 * 24) {
     localStorage.removeItem('films');
     localStorage.setItem('lastClear', now);
   }
 
-  // Завантажуємо фільми з кешу або з сервера
-  loadFilms();
+  // Показати скелетони
+  showSkeletonCollections();
+  showSkeletonFilmOfTheDay();
 
-  // Завантажуємо факти
+  // Завантажити фільми і факти
+  loadFilms();
   loadFacts();
 
-  // Показуємо країни і роки
+  // Показати фільтри країн і років
   showCountryFilters();
   showYearFilters();
 
-  // Обробник для зміни теми
+  // Темна тема
   const toggle = document.getElementById('theme-toggle');
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'light') {
@@ -651,48 +674,58 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
       }
     });
   }
-});
 
-
-
-      
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tab = btn.getAttribute('data-tab');
-          switchTab(tab, btn);
-        });
-      });
-
-      document.querySelectorAll('.genre-btn').forEach(button => {
-  button.addEventListener('click', () => {
-    const genre = button.getAttribute('data-genre');
-    filterByGenre(genre);
+  // Обробники кнопок навігації
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      switchTab(tab, btn);
+    });
   });
+
+  // Обробники жанрів
+  document.querySelectorAll('.genre-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const genre = button.getAttribute('data-genre');
+      filterByGenre(genre);
+    });
+  });
+
+  // Пошук
+  document.getElementById('searchInput').addEventListener('input', () => {
+    const val = document.getElementById('searchInput').value.toLowerCase();
+    const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
+    
+    if (results.length === 0) {
+      document.getElementById('searchResults').innerHTML = `
+        <p>Фільм не знайдено 😢</p>
+        <button class="suggest-button" onclick="suggestFilm()">➕ Замовити фільм для додавання</button>
+      `;
+    } else {
+      document.getElementById('searchResults').innerHTML = results.map(f => `
+        <div class="film-card fade-in">
+          <img src="${f['Фото']}" alt="${f['Назва']}">
+          <h3>${f['Назва']}</h3>
+          <p class="film-desc">${f['Опис']}</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="search-button" onclick="event.stopPropagation(); searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
+            <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  });
+
+  // Клік по картці
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.film-card');
+    if (card && !e.target.closest('button')) {
+      card.classList.toggle('expanded');
+    }
+  });
+
 });
 
-      document.getElementById('searchInput').addEventListener('input', () => {
-  const val = document.getElementById('searchInput').value.toLowerCase();
-  const results = films.filter(f => f['Назва'].toLowerCase().includes(val));
-  
-  if (results.length === 0) {
-    document.getElementById('searchResults').innerHTML = `
-      <p>Фільм не знайдено 😢</p>
-      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити фільм для додавання</button>
-    `;
-  } else {
-    document.getElementById('searchResults').innerHTML = results.map(f => `
-      <div class="film-card fade-in">
-        <img src="${f['Фото']}" alt="${f['Назва']}">
-        <h3>${f['Назва']}</h3>
-        <p class="film-desc">${f['Опис']}</p>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="search-button" onclick="event.stopPropagation(); searchInBot('${f['Назва'].replace(/'/g, "\\'")}')">▶️ Дивитись</button>
-          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
-        </div>
-      </div>
-    `).join('');
-  }
-});
 
     
     
