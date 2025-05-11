@@ -531,9 +531,10 @@ function showSeries(type = 'Серіал') {
   });
 
   container.innerHTML = Object.keys(grouped).map(title => `
-    <div class="series-card">
-      <h3 onclick="toggleSeries('${title}')" style="cursor:pointer;">📺 ${title}</h3>
-      <div id="series-${title}" style="display:none; padding-left:15px; margin-top:8px;">
+    <div class="series-header" onclick="toggleSeries('${title}')">
+  <span class="series-icon">📺</span>
+  <span class="series-title">${title}</span>
+</div>
         ${grouped[title].map(episode => `
           <div style="margin-bottom:8px;">
             ▶️ <button class="search-button" onclick="openVideo('${episode['Посилання']}')">${episode['Опис'] || 'Серія'}</button>
