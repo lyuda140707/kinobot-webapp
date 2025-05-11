@@ -482,6 +482,7 @@ function showYearFilters() {
   container.style.display = 'flex';
 }
 
+    
 
     function showCollections() {
   const container = document.getElementById('collections');
@@ -498,8 +499,55 @@ function showYearFilters() {
   document.getElementById('collections').style.display = 'flex';
 }
 
+function showSeries() {
+  const container = document.getElementById('genre-results');
+  container.innerHTML = '';
 
-    function filterByGenre(genre) {
+  const seriesFilms = films.filter(f => f['Тип'] === 'Серіал');
+
+  if (seriesFilms.length === 0) {
+    container.innerHTML = '<p>Немає серіалів 😢</p>';
+    return;
+  }
+
+  // Групуємо серії за назвою серіалу
+  const grouped = {};
+  seriesFilms.forEach(f => {
+    if (!grouped[f['Назва']]) {
+      grouped[f['Назва']] = [];
+    }
+    grouped[f['Назва']].push(f);
+  });
+
+  container.innerHTML = Object.keys(grouped).map(title => `
+    <div class="series-card">
+      <h3 onclick="toggleSeries('${title}')" style="cursor:pointer;">📺 ${title}</h3>
+      <div id="series-${title}" style="display:none; padding-left:15px; margin-top:8px;">
+        ${grouped[title].map(episode => `
+          <div style="margin-bottom:8px;">
+            ▶️ <button class="search-button" onclick="openVideo('${episode['Посилання']}')">${episode['Опис'] || 'Серія'}</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
+    function toggleSeries(title) {
+  const block = document.getElementById(`series-${title}`);
+  if (block) {
+    block.style.display = (block.style.display === 'none') ? 'block' : 'none';
+  }
+}
+
+   function filterByGenre(genre) {
+  if (genre === 'Серіали') {
+    showSeries();
+    return;
+  }
+
   switchTab('categories');
   const container = document.getElementById('genre-results');
 
@@ -512,6 +560,23 @@ function showYearFilters() {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
+
+  container.innerHTML = filtered.map(film => `
+    <div class="film-card">
+      <img src="${film['Фото']}" alt="${film['Назва']}">
+      <h3>${film['Назва']}</h3>
+      <p class="film-desc">${film['Опис']}</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+      </div>
+    </div>
+  `).join('');
+
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
+
 
   container.innerHTML = filtered.map(film => `
     <div class="film-card">
