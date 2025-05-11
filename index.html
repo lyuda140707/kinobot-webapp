@@ -358,8 +358,11 @@ function openVideo(link) {
 
   pendingLink = link;
   const modal = document.getElementById('confirm-modal');
+  
+  modal.style.display = 'flex'; // ⬅️ Додати цю стрічку!
   modal.classList.add('show');
 }
+
 
 
 function confirmOpen() {
