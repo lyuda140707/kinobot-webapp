@@ -356,12 +356,35 @@ function openVideo(link) {
     return;
   }
 
-  pendingLink = link;
-  const modal = document.getElementById('confirm-modal');
-  
-  modal.style.display = 'flex'; // ⬅️ Додати цю стрічку!
-  modal.classList.add('show');
+  const videoOverlay = document.getElementById('video-overlay');
+  const videoWrapper = document.getElementById('video-wrapper');
+
+  videoWrapper.innerHTML = `
+    <video id="filmVideo" controls autoplay style="width: 100%; max-height: 80vh; border-radius: 12px;">
+      <source src="${link}" type="video/mp4">
+      Ваш браузер не підтримує відтворення відео.
+    </video>
+    <button class="back-button" onclick="closeVideo()" style="margin-top: 20px;">⬅️ Назад</button>
+  `;
+
+  videoOverlay.style.display = 'flex';
+  setTimeout(() => {
+    videoOverlay.style.opacity = '1';
+  }, 10);
+
+  const video = document.getElementById('filmVideo');
+
+  if (video) {
+    video.addEventListener('ended', () => {
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.close(); // Закриваємо WebApp після перегляду
+      } else {
+        location.reload(); // Якщо немає доступу до API — просто перезавантажуємо
+      }
+    });
+  }
 }
+
 
 
 
