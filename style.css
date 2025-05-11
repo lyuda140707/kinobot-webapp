@@ -772,5 +772,36 @@ justify-content: center;
 .genre-btn[data-genre="Мультсеріали"]:hover {
   transform: scale(1.05);
 }
+.genre-main-btn {
+  font-weight: bold;
+  font-size: 18px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Мультфільми */
+.genre-main-btn:nth-child(2) {
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  box-shadow: 0 6px 12px rgba(255, 154, 158, 0.6);
+}
+
+/* Мультсеріали */
+.genre-main-btn:nth-child(3) {
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+  box-shadow: 0 6px 12px rgba(161, 196, 253, 0.6);
+}
+
+/* При наведенні */
+.genre-main-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+}
 
 
