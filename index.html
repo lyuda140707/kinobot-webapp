@@ -579,7 +579,8 @@ function showSeries(type = 'Серіал') {
       <h3>${film['Назва']}</h3>
       <p class="film-desc">${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
+        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -606,7 +607,7 @@ function showSeries(type = 'Серіал') {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
+        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -635,7 +636,7 @@ function filterByYear(year) {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
+        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -875,16 +876,17 @@ function showSkeletonCollections() {
       `;
     } else {
       document.getElementById('searchResults').innerHTML = results.map(f => `
-        <div class="film-card fade-in">
-          <img src="${f['Фото']}" alt="${f['Назва']}">
-          <h3>${f['Назва']}</h3>
-          <p class="film-desc">${f['Опис']}</p>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
-            <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
-          </div>
-        </div>
-      `).join('');
+  <div class="film-card fade-in">
+    <img src="${f['Фото']}" alt="${f['Назва']}">
+    <h3>${f['Назва']}</h3>
+    <p class="film-desc">${f['Опис']}</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      ${f['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Посилання']}')">▶️ Дивитись</button>` : ''}
+      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}', '${f['Посилання']}')">💛 Улюблене</button>
+    </div>
+  </div>
+`).join('');
+
     }
   });
 
