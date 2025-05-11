@@ -256,7 +256,9 @@
   <h2>👤 Акаунт</h2>
 
   <button id="lucky-button" class="account-button">🎲 Мені пощастить</button>
-<button class="account-button" onclick="switchTab('favorites', document.querySelector('[data-tab=favorites]'))">🧡 Улюблене</button>
+  <button class="account-button" onclick="switchTab('favorites', document.querySelector('[data-tab=favorites]'))">🧡 Улюблене</button>
+  <button class="account-button" onclick="goToCartoons()">👧 Мультфільми</button>
+
 
 <hr style="margin: 20px 0; border-color: #444;">
 
@@ -500,16 +502,18 @@ function showYearFilters() {
   document.getElementById('collections').style.display = 'flex';
 }
 
-function showSeries() {
+function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
   container.innerHTML = '';
 
-  const seriesFilms = films.filter(f => f['Тип'] === 'Серіал');
+  const seriesFilms = films.filter(f => f['Тип'] === type);
 
   if (seriesFilms.length === 0) {
-    container.innerHTML = '<p>Немає серіалів 😢</p>';
+    container.innerHTML = '<p>Немає серій 😢</p>';
     return;
   }
+
+
 
   // Групуємо серії за назвою серіалу
   const grouped = {};
@@ -545,13 +549,16 @@ function showSeries() {
 
   function filterByGenre(genre) {
   if (genre === 'Серіали') {
-    switchTab('categories'); // ✅ перейти у "Категорії"
-    showSeries();            // ✅ показати серіали
+    switchTab('categories');
+    showSeries('Серіал'); // 🟡 додали параметр "Серіал"
     return;
   }
 
-  
-
+  if (genre === 'Мультсеріали') {
+    switchTab('categories');
+    showSeries('Мультсеріал'); // 🟡 додали обробку "Мультсеріал"
+    return;
+  }
 
   switchTab('categories');
   const container = document.getElementById('genre-results');
@@ -566,10 +573,6 @@ function showSeries() {
     return;
   }
 
- 
-
-
-
   container.innerHTML = filtered.map(film => `
     <div class="film-card">
       <img src="${film['Фото']}" alt="${film['Назва']}">
@@ -582,9 +585,10 @@ function showSeries() {
     </div>
   `).join('');
 
-  // 🔽 Прокручуємо вниз до фільмів
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
+
     function filterByCountry(country) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
@@ -1030,6 +1034,22 @@ function clearHistory() {
   box.style.display = isVisible ? 'none' : 'block';
   arrow.textContent = isVisible ? '⬇️' : '⬆️';
 }
+
+   function goToCartoons() {
+  switchTab('categories', document.querySelector('[data-tab=categories]'));
+  openGenreGroup('cartoons');
+
+  // Додаємо плавну прокрутку через 300 мс, коли все відкриється
+  setTimeout(() => {
+    const target = document.getElementById('group-cartoons');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 300);
+}
+
+
+    
 </script>
 
 <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
