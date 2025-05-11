@@ -161,10 +161,9 @@
 
     <div class="genre-main-wrapper" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
   <button class="genre-main-btn" onclick="openGenreGroup('films')">🎯 За жанром</button>
-  <button class="genre-main-btn genre-btn-series" onclick="filterByGenre('Серіали')">📺 Серіали</button>
-  <button class="genre-main-btn genre-btn-cartoons" onclick="openGenreGroup('cartoons')">👧 Мультики</button>
+  <button class="genre-main-btn" onclick="filterByGenre('Серіали')">📺 Серіали</button>
+  <button class="genre-main-btn" onclick="openGenreGroup('cartoons')">👧 Мультики</button>
 </div>
-
 
 
   
@@ -1027,13 +1026,13 @@ function showHistory() {
 // ✅ ВИНЕСИ окремо функцію rate() після showHistory
 function rate(title, stars) {
   localStorage.setItem(`rating_${title}`, stars);
- 
+  showHistory();
 }
 
 
 function clearHistory() {
   localStorage.removeItem('history');
-  
+  showHistory(); // одразу оновлює вивід
 }
       
  function toggleFact() {
