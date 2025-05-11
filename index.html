@@ -161,7 +161,7 @@
 
     <div class="genre-main-wrapper" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
   <button class="genre-main-btn" onclick="openGenreGroup('films')">🎯 За жанром</button>
-  <button class="genre-main-btn" onclick="filterByGenre('Серіали')">📺 Серіали</button>
+  <button class="genre-main-btn" onclick="openSeriesCategory()">📺 Серіали</button>
   <button class="genre-main-btn" onclick="openGenreGroup('cartoons')">👧 Мультики</button>
 </div>
 
@@ -757,6 +757,12 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
   const block = document.getElementById("group-" + group);
   if (block) block.style.display = "flex";
 }
+
+    function openSeriesCategory() {
+  openGenreGroup('series'); // показати підкатегорії серіалів
+  showSeries('Серіал');     // завантажити серіали в genre-results
+}
+
 
   function switchTab(tabId, btn) {
   // ❌ Ховаємо всі секції
