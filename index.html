@@ -549,33 +549,7 @@ function showSeries() {
     return;
   }
 
-  switchTab('categories');
-  const container = document.getElementById('genre-results');
-
-  const filtered = films.filter(f =>
-    f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) ||
-    f['Добірка']?.toLowerCase() === genre.toLowerCase()
-  );
-
-  if (filtered.length === 0) {
-    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
-    return;
-  }
-
-  container.innerHTML = filtered.map(film => `
-    <div class="film-card">
-      <img src="${film['Фото']}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p class="film-desc">${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
-      </div>
-    </div>
-  `).join('');
-
-  container.scrollIntoView({ behavior: 'smooth' });
-}
+  
 
 
   switchTab('categories');
