@@ -563,6 +563,7 @@ function showSeries(type = 'Серіал') {
     showSeries('Серіал'); // 🟡 додали параметр "Серіал"
     return;
   }
+
     function filterSeriesByGenre(genre) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
@@ -591,7 +592,6 @@ function showSeries(type = 'Серіал') {
   container.scrollIntoView({ behavior: 'smooth' });
 }
 
-    
 
   if (genre === 'Мультсеріали') {
     switchTab('categories');
