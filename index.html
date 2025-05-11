@@ -605,18 +605,7 @@ function showSeries() {
     return;
   }
 
-  container.innerHTML = filtered.map(film => `
-    <div class="film-card">
-      <img src="${film['Фото']}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
-      </div>
-    </div>
-  `).join('');
-}
+  
 
 function filterByYear(year) {
   switchTab('categories');
