@@ -376,14 +376,24 @@ function openVideo(link) {
 
   if (video) {
     video.addEventListener('ended', () => {
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.close(); // Закриваємо WebApp після перегляду
-      } else {
-        location.reload(); // Якщо немає доступу до API — просто перезавантажуємо
-      }
+      // Коли фільм закінчився:
+      videoWrapper.innerHTML = `
+        <div style="color: #00f7ff; font-size: 24px; margin-top: 40px;">
+          🎬 Дякуємо за перегляд!
+        </div>
+      `;
+      // Почекати 2 секунди і закрити WebApp
+      setTimeout(() => {
+        if (window.Telegram && Telegram.WebApp) {
+          Telegram.WebApp.close();
+        } else {
+          location.reload();
+        }
+      }, 2000);
     });
   }
 }
+
 
 
 
