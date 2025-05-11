@@ -369,11 +369,21 @@ function confirmOpen() {
   const modal = document.getElementById('confirm-modal');
   modal.classList.remove('show');
   setTimeout(() => {
-    if (window.Telegram && window.Telegram.WebApp) {
-  window.Telegram.WebApp.openLink(pendingLink);
-} else {
-  window.open(pendingLink, '_blank');
+    try {
+      if (window.Telegram?.WebApp?.openLink) {
+        window.Telegram.WebApp.openLink(pendingLink);
+      } else {
+        window.open(pendingLink, '_blank');
+      }
+    } catch (e) {
+      console.error('Помилка при відкритті лінку:', e);
+      window.open(pendingLink, '_blank');
+    } finally {
+      pendingLink = "";
+    }
+  }, 200);
 }
+
 
     pendingLink = "";
   }, 200); // чекаємо трошки перед відкриттям
