@@ -1026,13 +1026,13 @@ function showHistory() {
 // ✅ ВИНЕСИ окремо функцію rate() після showHistory
 function rate(title, stars) {
   localStorage.setItem(`rating_${title}`, stars);
-  showHistory();
+ 
 }
 
 
 function clearHistory() {
   localStorage.removeItem('history');
-  showHistory(); // одразу оновлює вивід
+  
 }
       
  function toggleFact() {
