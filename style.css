@@ -742,6 +742,29 @@
       background-color: #29b6f6;
       transform: scale(1.05); /* при наведенні трохи збільшується */
     }
-    
+
+.series-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px; /* великий розмір заголовка */
+  font-weight: bold;
+  color: #00e5ff;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.series-header:hover {
+  color: #00f7ff;
+}
+
+.series-icon {
+  font-size: 28px;
+}
+.series-title {
+  font-size: 22px;
+}
+
     
     
