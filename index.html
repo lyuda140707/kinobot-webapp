@@ -462,11 +462,17 @@ function showFilmOfTheDay() {
 
 
     function showGenres() {
-      const genres = ['Новинки', 'Комедії', 'Драми', 'Серіали', 'Мультфільми'];
-      document.getElementById('genres').innerHTML = genres.map(g => `<button class="genre-btn" onclick="filterByGenre('${g}')">${g}</button>`).join('');
-      document.getElementById('genres').style.display = 'flex';
-
+  const genres = ['Новинки', 'Комедії', 'Драми', 'Серіали', 'Мультфільми'];
+  document.getElementById('genres').innerHTML = genres.map(g => {
+    if (g === 'Мультфільми') {
+      return `<button class="genre-btn" onclick="goToCartoons()">👧 ${g}</button>`;
     }
+    return `<button class="genre-btn" onclick="filterByGenre('${g}')">${g}</button>`;
+  }).join('');
+  document.getElementById('genres').style.display = 'flex';
+}
+
+    
     function showCountryFilters() {
   const countries = [...new Set(films.map(f => f['Країна']).filter(Boolean))];
   const container = document.getElementById('country-filters');
