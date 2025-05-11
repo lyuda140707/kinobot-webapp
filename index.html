@@ -554,20 +554,6 @@ function showSeries(type = 'Серіал') {
   container.scrollIntoView({ behavior: 'smooth' });
 }
 
-    function toggleSeries(title) {
-  const block = document.getElementById(`series-${title}`);
-  if (block) {
-    block.style.display = (block.style.display === 'none') ? 'block' : 'none';
-  }
-}
-
-  function filterByGenre(genre) {
-  if (genre === 'Серіали') {
-    switchTab('categories');
-    showSeries('Серіал'); // 🟡 додали параметр "Серіал"
-    return;
-  }
-
     function filterSeriesByGenre(genre) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
@@ -577,18 +563,30 @@ function showSeries(type = 'Серіал') {
   );
 
   if (filtered.length === 0) {
-    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    container.innerHTML = '<p>Немає серіалів у цій категорії 😢</p>';
     return;
   }
 
-  container.innerHTML = filtered.map(film => `
-    <div class="film-card">
-      <img src="${film['Фото']}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p class="film-desc">${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+  const grouped = {};
+  filtered.forEach(film => {
+    if (!grouped[film['Назва']]) {
+      grouped[film['Назва']] = [];
+    }
+    grouped[film['Назва']].push(film);
+  });
+
+  container.innerHTML = Object.keys(grouped).map(title => `
+    <div class="series-card">
+      <div class="series-header" onclick="toggleSeries('${title}')">
+        <span class="series-icon">📺</span>
+        <span class="series-title">${title}</span>
+      </div>
+      <div id="series-${title}" style="display:none; padding-left:15px; margin-top:8px;">
+        ${grouped[title].map(episode => `
+          <div style="margin-bottom:8px;">
+            ▶️ <button class="search-button" onclick="openVideo('${episode['Посилання']}')">${episode['Опис'] || 'Серія'}</button>
+          </div>
+        `).join('')}
       </div>
     </div>
   `).join('');
@@ -597,19 +595,31 @@ function showSeries(type = 'Серіал') {
 }
 
 
-  if (genre === 'Мультсеріали') {
-    switchTab('categories');
-    showSeries('Мультсеріал'); // 🟡 додали обробку "Мультсеріал"
-    return;
+    function toggleSeries(title) {
+  const block = document.getElementById(`series-${title}`);
+  if (block) {
+    block.style.display = (block.style.display === 'none') ? 'block' : 'none';
   }
+}
 
+  function filterByGenre(genre) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
 
-  const filtered = films.filter(f =>
-    f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) ||
-    f['Добірка']?.toLowerCase() === genre.toLowerCase()
-  );
+  let filtered = [];
+
+  if (genre === 'Мультфільми') {
+    filtered = films.filter(f => f['Тип'] === 'Мультфільм');
+  } else if (genre === 'Мультсеріали') {
+    filtered = films.filter(f => f['Тип'] === 'Мультсеріал');
+  } else if (genre === 'Серіали') {
+    filtered = films.filter(f => f['Тип'] === 'Серіал');
+  } else {
+    filtered = films.filter(f =>
+      f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) ||
+      f['Добірка']?.toLowerCase() === genre.toLowerCase()
+    );
+  }
 
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
@@ -623,7 +633,6 @@ function showSeries(type = 'Серіал') {
       <p class="film-desc">${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
-
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -633,7 +642,7 @@ function showSeries(type = 'Серіал') {
 }
 
 
-    function filterByCountry(country) {
+     function filterByCountry(country) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
 
