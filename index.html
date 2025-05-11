@@ -467,10 +467,14 @@ function showFilmOfTheDay() {
     if (g === 'Мультфільми') {
       return `<button class="genre-btn" onclick="goToCartoons()">👧 ${g}</button>`;
     }
+    if (g === 'Серіали') {
+      return `<button class="genre-btn" onclick="goToSeries()">📺 ${g}</button>`;
+    }
     return `<button class="genre-btn" onclick="filterByGenre('${g}')">${g}</button>`;
   }).join('');
   document.getElementById('genres').style.display = 'flex';
 }
+
 
     
     function showCountryFilters() {
@@ -1107,6 +1111,12 @@ function clearHistory() {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, 300);
+}
+
+    function goToSeries() {
+  switchTab('categories', document.querySelector('[data-tab=categories]'));
+  openGenreGroup('series');
+  showSeries('Серіал');
 }
 
 
