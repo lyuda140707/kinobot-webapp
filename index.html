@@ -792,9 +792,10 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 }
 
     function openSeriesCategory() {
-  openGenreGroup('series'); // показати підкатегорії серіалів
-  showSeries('Серіал');     // завантажити серіали в genre-results
+  openGenreGroup('series'); // ✅ Тільки показати кнопки підкатегорій
+  // Більше нічого тут не викликаємо!
 }
+
 
 
   function switchTab(tabId, btn) {
@@ -1115,10 +1116,8 @@ function clearHistory() {
 
    function goToSeries() {
   switchTab('categories', document.querySelector('[data-tab=categories]'));
-  openGenreGroup('series');
-  showSeries('Серіал');
+  openGenreGroup('series'); // ✅ Тільки відкриваємо підкатегорії серіалів
 
-  // Додаємо плавну прокрутку через 300 мс
   setTimeout(() => {
     const target = document.getElementById('group-series');
     if (target) {
@@ -1126,6 +1125,7 @@ function clearHistory() {
     }
   }, 300);
 }
+
 
 
 
