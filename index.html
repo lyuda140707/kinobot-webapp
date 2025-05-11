@@ -553,11 +553,12 @@ function showSeries(type = 'Серіал') {
   }
 }
 
-  function filterByGenre(genre) {
-  if (genre === 'Серіали') {
-    switchTab('categories');
-    showSeries('Серіал'); // 🟡 додали параметр "Серіал"
-    return;
+ function filterByGenre(genre) {
+  // Додаємо або забираємо мультяшну тему
+  if (genre === 'Мультфільми' || genre === 'Мультсеріали') {
+    document.body.classList.add('cartoon-theme');
+  } else {
+    document.body.classList.remove('cartoon-theme');
   }
 
   if (genre === 'Мультсеріали') {
@@ -1047,7 +1048,8 @@ function clearHistory() {
   switchTab('categories', document.querySelector('[data-tab=categories]'));
   openGenreGroup('cartoons');
 
-  // Додаємо плавну прокрутку через 300 мс, коли все відкриється
+  document.body.classList.add('cartoon-theme'); // ➡️ додаємо мультяшний стиль
+
   setTimeout(() => {
     const target = document.getElementById('group-cartoons');
     if (target) {
@@ -1055,6 +1057,7 @@ function clearHistory() {
     }
   }, 300);
 }
+
 
 
     
