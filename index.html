@@ -1113,11 +1113,20 @@ function clearHistory() {
   }, 300);
 }
 
-    function goToSeries() {
+   function goToSeries() {
   switchTab('categories', document.querySelector('[data-tab=categories]'));
   openGenreGroup('series');
   showSeries('Серіал');
+
+  // Додаємо плавну прокрутку через 300 мс
+  setTimeout(() => {
+    const target = document.getElementById('group-series');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 300);
 }
+
 
 
     
