@@ -769,6 +769,41 @@
   background: linear-gradient(135deg, #ff9a9e, #fad0c4);
   color: #fff;
 }
+.cartoon-theme body {
+  background: linear-gradient(135deg, #ffe4e1, #e0ffff);
+}
+
+.cartoon-theme .section {
+  background: linear-gradient(135deg, #ffe4e1, #e0ffff);
+}
+
+.cartoon-theme .genre-main-wrapper {
+  background: #ffebef;
+}
+
+.cartoon-theme .film-card {
+  background: #fff0f5;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(255, 182, 193, 0.6);
+}
+
+.cartoon-theme .collection-card {
+  background: #ffe4e1;
+  box-shadow: 0 4px 12px rgba(255, 192, 203, 0.5);
+}
+
+.cartoon-theme .collection-card p {
+  color: #555;
+}
+
+.cartoon-theme .back-button,
+.cartoon-theme .watch-btn,
+.cartoon-theme .search-button,
+.cartoon-theme .fav-button {
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 170, 200, 0.5);
+}
 
     
     
