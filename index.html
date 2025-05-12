@@ -862,6 +862,15 @@ function showSkeletonCollections() {
 
   document.addEventListener('DOMContentLoaded', () => {
   Telegram.WebApp.ready();
+    
+    document.addEventListener('DOMContentLoaded', () => {
+  Telegram.WebApp.ready();
+  
+  console.log('🔵 Telegram WebApp API доступний?', window.Telegram?.WebApp);
+  
+  ...
+});
+
 
   // Очищення кешу раз на добу
   const lastClear = localStorage.getItem('lastClear');
