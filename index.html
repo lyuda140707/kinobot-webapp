@@ -129,6 +129,12 @@
   </div>
 </div>
 
+    <!-- Кнопка для переходу в Telegram -->
+<div id="telegram-button-container" style="display: none;">
+    <button id="telegram-button" onclick="goToTelegram()">Переглянути в Telegram</button>
+</div>
+
+
 
 
       <div id="home-loading" style="text-align:center; margin-top:30px;">
@@ -326,6 +332,21 @@
 
   await fetchAndUpdateFilms();
 }
+
+function showTelegramButton(videoUrl) {
+  // Зберігаємо посилання на фільм
+  pendingLink = videoUrl;
+
+  // Відображаємо кнопку для переходу в Telegram
+  document.getElementById('telegram-button-container').style.display = 'block';
+}
+    
+function goToTelegram() {
+  // Переходимо в Telegram до фільма
+  window.Telegram.WebApp.openLink(pendingLink);
+}
+
+    
 
 async function fetchAndUpdateFilms() {
   try {
@@ -638,7 +659,9 @@ function showSeries(type = 'Серіал') {
       <h3>${film['Назва']}</h3>
       <p class="film-desc">${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); sendVideoRequest('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+        ${film['Посилання'] ? `
+  <button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${film['Посилання']}')">▶️ Дивитись</button>
+` : ''}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
 
       </div>
@@ -666,7 +689,9 @@ function showSeries(type = 'Серіал') {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); sendVideoRequest('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+        ${film['Посилання'] ? `
+  <button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${film['Посилання']}')">▶️ Дивитись</button>
+` : ''}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
 
       </div>
@@ -696,7 +721,9 @@ function filterByYear(year) {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); sendVideoRequest('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+        ${film['Посилання'] ? `
+  <button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${film['Посилання']}')">▶️ Дивитись</button>
+` : ''}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
 
       </div>
