@@ -414,14 +414,17 @@ function openVideo(filmName) {
 
     
 function showRedirectButton() {
-  const container = document.createElement('div');
-  container.style.marginTop = "20px";
-  container.style.textAlign = "center";
+  // Видалити попередню кнопку, якщо вона є
+  const oldButton = document.getElementById('redirect-button');
+  if (oldButton) {
+    oldButton.remove();
+  }
 
   const button = document.createElement('button');
+  button.id = 'redirect-button';
   button.className = "watch-btn";
   button.textContent = "🎬 Перейти до бота";
-  button.style.marginTop = "20px";
+  button.style.marginTop = "10px";
   button.style.padding = "10px 20px";
   button.style.borderRadius = "10px";
   button.style.background = "#00f7ff";
@@ -430,17 +433,19 @@ function showRedirectButton() {
   button.style.cursor = "pointer";
   button.style.boxShadow = "0 0 10px #00f7ff";
 
-  // 🟡 Тільки тут оголошуєш дію при кліку:
+  // Дія при кліку
   button.onclick = () => {
     window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot");
   };
 
-  // ✅ І тільки потім вставляєш кнопку в контейнер
-  container.appendChild(button);
-
-  // ✅ А потім контейнер в секцію "home"
-  const home = document.getElementById('home');
-  home.appendChild(container);
+  const message = document.getElementById('server-response');
+  if (message) {
+    message.parentNode.insertBefore(button, message.nextSibling); // 👈 вставляємо одразу після повідомлення
+  } else {
+    // Якщо повідомлення нема — додаємо в home
+    const home = document.getElementById('home');
+    home.appendChild(button);
+  }
 }
 
 
