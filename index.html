@@ -465,7 +465,7 @@ function showFilmOfTheDay() {
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
 
-document.getElementById('film-day-button').onclick = () => {
+  document.getElementById('film-day-button').onclick = () => {
     const videoUrl = film['Посилання'];
     pendingLink = videoUrl;
 
@@ -474,7 +474,9 @@ document.getElementById('film-day-button').onclick = () => {
     } else {
       window.open(pendingLink, '_blank');
     }
-};
+  };
+} // ← ОЦЕЇ ЗАКРИВАЮЧОЇ ДУЖКИ НЕМАЄ у тебе!!
+
 
 
 
@@ -1206,7 +1208,7 @@ function clearHistory() {
 }
   </script>
   
-</script>
+
 <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
 
 <div id="video-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; justify-content:center; align-items:center; transition: opacity 0.4s ease;">
