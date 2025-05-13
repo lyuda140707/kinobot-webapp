@@ -374,21 +374,20 @@ function openVideo(filmName) {
   })
   .then(response => response.json())
   .then(data => {
-    console.log("Відповідь сервера:", data); // 🟡 Додали для перевірки
+    console.log("Відповідь сервера:", data);
+    const home = document.getElementById('home');
+    const message = document.createElement('div');
+    message.textContent = "Відповідь сервера: " + JSON.stringify(data);
+    message.style.marginTop = "20px";
+    message.style.color = "#00f7ff";
+    home.appendChild(message);
+
     if (data.success) {
       showRedirectButton();
     } else {
       alert("❗️ Помилка надсилання фільму: " + (data.error || "Невідома помилка"));
     }
 })
-  .catch(error => {
-    console.error('Помилка:', error);
-    alert("❗️ Сталася помилка при надсиланні фільму");
-  })
-  .finally(() => {
-    document.getElementById("loading-indicator").style.display = "none";
-  });
-}
 
 function showRedirectButton() {
   const container = document.createElement('div');
