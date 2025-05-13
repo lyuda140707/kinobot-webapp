@@ -464,10 +464,11 @@ function showFilmOfTheDay() {
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
 
-  document.getElementById('film-day-button').onclick = () => {
-    const videoUrl = film['Посилання']; // ⬅️ тут тепер 'Посилання'
-    sendVideoRequest(videoUrl); // ⬅️ відкриваємо
-  };
+ document.getElementById('film-day-button').onclick = () => {
+    const videoUrl = film['Посилання'];
+    showTelegramButton(videoUrl); // ✅ Оце правильно
+};
+
 
   document.getElementById('film-title').textContent = film['Назва'];
 }
