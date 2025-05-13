@@ -415,12 +415,9 @@ function showRedirectButton() {
   button.style.boxShadow = "0 0 10px #00f7ff";
 
   button.onclick = () => {
-  if (window.Telegram?.WebApp?.openTelegramLink) {
-    window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot");
-  } else {
-    window.open("https://t.me/UAKinoTochka_bot", "_blank");
-  }
+    window.Telegram.WebApp.openLink("https://t.me/UAKinoTochka_bot");
 };
+
 
 
   videoWrapper.appendChild(message);
