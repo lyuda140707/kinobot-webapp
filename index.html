@@ -387,16 +387,17 @@ function openVideo(filmName) {
     } else {
       alert("❗️ Помилка надсилання фільму: " + (data.error || "Невідома помилка"));
     }
-})
-.catch(error => {
+  })
+  .catch(error => {
     console.error('Помилка:', error);
     alert("❗️ Сталася помилка при надсиланні фільму");
-})
-.finally(() => {
+  })
+  .finally(() => {
     document.getElementById("loading-indicator").style.display = "none";
-});
+  });  // ← Ось тут закрита finally!
+}  // ← І ось тут закрита вся функція openVideo()!!!
 
-
+    
 function showRedirectButton() {
   const container = document.createElement('div');
   container.style.marginTop = "20px";
