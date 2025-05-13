@@ -665,6 +665,10 @@ function showSeries(type = 'Серіал') {
   </div>
 `).join('');
 
+    
+    container.scrollIntoView({ behavior: 'smooth' });
+}
+
 
 
      function filterByCountry(country) {
@@ -712,6 +716,7 @@ function filterByYear(year) {
 
   container.innerHTML = filtered.map(film => `
     <div class="film-card">
+          
       <img src="${film['Фото']}" alt="${film['Назва']}">
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
