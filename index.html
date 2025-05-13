@@ -464,19 +464,10 @@ function showFilmOfTheDay() {
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
 
-  document.getElementById('film-day-button').onclick = () => {
-    const videoUrl = film['Посилання'];
-    pendingLink = videoUrl;
-
-    if (window.Telegram?.WebApp?.openLink) {
-      window.Telegram.WebApp.openLink(pendingLink);
-    } else {
-      window.open(pendingLink, '_blank');
-    }
-  };
-
-  document.getElementById('film-title').textContent = film['Назва'];
-}
+document.getElementById('film-day-button').onclick = () => {
+    const fileId = film['Посилання'];
+    sendVideoRequest(fileId); // ✅ Надсилаємо через бекенд
+};
 
 
 
