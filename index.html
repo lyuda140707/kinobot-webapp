@@ -353,39 +353,59 @@ async function fetchAndUpdateFilms() {
 
 let pendingLink = "";
 
-function openVideo(link) {
-  if (!link) {
-    alert('⛔ Посилання на фільм не знайдено!');
+function openVideo(filmName) {
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+  
+  if (!user) {
+    alert("❗️Не вдалося отримати ваш Telegram ID");
     return;
   }
 
-  const videoOverlay = document.getElementById('video-overlay');
-  const videoWrapper = document.getElementById('video-wrapper');
+  document.getElementById("loading-indicator").style.display = "block";
 
-  videoWrapper.innerHTML = `
-    <video id="filmVideo" controls autoplay style="width: 100%; max-height: 80vh; border-radius: 12px;">
-      <source src="${link}" type="video/mp4">
-      Ваш браузер не підтримує відтворення відео.
-    </video>
-    <button class="back-button" onclick="closeVideo()" style="margin-top: 20px;">⬅️ Назад</button>
-  `;
+  fetch('https://kinobot-qm9q.onrender.com/send-film', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user_id: user.id,
+      film_name: filmName
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showOpenFilmButton();
+    } else {
+      alert("❗️ Помилка надсилання фільму: " + (data.error || "Невідома помилка"));
+    }
+  })
+  .catch(error => {
+    console.error('Помилка:', error);
+    alert("❗️ Сталася помилка при надсиланні фільму");
+  })
+  .finally(() => {
+    document.getElementById("loading-indicator").style.display = "none";
+  });
+}
 
-  videoOverlay.style.display = 'flex';
-  setTimeout(() => {
-    videoOverlay.style.opacity = '1';
-  }, 10);
+function showOpenFilmButton() {
+  const container = document.createElement('div');
+  container.style.marginTop = "20px";
+  container.style.textAlign = "center";
 
-  const video = document.getElementById('filmVideo');
+  const button = document.createElement('button');
+  button.className = "watch-btn";
+  button.textContent = "🎬 Відкрити фільм";
+  button.onclick = () => {
+    window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot"); // тут твій бот
+  };
 
-  if (video) {
-    video.addEventListener('ended', () => {
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.close(); // Закриваємо WebApp після перегляду
-      } else {
-        location.reload(); // Якщо немає доступу до API — просто перезавантажуємо
-      }
-    });
-  }
+  container.appendChild(button);
+
+  // Додаємо кнопку в секцію "Головна"
+  const home = document.getElementById('home');
+  home.appendChild(container);
 }
 
 
@@ -445,7 +465,7 @@ function showFilmOfTheDay() {
 
   document.getElementById('film-day-button').onclick = () => {
     const videoUrl = film['Посилання']; // ⬅️ тут тепер 'Посилання'
-    openVideo(videoUrl); // ⬅️ відкриваємо
+    openVideo(film['Назва']); // ⬅️ відкриваємо
   };
 
   document.getElementById('film-title').textContent = film['Назва'];
@@ -589,7 +609,7 @@ function showSeries(type = 'Серіал') {
       <h3>${film['Назва']}</h3>
       <p class="film-desc">${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
 
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
@@ -617,7 +637,7 @@ function showSeries(type = 'Серіал') {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -646,7 +666,7 @@ function filterByYear(year) {
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
@@ -891,7 +911,7 @@ function showSkeletonCollections() {
     <h3>${f['Назва']}</h3>
     <p class="film-desc">${f['Опис']}</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      ${f['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Посилання']}')">▶️ Дивитись</button>` : ''}
+      ${f['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Назва']}')">▶️ Дивитись</button>` : ''}
       <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}', '${f['Посилання']}')">💛 Улюблене</button>
     </div>
   </div>
