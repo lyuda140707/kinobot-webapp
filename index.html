@@ -375,31 +375,10 @@ function openVideo(filmName) {
   .then(response => response.json())
   .then(data => {
     console.log("Відповідь сервера:", data);
-
-    // Видалити попереднє повідомлення, якщо є
-    const oldMessage = document.getElementById('server-response');
-    if (oldMessage) {
-      oldMessage.remove();
-    }
-
-    // Створюємо новий блок повідомлення
-    const message = document.createElement('div');
-    message.id = 'server-response';
-    message.textContent = data.success ? "✅ Фільм надіслано успішно!" : `❗️ Помилка: ${data.error || 'Невідома помилка'}`;
-    message.style.margin = "20px 10px";
-    message.style.padding = "12px 16px";
-    message.style.borderRadius = "10px";
-    message.style.background = data.success ? "#00f7ff" : "#ff5c5c";
-    message.style.color = "#000";
-    message.style.fontWeight = "bold";
-    message.style.textAlign = "center";
-    message.style.boxShadow = "0 0 10px rgba(0, 247, 255, 0.5)";
-    
-    const home = document.getElementById('home');
-    home.insertBefore(message, home.children[1]); // 👈 вставити одразу після заголовка!
-
     if (data.success) {
       showRedirectButton();
+    } else {
+      alert(`❗️ Помилка: ${data.error || 'Невідома помилка'}`);
     }
   })
   .catch(error => {
@@ -411,20 +390,22 @@ function openVideo(filmName) {
   });
 }
 
-
     
 function showRedirectButton() {
-  // Видалити попередню кнопку, якщо вона є
-  const oldButton = document.getElementById('redirect-button');
-  if (oldButton) {
-    oldButton.remove();
-  }
+  const videoWrapper = document.getElementById('video-wrapper');
+  videoWrapper.innerHTML = ''; // очищаємо вікно перед показом нового контенту
+
+  const message = document.createElement('div');
+  message.textContent = "✅ Фільм надіслано успішно!";
+  message.style.marginTop = "10px";
+  message.style.color = "#00f7ff";
+  message.style.fontSize = "18px";
+  message.style.fontWeight = "bold";
 
   const button = document.createElement('button');
-  button.id = 'redirect-button';
   button.className = "watch-btn";
   button.textContent = "🎬 Перейти до бота";
-  button.style.marginTop = "10px";
+  button.style.marginTop = "20px";
   button.style.padding = "10px 20px";
   button.style.borderRadius = "10px";
   button.style.background = "#00f7ff";
@@ -433,20 +414,20 @@ function showRedirectButton() {
   button.style.cursor = "pointer";
   button.style.boxShadow = "0 0 10px #00f7ff";
 
-  // Дія при кліку
   button.onclick = () => {
     window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot");
   };
 
-  const message = document.getElementById('server-response');
-  if (message) {
-    message.parentNode.insertBefore(button, message.nextSibling); // 👈 вставляємо одразу після повідомлення
-  } else {
-    // Якщо повідомлення нема — додаємо в home
-    const home = document.getElementById('home');
-    home.appendChild(button);
-  }
+  videoWrapper.appendChild(message);
+  videoWrapper.appendChild(button);
+
+  const overlay = document.getElementById('video-overlay');
+  overlay.style.display = 'flex'; // показуємо модальне вікно
+  setTimeout(() => {
+    overlay.style.opacity = '1';
+  }, 50);
 }
+
 
 
 function confirmOpen() {
