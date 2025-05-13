@@ -375,17 +375,31 @@ function openVideo(filmName) {
   .then(response => response.json())
   .then(data => {
     console.log("Відповідь сервера:", data);
-    const home = document.getElementById('home');
+
+    // Видалити попереднє повідомлення, якщо є
+    const oldMessage = document.getElementById('server-response');
+    if (oldMessage) {
+      oldMessage.remove();
+    }
+
+    // Створюємо новий блок повідомлення
     const message = document.createElement('div');
-    message.textContent = "Відповідь сервера: " + JSON.stringify(data);
-    message.style.marginTop = "20px";
-    message.style.color = "#00f7ff";
-    home.appendChild(message);
+    message.id = 'server-response';
+    message.textContent = data.success ? "✅ Фільм надіслано успішно!" : `❗️ Помилка: ${data.error || 'Невідома помилка'}`;
+    message.style.margin = "20px 10px";
+    message.style.padding = "12px 16px";
+    message.style.borderRadius = "10px";
+    message.style.background = data.success ? "#00f7ff" : "#ff5c5c";
+    message.style.color = "#000";
+    message.style.fontWeight = "bold";
+    message.style.textAlign = "center";
+    message.style.boxShadow = "0 0 10px rgba(0, 247, 255, 0.5)";
+    
+    const home = document.getElementById('home');
+    home.insertBefore(message, home.children[1]); // 👈 вставити одразу після заголовка!
 
     if (data.success) {
       showRedirectButton();
-    } else {
-      alert("❗️ Помилка надсилання фільму: " + (data.error || "Невідома помилка"));
     }
   })
   .catch(error => {
@@ -394,8 +408,9 @@ function openVideo(filmName) {
   })
   .finally(() => {
     document.getElementById("loading-indicator").style.display = "none";
-  });  // ← Ось тут закрита finally!
-}  // ← І ось тут закрита вся функція openVideo()!!!
+  });
+}
+
 
     
 function showRedirectButton() {
