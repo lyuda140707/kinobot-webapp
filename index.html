@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -465,9 +466,16 @@ function showFilmOfTheDay() {
   document.getElementById('film-day-img').src = film['Фото'];
 
 document.getElementById('film-day-button').onclick = () => {
-    const fileId = film['Посилання'];
-    sendVideoRequest(fileId); // ✅ Надсилаємо через бекенд
+    const videoUrl = film['Посилання'];
+    pendingLink = videoUrl;
+
+    if (window.Telegram?.WebApp?.openLink) {
+      window.Telegram.WebApp.openLink(pendingLink);
+    } else {
+      window.open(pendingLink, '_blank');
+    }
 };
+
 
 
 
