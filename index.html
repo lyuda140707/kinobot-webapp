@@ -375,7 +375,7 @@ function openVideo(filmName) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      showOpenFilmButton();
+      showRedirectButton();
     } else {
       alert("❗️ Помилка надсилання фільму: " + (data.error || "Невідома помилка"));
     }
@@ -389,19 +389,19 @@ function openVideo(filmName) {
   });
 }
 
-function showOpenFilmButton() {
+function showRedirectButton() {
   const container = document.createElement('div');
   container.style.marginTop = "20px";
   container.style.textAlign = "center";
 
   const button = document.createElement('button');
   button.className = "watch-btn";
-  button.textContent = "🎬 Відкрити фільм";
+  button.textContent = "🎬 Перейти до перегляду";
   button.onclick = () => {
-    window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot"); // тут твій бот
+    window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot"); // ← твій бот
   };
 
-  container.appendChild(button);
+ 
 
   // Додаємо кнопку в секцію "Головна"
   const home = document.getElementById('home');
