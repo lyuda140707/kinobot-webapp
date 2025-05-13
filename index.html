@@ -590,36 +590,25 @@ function showSeries(type = 'Серіал') {
   }
 
   if (filtered.length === 0) {
-    container.innerHTML = '<p>Немає серіалів у цій категорії 😢</p>';
-    return;
-  }
-
-  const grouped = {};
-  filtered.forEach(film => {
-    if (!grouped[film['Назва']]) {
-      grouped[film['Назва']] = [];
-    }
-    grouped[film['Назва']].push(film);
-  });
-
-  container.innerHTML = Object.keys(grouped).map(title => `
-    <div class="series-card">
-      <div class="series-header" onclick="toggleSeries('${title}')">
-        <span class="series-icon">📺</span>
-        <span class="series-title">${title}</span>
-      </div>
-      <div id="series-${title}" style="display:none; padding-left:15px; margin-top:8px;">
-        ${grouped[title].map(episode => `
-          <div style="margin-bottom:8px;">
-            ▶️ <button class="search-button" onclick="openVideo('${episode['Посилання']}')">${episode['Опис'] || 'Серія'}</button>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-
-  container.scrollIntoView({ behavior: 'smooth' });
+  container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+  return;
 }
+
+container.innerHTML = filtered.map(film => `
+  <div class="film-card">
+    <img src="${film['Фото']}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p class="film-desc">${film['Опис']}</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
+    </div>
+  </div>
+`).join('');
+
+container.scrollIntoView({ behavior: 'smooth' });
+}
+
 
 
     function toggleSeries(title) {
