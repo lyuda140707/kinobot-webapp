@@ -402,30 +402,54 @@ function showRedirectButton() {
   message.style.fontSize = "18px";
   message.style.fontWeight = "bold";
 
-  const button = document.createElement('button');
-  button.className = "watch-btn";
-  button.textContent = "🎬 Перейти до бота";
-  button.style.marginTop = "20px";
-  button.style.padding = "10px 20px";
-  button.style.borderRadius = "10px";
-  button.style.background = "#00f7ff";
-  button.style.color = "#000";
-  button.style.fontWeight = "bold";
-  button.style.cursor = "pointer";
-  button.style.boxShadow = "0 0 10px #00f7ff";
+  const buttonsWrapper = document.createElement('div');
+  buttonsWrapper.style.display = 'flex';
+  buttonsWrapper.style.gap = '15px';
+  buttonsWrapper.style.marginTop = '20px';
+  buttonsWrapper.style.justifyContent = 'center';
+  buttonsWrapper.style.flexWrap = 'wrap';
 
-  button.onclick = () => {
+  // Кнопка "Перейти до бота"
+  const confirmButton = document.createElement('button');
+  confirmButton.className = "watch-btn";
+  confirmButton.textContent = "🎬 Перейти до бота";
+  confirmButton.style.padding = "10px 20px";
+  confirmButton.style.borderRadius = "10px";
+  confirmButton.style.background = "#00f7ff";
+  confirmButton.style.color = "#000";
+  confirmButton.style.fontWeight = "bold";
+  confirmButton.style.cursor = "pointer";
+  confirmButton.style.boxShadow = "0 0 10px #00f7ff";
+  confirmButton.onclick = () => {
     window.Telegram.WebApp.close();
-};
+  };
 
+  // Кнопка "Ні, залишитись тут"
+  const cancelButton = document.createElement('button');
+  cancelButton.className = "watch-btn";
+  cancelButton.textContent = "❌ Залишитись тут";
+  cancelButton.style.padding = "10px 20px";
+  cancelButton.style.borderRadius = "10px";
+  cancelButton.style.background = "#444";
+  cancelButton.style.color = "#fff";
+  cancelButton.style.fontWeight = "bold";
+  cancelButton.style.cursor = "pointer";
+  cancelButton.onclick = () => {
+    const overlay = document.getElementById('video-overlay');
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 300);
+  };
 
-
+  buttonsWrapper.appendChild(confirmButton);
+  buttonsWrapper.appendChild(cancelButton);
 
   videoWrapper.appendChild(message);
-  videoWrapper.appendChild(button);
+  videoWrapper.appendChild(buttonsWrapper);
 
   const overlay = document.getElementById('video-overlay');
-  overlay.style.display = 'flex'; // показуємо модальне вікно
+  overlay.style.display = 'flex';
   setTimeout(() => {
     overlay.style.opacity = '1';
   }, 50);
