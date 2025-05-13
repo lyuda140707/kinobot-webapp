@@ -396,8 +396,8 @@ function showRedirectButton() {
   container.style.textAlign = "center";
 
   const button = document.createElement('button');
-  button.className = "watch-btn"; // стиль кнопки як у "Дивитись"
-  button.textContent = "🎬 Перейти до бота"; // або "🎬 Перейти до перегляду"
+  button.className = "watch-btn";
+  button.textContent = "🎬 Перейти до бота";
   button.style.marginTop = "20px";
   button.style.padding = "10px 20px";
   button.style.borderRadius = "10px";
@@ -407,15 +407,18 @@ function showRedirectButton() {
   button.style.cursor = "pointer";
   button.style.boxShadow = "0 0 10px #00f7ff";
 
+  // 🟡 Тільки тут оголошуєш дію при кліку:
   button.onclick = () => {
     window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot");
   };
 
+  // ✅ І тільки потім вставляєш кнопку в контейнер
+  container.appendChild(button);
+
+  // ✅ А потім контейнер в секцію "home"
   const home = document.getElementById('home');
   home.appendChild(container);
-  container.appendChild(button); // дуже важливо!
 }
-
 
 
 function confirmOpen() {
