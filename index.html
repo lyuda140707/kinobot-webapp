@@ -663,7 +663,7 @@ function showSeries(type = 'Серіал') {
       <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
     </div>
   </div>
-`).join('');
+``).join('');
 
     
     container.scrollIntoView({ behavior: 'smooth' });
@@ -683,19 +683,16 @@ function showSeries(type = 'Серіал') {
   }
 
   container.innerHTML = filtered.map(film => `
-    <div class="film-card">
-      <img src="${film['Фото']}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        `
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
-
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
-
-      </div>
+  <div class="film-card">
+    <img src="${film['Фото']}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p>${film['Опис']}</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
     </div>
-).join('')};
+  </div>
+`).join('');
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
@@ -750,7 +747,8 @@ function filterByYear(year) {
         <p>${f.description}</p>
         <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
         <!-- Додаємо кнопку для перегляду відео -->
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${film['Посилання']}')">▶️ Дивитись</button>` : ''}
+        ${f.videoUrl ? `<button class="search-button" onclick="event.stopPropagation(); showTelegramButton('${f.videoUrl}')">▶️ Дивитись</button>` : ''}
+
       </div>
     `).join('');
   }
