@@ -396,36 +396,25 @@ function showRedirectButton() {
   container.style.textAlign = "center";
 
   const button = document.createElement('button');
-  button.className = "watch-btn"; // 🔵 Стиль кнопки "Дивитись"
-  button.textContent = "🎬 Перейти до бота";
+  button.className = "watch-btn"; // стиль кнопки як у "Дивитись"
+  button.textContent = "🎬 Перейти до бота"; // або "🎬 Перейти до перегляду"
+  button.style.marginTop = "20px";
+  button.style.padding = "10px 20px";
+  button.style.borderRadius = "10px";
+  button.style.background = "#00f7ff";
+  button.style.color = "#000";
+  button.style.fontWeight = "bold";
+  button.style.cursor = "pointer";
+  button.style.boxShadow = "0 0 10px #00f7ff";
+
   button.onclick = () => {
     window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot");
   };
 
   const home = document.getElementById('home');
   home.appendChild(container);
+  container.appendChild(button); // дуже важливо!
 }
-
-
-function showRedirectButton() {
-  const container = document.createElement('div');
-  container.style.marginTop = "20px";
-  container.style.textAlign = "center";
-
-  const button = document.createElement('button');
-  button.className = "watch-btn";
-  button.textContent = "🎬 Перейти до перегляду";
-  button.onclick = () => {
-    window.Telegram.WebApp.openTelegramLink("https://t.me/UAKinoTochka_bot"); // ← твій бот
-  };
-
- 
-
-  // Додаємо кнопку в секцію "Головна"
-  const home = document.getElementById('home');
-  home.appendChild(container);
-}
-
 
 
 
