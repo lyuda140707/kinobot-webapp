@@ -388,6 +388,14 @@ function openVideo(filmName) {
       alert("❗️ Помилка надсилання фільму: " + (data.error || "Невідома помилка"));
     }
 })
+.catch(error => {
+    console.error('Помилка:', error);
+    alert("❗️ Сталася помилка при надсиланні фільму");
+})
+.finally(() => {
+    document.getElementById("loading-indicator").style.display = "none";
+});
+
 
 function showRedirectButton() {
   const container = document.createElement('div');
