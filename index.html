@@ -159,11 +159,12 @@
   <h2>Категорії</h2>
   <button class="back-button" onclick="switchTab('home', document.querySelector('[data-tab=home]'))">⬅️ Назад</button>
 
-    <div class="genre-main-wrapper" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
+<div class="genre-main-wrapper" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
   <button class="genre-main-btn" onclick="openGenreGroup('films')">🎯 За жанром</button>
-  <button class="genre-main-btn" onclick="filterByGenre('Серіали')">📺 Серіали</button>
+  <button class="genre-main-btn" onclick="switchTab('categories'); openGenreGroup('series')">📺 Серіали</button>
   <button class="genre-main-btn" onclick="openGenreGroup('cartoons')">👧 Мультики</button>
 </div>
+
 
 
   
