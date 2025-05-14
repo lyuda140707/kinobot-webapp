@@ -324,7 +324,7 @@
       text-align: center;
       color: #fff;
       font-family: 'Russo One', sans-serif;
-      font-size: 18px;
+       font-size: 14px; /* або 13px */
       font-weight: bold;
       text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
       background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
