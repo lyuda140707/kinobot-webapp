@@ -625,24 +625,12 @@ function showSeries(type = 'Серіал') {
 }
 
   function filterByGenre(genre) {
-  if (genre === 'Серіали') {
-    switchTab('categories');
-    showSeries('Серіал'); // 🟡 додали параметр "Серіал"
-    return;
-  }
-
-  if (genre === 'Мультсеріали') {
-    switchTab('categories');
-    showSeries('Мультсеріал'); // 🟡 додали обробку "Мультсеріал"
-    return;
-  }
-
   switchTab('categories');
   const container = document.getElementById('genre-results');
 
-  const filtered = films.filter(f =>
-    f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) ||
-    f['Добірка']?.toLowerCase() === genre.toLowerCase()
+  let filtered = films.filter(f =>
+    (f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || 
+    f['Добірка']?.toLowerCase() === genre.toLowerCase())
   );
 
   if (filtered.length === 0) {
@@ -650,21 +638,53 @@ function showSeries(type = 'Серіал') {
     return;
   }
 
-  container.innerHTML = filtered.map(film => `
-    <div class="film-card">
-      <img src="${film['Фото']}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p class="film-desc">${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
+  // 🔵 Перевіряємо: якщо є серіали
+  const hasSeries = filtered.some(f => f['Тип'] === 'Серіал');
 
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+  if (hasSeries) {
+    // 🔥 Групуємо серіали
+    const grouped = {};
+    filtered.forEach(f => {
+      if (!grouped[f['Назва']]) {
+        grouped[f['Назва']] = [];
+      }
+      grouped[f['Назва']].push(f);
+    });
+
+    container.innerHTML = Object.keys(grouped).map(title => `
+      <div class="series-card">
+        <div class="series-header" onclick="toggleSeries('${title}')">
+          <span class="series-icon">📺</span>
+          <span class="series-title">${title}</span>
+        </div>
+        <div id="series-${title}" style="display:none; padding-left:15px; margin-top:8px;">
+          ${grouped[title].map(episode => `
+            <div style="margin-bottom:8px;">
+              ▶️ <button class="search-button" onclick="openVideo('${episode['Назва']}')">${episode['Опис'] || 'Серія'}</button>
+            </div>
+          `).join('')}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `).join('');
+
+  } else {
+    // 🟡 Звичайні фільми
+    container.innerHTML = filtered.map(film => `
+      <div class="film-card">
+        <img src="${film['Фото']}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p class="film-desc">${film['Опис']}</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
+          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+        </div>
+      </div>
+    `).join('');
+  }
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
     function filterByCountry(country) {
