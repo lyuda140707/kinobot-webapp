@@ -915,17 +915,43 @@ function showSkeletonCollections() {
 
     const data = await res.json();
 
-    if (!data.subscribed) {
-      // ❌ Якщо НЕ підписаний — показуємо красиву заставку
-      document.body.innerHTML = `
-        <div style="text-align:center; padding:50px; color:#00f7ff;">
-          <h2>❗ Щоб користуватися застосунком, потрібно підписатись на канал</h2>
-          <a href="https://t.me/KinoTochkaUA" target="_blank" style="background:#00f7ff; color:#000; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:bold; margin-top:20px; display:inline-block;">📢 Підписатись</a>
-          <p style="margin-top:20px;">Після підписки перезавантажте застосунок 📲</p>
-        </div>
-      `;
-      return;
-    }
+   if (!data.subscribed) {
+  document.body.innerHTML = `
+    <div style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #00f7ff;
+      text-align: center;
+      padding: 20px;
+      font-family: 'Russo One', sans-serif;
+    ">
+      <h1 style="font-size: 28px; margin-bottom: 20px;">❗ Щоб користуватись застосунком</h1>
+      <h2 style="font-size: 22px; margin-bottom: 40px;">Підпишіться на канал 🎥</h2>
+
+      <a href="https://t.me/KinoTochkaUA" target="_blank" style="
+        background: #00f7ff;
+        color: #000;
+        padding: 15px 30px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: bold;
+        text-decoration: none;
+        box-shadow: 0 0 15px #00f7ff;
+        transition: all 0.3s ease;
+      " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 25px #00f7ff';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 15px #00f7ff';">
+        📢 ПІДПИСАТИСЬ
+      </a>
+
+      <p style="margin-top: 40px; font-size: 16px; color: #ccc;">Після підписки оновіть застосунок 📲</p>
+    </div>
+  `;
+  return;
+}
+
   } catch (error) {
     console.error('Помилка перевірки підписки', error);
     alert("❗ Помилка перевірки підписки");
