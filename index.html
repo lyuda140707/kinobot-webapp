@@ -815,15 +815,22 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
     
     function openGenreGroup(group) {
-  // Ховаємо всі групи
+  // ❌ Приховати ВСІ підкатегорії
   document.getElementById("group-films").style.display = "none";
   document.getElementById("group-series").style.display = "none";
   document.getElementById("group-cartoons").style.display = "none";
-      
-  // Показуємо тільки потрібну
+
+  // ❌ Очистити вивід результатів пошуку фільмів
+  const container = document.getElementById('genre-results');
+  if (container) {
+    container.innerHTML = '';
+  }
+
+  // ✅ Показати тільки потрібну групу
   const block = document.getElementById("group-" + group);
   if (block) block.style.display = "flex";
 }
+
 
   function switchTab(tabId, btn) {
   // ❌ Ховаємо всі секції
