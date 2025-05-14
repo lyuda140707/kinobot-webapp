@@ -896,8 +896,44 @@ function showSkeletonCollections() {
 }
 
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
   Telegram.WebApp.ready();
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    alert("Не вдалося отримати ваш Telegram ID");
+    return;
+  }
+
+  try {
+    const res = await fetch('https://kinobot-qm9q.onrender.com/check-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id })
+    });
+
+    const data = await res.json();
+
+    if (!data.subscribed) {
+      // ❌ Якщо НЕ підписаний — показуємо красиву заставку
+      document.body.innerHTML = `
+        <div style="text-align:center; padding:50px; color:#00f7ff;">
+          <h2>❗ Щоб користуватися застосунком, потрібно підписатись на канал</h2>
+          <a href="https://t.me/KinoTochkaUA" target="_blank" style="background:#00f7ff; color:#000; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:bold; margin-top:20px; display:inline-block;">📢 Підписатись</a>
+          <p style="margin-top:20px;">Після підписки перезавантажте застосунок 📲</p>
+        </div>
+      `;
+      return;
+    }
+  } catch (error) {
+    console.error('Помилка перевірки підписки', error);
+    alert("❗ Помилка перевірки підписки");
+    return;
+  }
+
+  // 🟢 Якщо підписаний, тільки тоді все інше:
+  
 
   // Очищення кешу раз на добу
   const lastClear = localStorage.getItem('lastClear');
