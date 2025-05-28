@@ -676,7 +676,7 @@ function showSeries(type = 'Серіал') {
         <p class="film-desc">${film['Опис']}</p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites(${JSON.stringify(film['Назва'])}, ${JSON.stringify(film['Опис'])}, ${JSON.stringify(film['Посилання'])})">💛 Улюблене</button>
         </div>
       </div>
     `).join('');
