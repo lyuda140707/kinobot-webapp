@@ -192,7 +192,7 @@
 <!-- 🔽 Підкатегорії: Серіали -->
 <div id="group-series" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
   <button class="genre-btn" data-genre="Українські">🇺🇦 Українські</button>
-  <button class="genre-btn" data-genre="Детективні серіали">🕵️‍♀️ Детективні серіали</button>
+  <button class="genre-btn" data-genre="Детективні">🕵️‍♀️ Детективні</button>
   <button class="genre-btn" data-genre="Драматичні">🎭 Драматичні</button>
   <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
   <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
@@ -629,9 +629,10 @@ function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
 
   let filtered = films.filter(f =>
-    (f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || 
-    f['Добірка']?.toLowerCase() === genre.toLowerCase())
-  );
+  f['Жанр']?.toLowerCase() === genre.toLowerCase() || 
+  f['Добірка']?.toLowerCase() === genre.toLowerCase()
+);
+
 
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
@@ -853,36 +854,29 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
 
   function switchTab(tabId, btn) {
-  // ❌ Ховаємо всі секції
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-  // ❌ Знімаємо активні вкладки
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  // ✅ Активуємо потрібну секцію і кнопку
+  // 🧹 Очищаємо всі основні контейнери
+  const containersToClear = [
+    'genre-results',
+    'searchResults',
+    'fav-list'
+  ];
+  containersToClear.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+
+  // Прибираємо розгорнуті картки
+  document.querySelectorAll('.film-card.expanded').forEach(el => el.classList.remove('expanded'));
+
   const target = document.getElementById(tabId);
   if (target) target.classList.add('active');
-  if (tabId === 'home') {
-  document.getElementById('filter-details')?.removeAttribute('open'); // згорнути фільтр
-}
-
   if (btn) btn.classList.add('active');
 
-  // ✅ Ховаємо всі списки карток при перемиканні табів
-  document.querySelectorAll('.film-list').forEach(el => el.style.display = 'none');
-
-  // ✅ Якщо це "Улюблене" — показати
-  if (tabId === 'favorites') {
-    showFavorites();
-  }
-
-  // ✅ Якщо "Акаунт" — прокрутити вгору
-  if (tabId === 'categories') {
-  document.getElementById('filter-details')?.removeAttribute('open');
-}
-
-  if (tabId === 'account') {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  if (tabId === 'favorites') showFavorites();
+  if (tabId === 'account') window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 
