@@ -257,7 +257,9 @@
   <h2>👤 Акаунт</h2>
 
   <button id="lucky-button" class="account-button">🎲 Мені пощастить</button>
- 
+  <button class="account-button" onclick="switchTab('favorites', document.querySelector('[data-tab=favorites]'))">🧡 Улюблене</button>
+
+
 
 <hr style="margin: 20px 0; border-color: #444;">
 
@@ -627,8 +629,8 @@ function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
 
   let filtered = films.filter(f =>
-    (f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) ||
-     f['Добірка']?.toLowerCase() === genre.toLowerCase())
+    (f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || 
+    f['Добірка']?.toLowerCase() === genre.toLowerCase())
   );
 
   if (filtered.length === 0) {
@@ -636,9 +638,11 @@ function showSeries(type = 'Серіал') {
     return;
   }
 
+  // 🔵 Перевіряємо: якщо є серіали
   const hasSeries = filtered.some(f => f['Тип'] === 'Серіал');
 
   if (hasSeries) {
+    // 🔥 Групуємо серіали
     const grouped = {};
     filtered.forEach(f => {
       if (!grouped[f['Назва']]) {
@@ -664,43 +668,18 @@ function showSeries(type = 'Серіал') {
     `).join('');
 
   } else {
-    // 🟡 Звичайні фільми (оновлений блок)
-    container.innerHTML = filtered.map(film => {
-      const isFav = isFavorite(film['Назва']);
-      return `
-        <div class="film-card">
-          <img src="${film['Фото']}" alt="${film['Назва']}">
-          <h3>${film['Назва']}</h3>
-          <p class="film-desc">${film['Опис']}</p>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-            <button 
-              class="fav-button" 
-              data-title="${film['Назва']}" 
-              data-description="${film['Опис']}" 
-              data-url="${film['Посилання']}">
-              ${isFav ? '🗑️ Видалити' : '💛 Улюблене'}
-            </button>
-          </div>
+    // 🟡 Звичайні фільми
+    container.innerHTML = filtered.map(film => `
+      <div class="film-card">
+        <img src="${film['Фото']}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p class="film-desc">${film['Опис']}</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
+          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
         </div>
-      `;
-    }).join('');
-
-    // 🔁 Після вставки HTML — додаємо слухачі на кнопки
-    document.querySelectorAll('.fav-button').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const title = btn.dataset.title;
-        const description = btn.dataset.description;
-        const url = btn.dataset.url;
-
-        if (isFavorite(title)) {
-          removeFromFavorites(title);
-        } else {
-          addToFavorites(title, description, url);
-        }
-      });
-    });
+      </div>
+    `).join('');
   }
 
   container.scrollIntoView({ behavior: 'smooth' });
@@ -726,8 +705,7 @@ function showSeries(type = 'Серіал') {
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
-
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
   `).join('');
@@ -756,8 +734,7 @@ function filterByYear(year) {
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}', '${film['Посилання']}')">💛 Улюблене</button>
-
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
     </div>
   `).join('');
