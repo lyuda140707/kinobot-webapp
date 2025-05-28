@@ -629,9 +629,9 @@ function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
 
   let filtered = films.filter(f =>
-  f['Жанр']?.toLowerCase() === genre.toLowerCase() || 
-  f['Добірка']?.toLowerCase() === genre.toLowerCase()
-);
+    (f['Жанр']?.toLowerCase().includes(genre.toLowerCase()) || 
+    f['Добірка']?.toLowerCase() === genre.toLowerCase())
+  );
 
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
