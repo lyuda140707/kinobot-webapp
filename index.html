@@ -673,10 +673,19 @@ function showSeries(type = 'Серіал') {
         <p class="film-desc">${film['Опис']}</p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+          <button 
+  class="fav-button" 
+  data-title="${film['Назва']}" 
+  data-description="${film['Опис']}" 
+  data-url="${film['Посилання']}">
+  💛 Улюблене
+</button>
+
         </div>
       </div>
     `).join('');
+    bindFavoriteButtons();
+
   }
 
   container.scrollIntoView({ behavior: 'smooth' });
@@ -702,13 +711,21 @@ function showSeries(type = 'Серіал') {
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+        <button 
+          class="fav-button" 
+          data-title="${film['Назва']}" 
+          data-description="${film['Опис']}" 
+          data-url="${film['Посилання']}">
+          💛 Улюблене
+        </button>
       </div>
     </div>
   `).join('');
+      bindFavoriteButtons()
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
   
@@ -731,10 +748,19 @@ function filterByYear(year) {
       <p>${film['Опис']}</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+        <button 
+  class="fav-button" 
+  data-title="${film['Назва']}" 
+  data-description="${film['Опис']}" 
+  data-url="${film['Посилання']}">
+  💛 Улюблене
+</button>
+
       </div>
     </div>
   `).join('');
+  bindFavoriteButtons();
+
 }
 
 
@@ -893,6 +919,24 @@ function showSkeletonCollections() {
 }
 
 
+ function bindFavoriteButtons() {
+  document.querySelectorAll('.fav-button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const title = btn.dataset.title;
+      const description = btn.dataset.description;
+      const url = btn.dataset.url;
+
+      if (isFavorite(title)) {
+        removeFromFavorites(title);
+      } else {
+        addToFavorites(title, description, url);
+      }
+    });
+  });
+}
+
+    
   document.addEventListener('DOMContentLoaded', async () => {
   Telegram.WebApp.ready();
   const tg = window.Telegram.WebApp;
@@ -1045,10 +1089,18 @@ function showSkeletonCollections() {
     <p class="film-desc">${f['Опис']}</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
       ${f['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Назва']}')">▶️ Дивитись</button>` : ''}
-      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}', '${f['Посилання']}')">💛 Улюблене</button>
+      <button 
+  class="fav-button" 
+  data-title="${film['Назва']}" 
+  data-description="${film['Опис']}" 
+  data-url="${film['Посилання']}">
+  💛 Улюблене
+</button>
+
     </div>
   </div>
 `).join('');
+bindFavoriteButtons();
 
     }
   });
