@@ -363,7 +363,13 @@ async function openVideo(filmName) {
   const user = tg.initDataUnsafe.user;
   document.getElementById("loading-indicator").style.display = "block";
 
-  // ⏳ Додати паузу 500мс перед fetch
+  // ⛔ Заблокуємо всі кнопки "Дивитись" на 3 секунди
+  document.querySelectorAll('.watch-button').forEach(btn => btn.disabled = true);
+  setTimeout(() => {
+    document.querySelectorAll('.watch-button').forEach(btn => btn.disabled = false);
+  }, 3000);
+
+  // ⏳ Затримка 2 секунди перед запитом
   setTimeout(async () => {
     try {
       const response = await fetch('https://kinobot-qm9q.onrender.com/send-film', {
@@ -389,7 +395,7 @@ async function openVideo(filmName) {
     } finally {
       document.getElementById("loading-indicator").style.display = "none";
     }
-  }, 500); // 0.5 секунди пауза
+  }, 2000);
 }
 
     
