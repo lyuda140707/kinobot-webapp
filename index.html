@@ -1122,10 +1122,17 @@ document.getElementById("lucky-button").addEventListener("click", () => {
   alert(`🎬 ${randomFilm['Назва']}\n\n${randomFilm['Опис'] || ''}`);
 });
 
-      function suggestFilm() {
+     let isSending = false;
+
+function suggestFilm() {
   const val = document.getElementById('searchInput').value.trim();
   if (!val) {
     alert("Спочатку введіть назву фільму!");
+    return;
+  }
+
+  if (isSending) {
+    alert("⏳ Запит вже надсилається...");
     return;
   }
 
@@ -1137,49 +1144,39 @@ document.getElementById("lucky-button").addEventListener("click", () => {
     return;
   }
 
+  isSending = true;
+  const btn = document.querySelector(".suggest-button");
+if (btn) {
+  btn.disabled = true;
+  setTimeout(() => btn.disabled = false, 3000);
+}
+
+
   fetch('https://kinobot-qm9q.onrender.com/request-film', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: user.id, film_name: val })
-  }).then(() => {
-    alert('✅ Запит на додавання фільму надіслано!');
-  }).catch((error) => {
+  })
+  .then(async res => {
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const data = await res.json();
+      alert('✅ Запит на додавання фільму надіслано!');
+    } else {
+      const text = await res.text();
+      console.warn("⚠️ Не JSON відповідь:", text.slice(0, 100));
+      alert("⚠️ Сервер повернув неочікувану відповідь. Спробуйте пізніше.");
+    }
+  })
+  .catch((error) => {
     console.error(error);
     alert('❗️ Сталася помилка при надсиланні запиту.');
+  })
+  .finally(() => {
+    isSending = false;
   });
 }
 
-function showHistory() {
-  // 🔧 Прибираємо фільм, що "завис" поверх
-  document.querySelectorAll('.film-card.expanded')?.forEach(el => el.classList.remove('expanded'));
-
-  // 🔹 Сховати всі фільм-листи
-  document.querySelectorAll('.film-list').forEach(el => el.style.display = 'none');
-
-  const history = JSON.parse(localStorage.getItem('history') || '[]');
-  const container = document.getElementById('history-list');
-
-  if (history.length === 0) {
-    container.innerHTML = '<p>Немає переглянутих фільмів</p>';
-  } else {
-    container.innerHTML = history.map(f => {
-      const rating = localStorage.getItem(`rating_${f.title}`) || 0;
-      return `
-        <div class="film-card">
-          <h3>${f.title}</h3>
-          <p>${f.description}</p>
-          <div class="rating" data-title="${f.title}">
-            ${[1,2,3,4,5].map(i => `
-              <span class="star ${i <= rating ? 'filled' : ''}" onclick="rate('${f.title}', ${i})">★</span>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  container.style.display = 'block';
-}
 
     async function loadFacts() {
   try {
