@@ -1123,8 +1123,20 @@ document.getElementById("lucky-button").addEventListener("click", () => {
 });
 
      let isSending = false;
+async function requestWithRetry(url, options, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+    } catch (e) {
+      console.warn(`⚠️ Спроба ${i + 1} не вдалася`);
+    }
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+  throw new Error("❌ Усі спроби запиту не вдалися");
+}
 
-function suggestFilm() {
+async function suggestFilm() {
   const val = document.getElementById('searchInput').value.trim();
   if (!val) {
     alert("Спочатку введіть назву фільму!");
@@ -1138,7 +1150,6 @@ function suggestFilm() {
 
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
-
   if (!user) {
     alert("❗️Не вдалося отримати ваш Telegram ID");
     return;
@@ -1146,18 +1157,23 @@ function suggestFilm() {
 
   isSending = true;
   const btn = document.querySelector(".suggest-button");
-if (btn) {
-  btn.disabled = true;
-  setTimeout(() => btn.disabled = false, 3000);
-}
+  if (btn) {
+    btn.disabled = true;
+    setTimeout(() => btn.disabled = false, 7000); // довше чекаємо
+  }
 
+  try {
+    // 🟢 КРОК 1: Пробудити сервер
+    await fetch('https://kinobot-qm9q.onrender.com/ping');
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 🕒 1 секунда паузи
 
-  fetch('https://kinobot-qm9q.onrender.com/request-film', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: user.id, film_name: val })
-  })
-  .then(async res => {
+    // 🟢 КРОК 2: Основний запит з повтором до 3 разів
+    const res = await requestWithRetry('https://kinobot-qm9q.onrender.com/request-film', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id, film_name: val })
+    });
+
     const contentType = res.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       const data = await res.json();
@@ -1165,17 +1181,17 @@ if (btn) {
     } else {
       const text = await res.text();
       console.warn("⚠️ Не JSON відповідь:", text.slice(0, 100));
-      alert("⚠️ Сервер повернув неочікувану відповідь. Спробуйте пізніше.");
+      alert("⚠️ Сервер ще не готовий. Спробуйте трохи пізніше.");
     }
-  })
-  .catch((error) => {
+
+  } catch (error) {
     console.error(error);
     alert('❗️ Сталася помилка при надсиланні запиту.');
-  })
-  .finally(() => {
+  } finally {
     isSending = false;
-  });
+  }
 }
+
 
 
     async function loadFacts() {
