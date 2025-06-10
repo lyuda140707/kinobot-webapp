@@ -758,7 +758,7 @@ function filterByYear(year) {
         <p>${f.description}</p>
         <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
         <!-- Додаємо кнопку для перегляду відео -->
-        <button class="search-button" onclick="event.stopPropagation(); openVideo('${f.videoUrl}')">▶️ Дивитись</button>
+        <button class="search-button" onclick="event.stopPropagation(); openVideo('${f.title}')">▶️ Дивитись</button>
       </div>
     `).join('');
   }
