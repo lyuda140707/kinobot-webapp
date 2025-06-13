@@ -621,6 +621,12 @@ function showSeries(type = 'Серіал') {
   container.innerHTML = '';
 
   const seriesFilms = films.filter(f => f['Тип'] === type);
+   seriesFilms.sort((a, b) => {
+    const numA = parseInt(a['Опис']?.match(/\d+/)?.[0] || 0);
+    const numB = parseInt(b['Опис']?.match(/\d+/)?.[0] || 0);
+    return numA - numB;
+  });
+
 
   if (seriesFilms.length === 0) {
     container.innerHTML = '<p>Немає серій 😢</p>';
