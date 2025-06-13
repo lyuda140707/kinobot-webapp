@@ -1249,7 +1249,15 @@ function clearHistory() {
   }, 300);
 }
 
-// 🧡 Автоматичне віконце для донату через 20 секунд
+function closeDonatePopup() {
+  const popup = document.getElementById('donate-popup');
+  if (popup) {
+    popup.style.opacity = '0';
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 300);
+  }
+}
 // ✅ Автоматичне стабільне віконце донату через 20 секунд
 setTimeout(() => {
   const popup = document.getElementById('donate-popup');
@@ -1293,6 +1301,33 @@ background:#1e1e1e; color:#fff; padding:20px 20px 16px; border-radius:12px; text
     text-decoration:none; border-radius:8px; display:inline-block;
     box-shadow:0 0 12px #00f7ff;">☕ На каву адміну</a>
 </div>
+
+<script>
+  // 🔸 Функція закриття вікна
+  function closeDonatePopup() {
+    const popup = document.getElementById('donate-popup');
+    if (popup) {
+      popup.style.opacity = '0';
+      setTimeout(() => {
+        popup.style.display = 'none';
+      }, 300);
+    }
+  }
+
+  // 🔸 Через 20 сек показати віконце
+  setTimeout(() => {
+    const popup = document.getElementById('donate-popup');
+    if (popup) {
+      popup.style.display = 'block';
+      popup.style.opacity = '0';
+      popup.style.transition = 'opacity 0.5s ease';
+      setTimeout(() => popup.style.opacity = '1', 10);
+
+      // 🔸 Автоматично сховати через 15 сек
+      setTimeout(() => closeDonatePopup(), 15000);
+    }
+  }, 20000);
+</script>
 
 
 </body>
