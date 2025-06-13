@@ -112,13 +112,32 @@
   opacity: 1;
   pointer-events: auto;
 }
+@keyframes pulse-glow {
+  0% {
+    text-shadow: 0 0 6px #00f7ff;
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 15px #00f7ff;
+    transform: scale(1.15);
+  }
+  100% {
+    text-shadow: 0 0 6px #00f7ff;
+    transform: scale(1);
+  }
+}
+
 #donate-popup button[onclick="closeDonatePopup()"] {
   font-size: 28px;
   font-weight: bold;
   color: #00f7ff;
-  text-shadow: 0 0 10px #00f7ff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  animation: pulse-glow 2s infinite;
   transition: transform 0.2s ease, text-shadow 0.2s ease;
 }
+
 
 #donate-popup button[onclick="closeDonatePopup()"]:hover {
   transform: scale(1.3);
