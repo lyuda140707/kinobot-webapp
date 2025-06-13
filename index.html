@@ -307,10 +307,6 @@
 
   <script>
     let films = [];
-    
-  function shuffleArray(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
 
   async function loadFilms() {
   const cachedFilms = localStorage.getItem('films');
@@ -574,8 +570,7 @@ function showYearFilters() {
     function showCollections() {
   const container = document.getElementById('collections');
   const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
-  const shuffledNames = shuffleArray(names);
-  container.innerHTML = shuffledNames.map(name => {
+  container.innerHTML = names.map(name => {
     const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
     return `
       <div class="collection-card" onclick="filterByGenre('${name}')">
@@ -644,8 +639,6 @@ function showSeries(type = 'Серіал') {
   f['Жанр']?.toLowerCase() === genre.toLowerCase() || 
   f['Добірка']?.toLowerCase() === genre.toLowerCase()
 );
-  filtered = shuffleArray(filtered);
-  
 
 
   if (filtered.length === 0) {
@@ -684,7 +677,7 @@ function showSeries(type = 'Серіал') {
 
   } else {
     // 🟡 Звичайні фільми
-    container.innerHTML = shuffled.map(film => `
+    container.innerHTML = filtered.map(film => `
       <div class="film-card">
         <img src="${film['Фото']}" alt="${film['Назва']}">
         <h3>${film['Назва']}</h3>
@@ -707,15 +700,13 @@ function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
 
   const filtered = films.filter(f => f['Країна'] === country);
-  const shuffled = shuffleArray(filtered);
-
 
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  container.innerHTML = shuffled.map(film => `
+  container.innerHTML = filtered.map(film => `
     <div class="film-card">
       <img src="${film['Фото']}" alt="${film['Назва']}">
       <h3>${film['Назва']}</h3>
@@ -738,15 +729,13 @@ function filterByYear(year) {
   const container = document.getElementById('genre-results');
 
   const filtered = films.filter(f => f['Рік']?.toString() === year.toString());
-  const shuffled = shuffleArray(filtered);
-
 
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  container.innerHTML = shuffled.map(film => `
+  container.innerHTML = filtered.map(film => `
     <div class="film-card">
       <img src="${film['Фото']}" alt="${film['Назва']}">
       <h3>${film['Назва']}</h3>
