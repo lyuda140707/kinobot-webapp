@@ -1251,12 +1251,13 @@ function clearHistory() {
 
 // 🧡 Автоматичне віконце для донату через 20 секунд
 setTimeout(() => {
-  Telegram.WebApp.showConfirm("Підтримати проєкт донатом? 💸", function(result) {
+  Telegram.WebApp.showConfirm("Твій донат = наша мотивація працювати ще краще 💪", function(result) {
     if (result) {
       Telegram.WebApp.openLink("https://send.monobank.ua/jar/2FdmSYjoGo");
     }
   });
-}, 20000); // 20 секунд
+}, 20000);
+
 
 
     
