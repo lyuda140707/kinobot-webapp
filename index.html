@@ -1261,9 +1261,9 @@ setTimeout(() => {
   });
 }, 20000); // 20 секунд
 
-Telegram.WebApp.onEvent('popupClosed', (btnId) => {
+Telegram.WebApp.onEvent('popupClosed', function(btnId) {
   if (btnId === "donate") {
-    window.open("https://send.monobank.ua/jar/2FdmSYjoGo", "_blank");
+    Telegram.WebApp.openLink("https://send.monobank.ua/jar/2FdmSYjoGo");
   }
 });
 
