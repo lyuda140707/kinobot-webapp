@@ -1250,12 +1250,15 @@ function clearHistory() {
 }
 
 // 🧡 Автоматичне віконце для донату через 20 секунд
+// ✅ Автоматичне стабільне віконце донату через 20 секунд
 setTimeout(() => {
-  Telegram.WebApp.showConfirm("Твій донат = наша мотивація працювати ще краще 💪", function(result) {
-    if (result) {
-      Telegram.WebApp.openLink("https://send.monobank.ua/jar/2FdmSYjoGo");
-    }
-  });
+  const popup = document.getElementById('donate-popup');
+  if (popup) {
+    popup.style.display = 'block';
+    popup.style.opacity = '0';
+    popup.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => popup.style.opacity = '1', 10);
+  }
 }, 20000);
 
 
@@ -1281,7 +1284,14 @@ setTimeout(() => {
   </div>
 </div>
 
-
+<div id="donate-popup" style="display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
+background:#1e1e1e; color:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 0 20px #00f7ff; z-index:9999;">
+  <p style="margin-bottom:10px;">Твій донат = наша мотивація працювати ще краще 💪</p>
+  <a href="https://send.monobank.ua/jar/2FdmSYjoGo" target="_blank" style="
+    padding:10px 20px; background:#00f7ff; color:#000; font-weight:bold;
+    text-decoration:none; border-radius:8px; display:inline-block;
+    box-shadow:0 0 12px #00f7ff;">☕ На каву адміну</a>
+</div>
 
 </body>
 </html>
