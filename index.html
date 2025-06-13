@@ -1249,6 +1249,23 @@ function clearHistory() {
   }, 300);
 }
 
+// 🧡 Автоматичне віконце для донату через 20 секунд
+setTimeout(() => {
+  Telegram.WebApp.showPopup({
+    title: "Підтримай проєкт",
+    message: "Твій донат допоможе розвивати наш кіно-контент 🎬",
+    buttons: [
+      { id: "donate", type: "default", text: "💸 Донатити" },
+      { id: "later", type: "cancel", text: "Пізніше" }
+    ]
+  });
+}, 20000); // 20 секунд
+
+Telegram.WebApp.onEvent('popupClosed', (btnId) => {
+  if (btnId === "donate") {
+    window.open("https://send.monobank.ua/jar/2FdmSYjoGo", "_blank");
+  }
+});
 
     
 </script>
