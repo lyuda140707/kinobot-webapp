@@ -344,6 +344,7 @@
 
   if (cachedFilms) {
     films = JSON.parse(cachedFilms);
+    shuffleArray(films);
     console.log('Фільми завантажені з кешу');
     showFilmOfTheDay();
     showCollections();
@@ -363,6 +364,8 @@ async function fetchAndUpdateFilms() {
 
     const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
     films = await res.json();
+    shuffleArray(films);
+
 
     localStorage.setItem('films', JSON.stringify(films));
     showFilmOfTheDay();
@@ -1300,6 +1303,12 @@ setTimeout(() => {
   }
 }, 20000);
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
 
     
