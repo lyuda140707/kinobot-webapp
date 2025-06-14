@@ -1100,7 +1100,11 @@ function showSkeletonCollections() {
     <h3>${f['Назва']}</h3>
     <p class="film-desc">${f['Опис']}</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      ${f['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Назва']}')">▶️ Дивитись</button>` : ''}
+      ${f['Тип'] === 'Серіал' 
+  ? `<button class="search-button" onclick="goToSeries('${f['Назва']}')">📺 Перейти до серіалу</button>` 
+  : (f['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Назва']}')">▶️ Дивитись</button>` : '')
+}
+
       <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}', '${f['Назва']}')">💛 Улюблене</button>
 
     </div>
@@ -1308,6 +1312,41 @@ function shuffleArray(array) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
+}
+
+function goToSeries(seriesTitle) {
+  switchTab('categories', document.querySelector('[data-tab=categories]'));
+  openGenreGroup('series');
+
+  setTimeout(() => {
+    const filtered = films.filter(f => f['Назва'] === seriesTitle && f['Тип'] === 'Серіал');
+
+    if (filtered.length === 0) {
+      alert('Серіал не знайдено 😢');
+      return;
+    }
+
+    const container = document.getElementById('genre-results');
+    const grouped = { [seriesTitle]: filtered };
+
+    container.innerHTML = Object.keys(grouped).map(title => `
+      <div class="series-card">
+        <div class="series-header" onclick="toggleSeries('${title}')">
+          <span class="series-icon">📺</span>
+          <span class="series-title">${title}</span>
+        </div>
+        <div id="series-${title}" style="display:block; padding-left:15px; margin-top:8px;">
+          ${grouped[title].map(episode => `
+            <div style="margin-bottom:8px;">
+              ▶️ <button class="search-button" onclick="openVideo('${episode['Посилання']}')">${episode['Опис'] || 'Серія'}</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    container.scrollIntoView({ behavior: 'smooth' });
+  }, 300);
 }
 
 
