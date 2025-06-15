@@ -303,9 +303,6 @@
 <!-- ✅ Секція Акаунт -->
 <section id="account" class="section">
   <h2>👤 Акаунт</h2>
-  <div id="profile-requests" style="margin-top: 10px; font-size: 14px;">📩 Завантаження...</div>
-  <ul id="request-history" style="padding-left: 1em; font-size: 14px; line-height: 1.4;"></ul>
-
 
   <button id="lucky-button" class="account-button">🎲 Мені пощастить</button>
 
@@ -1217,35 +1214,34 @@ async function suggestFilm() {
   const btn = document.querySelector(".suggest-button");
   if (btn) {
     btn.disabled = true;
-    setTimeout(() => btn.disabled = false, 7000);
+    setTimeout(() => btn.disabled = false, 7000); // довше чекаємо
   }
 
   try {
+    // 🟢 КРОК 1: Пробудити сервер
     await fetch('https://kinobot-qm9q.onrender.com/ping');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 🕒 1 секунда паузи
 
-    const res = await fetch('https://kinobot-qm9q.onrender.com/request-film', {
+    // 🟢 КРОК 2: Основний запит з повтором до 3 разів
+    const res = await requestWithRetry('https://kinobot-qm9q.onrender.com/request-film', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id, film_name: val })
     });
 
-    if (res.status === 429) {
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
       const data = await res.json();
-      alert(data.error || "❗ Ви досягли ліміту запитів");
-      return;
+      alert('✅ Запит на додавання фільму надіслано!');
+    } else {
+      const text = await res.text();
+      console.warn("⚠️ Не JSON відповідь:", text.slice(0, 100));
+      alert("⚠️ Сервер ще не готовий. Спробуйте трохи пізніше.");
     }
 
-    if (!res.ok) {
-      alert("❗ Сталася помилка при надсиланні запиту");
-      return;
-    }
-
-    alert("✅ Запит на додавання фільму надіслано!");
-
-  } catch (e) {
-    console.error(e);
-    alert("❗ Помилка при запиті");
+  } catch (error) {
+    console.error(error);
+    alert('❗️ Сталася помилка при надсиланні запиту.');
   } finally {
     isSending = false;
   }
@@ -1427,67 +1423,6 @@ background:#1e1e1e; color:#fff; padding:20px 20px 16px; border-radius:12px; text
       setTimeout(() => closeDonatePopup(), 15000);
     }
   }, 20000);
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-  const user = window.Telegram.WebApp.initDataUnsafe?.user;
-  if (!user) return;
-
-  const userId = user.id;
-
-  // 🔹 ПЕРЕВІРКА ЛІМІТУ
-  try {
-    const res = await fetch("https://sendpulse-bot-check.onrender.com/check-requests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId })
-    });
-    const data = await res.json();
-
-    const left = data.left ?? 0;
-    const used = data.used ?? 0;
-
-    const profile = document.getElementById("profile-requests");
-    if (profile) {
-      profile.innerHTML = `📩 Запитів залишилось: <b>${left} з 3</b>`;
-    }
-
-    if (left === 0) {
-      setTimeout(() => {
-        alert("💬 Ви використали 3 запити цього місяця. Щоб продовжити — підтримай бота на каву ☕");
-        document.getElementById("donate-popup")?.classList.add("show");
-      }, 800);
-    }
-  } catch (err) {
-    console.error("Помилка при перевірці ліміту:", err);
-  }
-
-  // 🔹 ІСТОРІЯ ЗАПИТІВ
-  try {
-    const res = await fetch("https://sendpulse-bot-check.onrender.com/request-history", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId })
-    });
-    const data = await res.json();
-    const history = data.history ?? [];
-
-    const historyList = document.getElementById("request-history");
-    if (historyList) {
-      if (history.length === 0) {
-        historyList.innerHTML = "<i>Запитів поки немає</i>";
-      } else {
-        historyList.innerHTML = history.map(item => {
-          const [title, date] = item;
-          return `<li>🎬 ${title} <br><small>${new Date(date).toLocaleDateString()}</small></li>`;
-        }).join("");
-      }
-    }
-  } catch (err) {
-    console.error("Помилка при отриманні історії:", err);
-  }
-});
 </script>
 
 
