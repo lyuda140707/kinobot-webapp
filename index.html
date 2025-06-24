@@ -974,6 +974,7 @@ function showSkeletonCollections() {
       body: JSON.stringify({ user_id: user.id })
     });
 
+ 
     const data = await res.json();
 
    if (!data.subscribed) {
@@ -1024,6 +1025,14 @@ function showSkeletonCollections() {
   `;
   return;
 }
+
+  fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: user.id })
+  }).catch(console.warn);
+
+  
 
   } catch (error) {
     console.error('Помилка перевірки підписки', error);
