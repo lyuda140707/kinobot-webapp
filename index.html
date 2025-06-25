@@ -166,14 +166,14 @@
 </head>
 <body>
   <div id="home" class="section active">
-    <h2>🎬 Фільм дня</h2>
+    <h2>🎯 Топ за сьогодні</h2>
    <div id="film-of-the-day" class="film-day-card">
   <div class="image-wrapper" style="position: relative;">
-    <img id="film-day-img" src="" alt="Фільм дня">
+    <img id="film-day-img" src="" alt="Топ за сьогодні">
     <div class="film-title-overlay" id="film-title">Назва фільму</div>
   </div>
   <div class="btn-container">
-    <button id="film-day-button" class="watch-btn">🎬 Дивитись</button>
+    <button id="film-day-button" class="watch-btn">👀 Поглянути</button>
   </div>
 </div>
 
@@ -1409,15 +1409,29 @@ function goToSeries(seriesTitle) {
   </div>
 </div>
 
-<div id="donate-popup" style="display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
-background:#1e1e1e; color:#fff; padding:20px 20px 16px; border-radius:12px; text-align:center; box-shadow:0 0 20px #00f7ff; z-index:9999;">
-  <button onclick="closeDonatePopup()" style="position:absolute; top:6px; right:10px; background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✖️</button>
-  <p style="margin-bottom:10px;">Твій донат = наша мотивація працювати ще краще 💪</p>
+<div id="donate-popup" style="
+  display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+  color:#fff; padding:20px 20px 16px; border-radius:12px; 
+  text-align:center; box-shadow:0 0 20px #00f7ff; z-index:9999;
+">
+  
+  <button onclick="closeDonatePopup()" style="
+    position:absolute; top:6px; right:10px; background:none; 
+    border:none; color:#fff; font-size:20px; cursor:pointer;">✖️</button>
+
+  <p style="margin-bottom:10px; font-size:16px;">
+    <span style="color:#00f7ff;">Твій донат</span> = 
+    <span style="color:#ffcc00;">наша мотивація</span> працювати ще краще 💪
+  </p>
+
   <a href="https://send.monobank.ua/jar/2FdmSYjoGo" target="_blank" style="
-    padding:10px 20px; background:#00f7ff; color:#000; font-weight:bold;
-    text-decoration:none; border-radius:8px; display:inline-block;
-    box-shadow:0 0 12px #00f7ff;">☕ На каву адміну</a>
+    padding:12px 24px; background:#00f7ff; color:#000; font-weight:bold;
+    text-decoration:none; border-radius:10px; display:inline-block;
+    box-shadow:0 0 15px #00f7ff; font-size:16px;
+  ">☕ Підтримати RelaxTime</a>
 </div>
+
 
 <script>
   // 🔸 Функція закриття вікна
