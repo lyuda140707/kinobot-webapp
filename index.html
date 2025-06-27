@@ -412,6 +412,16 @@ async function openVideo(filmName) {
   }
 
   const user = tg.initDataUnsafe.user;
+
+  // 🔒 Перевірка доступу PRO
+  const isPro = localStorage.getItem('isProUser') === 'true';
+  const film = films.find(f => f['Назва'] === filmName);
+
+  if (film?.['Доступ'] === 'PRO' && !isPro) {
+    alert("🔒 Цей фільм доступний лише для PRO користувачів.");
+    return;
+  }
+
   document.getElementById("loading-indicator").style.display = "block";
 
   // ⛔ Заблокуємо всі кнопки "Дивитись" на 3 секунди
@@ -448,6 +458,7 @@ async function openVideo(filmName) {
     }
   }, 2000);
 }
+
 
     
 function showRedirectButton() {
@@ -664,7 +675,7 @@ function showSeries(type = 'Серіал') {
     <div id="series-${title}" style="display:none; padding-left:15px; margin-top:8px;">
       ${grouped[title].map(episode => `
         <div style="margin-bottom:8px;">
-          ▶️ <button class="search-button" onclick="openVideo('${episode['Посилання']}')">${episode['Опис'] || 'Серія'} </button>
+          ▶️ <button class="search-button" onclick="openVideo('${episode['Назва']}')">${episode['Опис'] || 'Серія'} </button>
         </div>
       `).join('')}
     </div>
