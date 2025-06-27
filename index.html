@@ -685,23 +685,21 @@ function showSeries(type = 'Серіал') {
   function filterByGenre(genre) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
+  const isPro = localStorage.getItem('isProUser') === 'true';
 
   let filtered = films.filter(f =>
-  f['Жанр']?.toLowerCase() === genre.toLowerCase() || 
-  f['Добірка']?.toLowerCase() === genre.toLowerCase()
-);
-
+    f['Жанр']?.toLowerCase() === genre.toLowerCase() || 
+    f['Добірка']?.toLowerCase() === genre.toLowerCase()
+  );
 
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  // 🔵 Перевіряємо: якщо є серіали
   const hasSeries = filtered.some(f => f['Тип'] === 'Серіал');
 
   if (hasSeries) {
-    // 🔥 Групуємо серіали
     const grouped = {};
     filtered.forEach(f => {
       if (!grouped[f['Назва']]) {
@@ -717,28 +715,40 @@ function showSeries(type = 'Серіал') {
           <span class="series-title">${title}</span>
         </div>
         <div id="series-${title}" class="series-episodes-grid" style="display:none;">
-          ${grouped[title].map(episode => `
-            <div style="margin-bottom:8px;">
-              ▶️ <button class="search-button" onclick="openVideo('${episode['Назва']}')">${episode['Опис'] || 'Серія'}</button>
-            </div>
-          `).join('')}
+          ${grouped[title].map(episode => {
+            const isProFilm = episode['Доступ'] === 'PRO';
+            if (isProFilm && !isPro) {
+              return `<div><button class="search-button" onclick="alert('🔒 Лише для PRO користувачів')">🔒 PRO Доступ</button></div>`;
+            }
+            return `<div><button class="search-button" onclick="openVideo('${episode['Назва']}')">${episode['Опис'] || 'Серія'}</button></div>`;
+          }).join('')}
         </div>
       </div>
     `).join('');
 
   } else {
-    // 🟡 Звичайні фільми
-    container.innerHTML = filtered.map(film => `
-      <div class="film-card">
-        <img src="${film['Фото']}" alt="${film['Назва']}">
-        <h3>${film['Назва']}</h3>
-        <p class="film-desc">${film['Опис']}</p>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+    container.innerHTML = filtered.map(film => {
+      const isProFilm = film['Доступ'] === 'PRO';
+      let buttons = '';
+
+      if (isProFilm && !isPro) {
+        buttons = `<button class="search-button" onclick="alert('🔒 Фільм лише для PRO користувачів')">🔒 PRO Доступ</button>`;
+      } else if (film['Посилання']) {
+        buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+      }
+
+      return `
+        <div class="film-card">
+          <img src="${film['Фото']}" alt="${film['Назва']}">
+          <h3>${film['Назва']}</h3>
+          <p class="film-desc">${film['Опис']}</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            ${buttons}
+            <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   container.scrollIntoView({ behavior: 'smooth' });
@@ -778,6 +788,7 @@ function showSeries(type = 'Серіал') {
 function filterByYear(year) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
+  const isPro = localStorage.getItem('isProUser') === 'true';
 
   const filtered = films.filter(f => f['Рік']?.toString() === year.toString());
 
@@ -786,18 +797,32 @@ function filterByYear(year) {
     return;
   }
 
-  container.innerHTML = filtered.map(film => `
-    <div class="film-card">
-      <img src="${film['Фото']}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${film['Посилання'] ? `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>` : ''}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+  container.innerHTML = filtered.map(film => {
+    const isProFilm = film['Доступ'] === 'PRO';
+    let buttons = '';
+
+    if (isProFilm && !isPro) {
+      buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO користувачів')">🔒 PRO Доступ</button>`;
+    } else if (film['Посилання']) {
+      buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+    }
+
+    return `
+      <div class="film-card">
+        <img src="${film['Фото']}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p>${film['Опис']}</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          ${buttons}
+          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+
+  container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
 
@@ -1026,6 +1051,22 @@ function showSkeletonCollections() {
   return;
 }
 
+// ✅ Тут вставляємо перевірку PRO
+  const proRes = await fetch('https://kinobot-qm9q.onrender.com/check-pro', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: user.id })
+  });
+  const proData = await proRes.json();
+
+  if (proData.isPro) {
+    localStorage.setItem('isProUser', 'true');
+  } else {
+    localStorage.removeItem('isProUser');
+  }
+
+
+    
   fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1433,32 +1474,7 @@ function goToSeries(seriesTitle) {
 </div>
 
 
-<script>
-  // 🔸 Функція закриття вікна
-  function closeDonatePopup() {
-    const popup = document.getElementById('donate-popup');
-    if (popup) {
-      popup.style.opacity = '0';
-      setTimeout(() => {
-        popup.style.display = 'none';
-      }, 300);
-    }
-  }
 
-  // 🔸 Через 20 сек показати віконце
-  setTimeout(() => {
-    const popup = document.getElementById('donate-popup');
-    if (popup) {
-      popup.style.display = 'block';
-      popup.style.opacity = '0';
-      popup.style.transition = 'opacity 0.5s ease';
-      setTimeout(() => popup.style.opacity = '1', 10);
-
-      // 🔸 Автоматично сховати через 15 сек
-      setTimeout(() => closeDonatePopup(), 15000);
-    }
-  }, 20000);
-</script>
 
 <footer style="text-align:center; font-size:12px; color:#666; padding:15px 10px; line-height:1.4;">
   ⚠️ Весь контент лише для ознайомлення. Якщо ми порушили ваші авторські права — звертайтесь: 
