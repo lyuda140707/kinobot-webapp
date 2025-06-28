@@ -304,17 +304,18 @@
 <section id="account" class="section">
   <h2>👤 Акаунт</h2>
 
+  <hr style="margin: 20px 0; border-color: #444;">
+  <h3>🔒 PRO Доступ</h3>
+  <p style="font-size:14px; color:#ccc;">Відкриває доступ до всіх відео</p>
+  <button id="getProBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold;">🚀 Отримати PRO</button>
+  
+
   <button id="lucky-button" class="account-button">🎲 Мені пощастить</button>
 
 
 <hr style="margin: 20px 0; border-color: #444;">
 
-<button class="account-button" onclick="toggleHistory()">🎞 Історія переглядів</button>
-<div id="history-wrapper" style="margin-top: 10px;">
-  <div id="history-list" class="film-list" style="display: none;"></div>
-</div>
 
-<button class="account-button" onclick="clearHistory()">🧹 Очистити історію</button>
 
 <h3 onclick="toggleFact()" style="cursor:pointer; display:flex; align-items:center; gap:10px;">
   🎬 Цікавий факт про кіно
@@ -1439,6 +1440,52 @@ function goToSeries(seriesTitle) {
   }, 300);
 }
 
+document.getElementById('getProBtn').addEventListener('click', () => {
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+  if (!user) {
+    alert("❗️ Не вдалося отримати ваш Telegram ID");
+    return;
+  }
+
+  const confirmed = confirm("Після оплати натисніть 'Я оплатив', ми перевіримо оплату і активуємо PRO");
+
+  if (confirmed) {
+    const paymentInfo = "💳 Оплата на Monobank: 5375411200000000\nСума: будь-яка (мінімум 25 грн)\nПризначення: PRO RelaxTime";
+
+    const paymentLink = "https://send.monobank.ua/jar/2FdmSYjoGo";
+
+    alert(paymentInfo);
+
+    window.open(paymentLink, "_blank");
+
+    setTimeout(() => {
+      if (confirm("Ви оплатили? Натисніть 'ОК', щоб ми перевірили")) {
+        notifyPayment(user.id);
+      }
+    }, 5000);
+  }
+});
+
+
+async function notifyPayment(userId) {
+  try {
+    const res = await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert("✅ Запит на активацію PRO надіслано! Ми перевіримо оплату.");
+    } else {
+      alert("❗ Помилка: не вдалося надіслати запит.");
+    }
+  } catch (e) {
+    console.error(e);
+    alert("❗ Сталася помилка при надсиланні запиту.");
+  }
+}
 
     
 </script>
