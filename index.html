@@ -309,15 +309,12 @@
 
 <hr style="margin: 20px 0; border-color: #444;">
 
-<h3>🌟 PRO доступ</h3>
-<div style="margin: 20px 0; text-align: center;">
-  <p id="pro-status">Статус: ❌ Не активовано</p>
-
-  <a href="https://send.monobank.ua/jar/2FdmSYjoGo" target="_blank" class="btn-donate">💳 Отримати PRO</a>
-
-  <button onclick="submitPaymentCheck()" class="account-button" style="margin-top: 10px;">✅ Я оплатив</button>
+<button class="account-button" onclick="toggleHistory()">🎞 Історія переглядів</button>
+<div id="history-wrapper" style="margin-top: 10px;">
+  <div id="history-list" class="film-list" style="display: none;"></div>
 </div>
 
+<button class="account-button" onclick="clearHistory()">🧹 Очистити історію</button>
 
 <h3 onclick="toggleFact()" style="cursor:pointer; display:flex; align-items:center; gap:10px;">
   🎬 Цікавий факт про кіно
@@ -974,13 +971,7 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
   if (tabId === 'favorites') showFavorites();
   if (tabId === 'account') window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  if (tabId === 'account') {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  checkProStatus();
 }
-
-
 
 
 function showSkeletonCollections() {
@@ -1342,58 +1333,29 @@ async function suggestFilm() {
   }
 }
 
-
-
-async function checkProStatus() {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-  if (!user) return;
-
-  const res = await fetch('https://kinobot-qm9q.onrender.com/check-pro', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: user.id })
-  });
-
-  const data = await res.json();
-  const statusText = document.getElementById('pro-status');
-
-  if (data.isPro) {
-    statusText.textContent = 'Статус: ✅ Активовано';
-    localStorage.setItem('isProUser', 'true');
+    function toggleHistory() {
+  const container = document.getElementById('history-list');
+  if (container.style.display === 'block') {
+    container.style.display = 'none';
   } else {
-    statusText.textContent = 'Статус: ❌ Не активовано';
-    localStorage.removeItem('isProUser');
-    setTimeout(() => {
-      document.getElementById('pro-popup').style.display = 'block';
-    }, 5000); // показати через 5 секунд
-  }
-}
-
-function closeProPopup() {
-  document.getElementById('pro-popup').style.display = 'none';
-}
-
-async function submitPaymentCheck() {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-  if (!user) return alert("Не вдалося отримати Telegram ID");
-
-  try {
-    await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id })
-    });
-    alert("Запит на перевірку оплати надіслано. Очікуйте підтвердження.");
-  } catch (e) {
-    console.error(e);
-    alert("Помилка при надсиланні запиту.");
+    showHistory();
   }
 }
 
 
-     
+
+// ✅ ВИНЕСИ окремо функцію rate() після showHistory
+function rate(title, stars) {
+  localStorage.setItem(`rating_${title}`, stars);
+  showHistory();
+}
+
+
+function clearHistory() {
+  localStorage.removeItem('history');
+  showHistory(); // одразу оновлює вивід
+}
+      
  function toggleFact() {
   const box = document.getElementById('fact-box');
   const arrow = document.getElementById('fact-arrow');
@@ -1498,28 +1460,6 @@ function goToSeries(seriesTitle) {
     </div>
   </div>
 </div>
-
-<div id="pro-popup" style="
-  display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
-  color:#fff; padding:20px 20px 16px; border-radius:12px; 
-  text-align:center; box-shadow:0 0 20px #00f7ff; z-index:9999;
-">
-  <button onclick="closeProPopup()" style="
-    position:absolute; top:6px; right:10px; background:none; 
-    border:none; color:#fff; font-size:20px; cursor:pointer;">✖️</button>
-
-  <p style="margin-bottom:10px; font-size:16px;">
-    🌟 <b>Отримай PRO</b> — відкриває всі фільми і бонуси на 30 днів
-  </p>
-
-  <a href="https://send.monobank.ua/jar/2FdmSYjoGo" target="_blank" style="
-    padding:12px 24px; background:#00f7ff; color:#000; font-weight:bold;
-    text-decoration:none; border-radius:10px; display:inline-block;
-    box-shadow:0 0 15px #00f7ff; font-size:16px;
-  ">💳 Отримати PRO</a>
-</div>
-
 
 <div id="donate-popup" style="
   display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
