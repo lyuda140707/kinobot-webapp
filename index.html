@@ -1342,7 +1342,9 @@ async function suggestFilm() {
   }
 }
 
-    async function checkProStatus() {
+
+
+async function checkProStatus() {
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
   if (!user) return;
@@ -1362,7 +1364,14 @@ async function suggestFilm() {
   } else {
     statusText.textContent = 'Статус: ❌ Не активовано';
     localStorage.removeItem('isProUser');
+    setTimeout(() => {
+      document.getElementById('pro-popup').style.display = 'block';
+    }, 5000); // показати через 5 секунд
   }
+}
+
+function closeProPopup() {
+  document.getElementById('pro-popup').style.display = 'none';
 }
 
 async function submitPaymentCheck() {
@@ -1489,6 +1498,28 @@ function goToSeries(seriesTitle) {
     </div>
   </div>
 </div>
+
+<div id="pro-popup" style="
+  display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+  color:#fff; padding:20px 20px 16px; border-radius:12px; 
+  text-align:center; box-shadow:0 0 20px #00f7ff; z-index:9999;
+">
+  <button onclick="closeProPopup()" style="
+    position:absolute; top:6px; right:10px; background:none; 
+    border:none; color:#fff; font-size:20px; cursor:pointer;">✖️</button>
+
+  <p style="margin-bottom:10px; font-size:16px;">
+    🌟 <b>Отримай PRO</b> — відкриває всі фільми і бонуси на 30 днів
+  </p>
+
+  <a href="https://send.monobank.ua/jar/2FdmSYjoGo" target="_blank" style="
+    padding:12px 24px; background:#00f7ff; color:#000; font-weight:bold;
+    text-decoration:none; border-radius:10px; display:inline-block;
+    box-shadow:0 0 15px #00f7ff; font-size:16px;
+  ">💳 Отримати PRO</a>
+</div>
+
 
 <div id="donate-popup" style="
   display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
