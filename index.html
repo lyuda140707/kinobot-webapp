@@ -567,13 +567,13 @@ function closeVideo() {
   const videoOverlay = document.getElementById('video-overlay');
   const videoWrapper = document.getElementById('video-wrapper');
 
-  videoWrapper.innerHTML = ''; // очищаємо відео
+  videoWrapper.innerHTML = '';
   videoOverlay.style.opacity = '0';
   setTimeout(() => {
     videoOverlay.style.display = 'none';
-    switchTab('home', document.querySelector('[data-tab=home]'));
   }, 400);
 }
+
 
 
 
