@@ -1077,6 +1077,17 @@ function showSkeletonCollections() {
     localStorage.removeItem('isProUser');
   }
 
+const getProBtn = document.getElementById('getProBtn');
+if (proData.isPro && getProBtn) {
+    getProBtn.style.display = 'none';
+
+    const proNotice = document.createElement('p');
+    proNotice.textContent = `✅ Ваш PRO активний до ${proData.expire_date || "кінця періоду"}`;
+    proNotice.style.color = "#00f7ff";
+    proNotice.style.marginTop = "15px";
+    getProBtn.parentNode.insertBefore(proNotice, getProBtn.nextSibling);
+}
+
 
     
   fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
