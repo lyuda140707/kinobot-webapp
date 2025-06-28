@@ -308,6 +308,8 @@
   <h3>🔒 PRO Доступ</h3>
   <p style="font-size:14px; color:#ccc;">Відкриває доступ до всіх відео</p>
   <button id="getProBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold;">🚀 Отримати PRO</button>
+  <p style="font-size:11px; color:#aaa; margin-top:5px;">Будь-яка сума — PRO доступ</p>
+
 
   <button id="confirmPaidBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold; display:none;">
     ✅ Я оплатив
@@ -1566,9 +1568,24 @@ function showProPrompt() {
 }
 
 function goToPro() {
-  closeVideo();
-  switchTab('account', document.querySelector('[data-tab=account]'));
-}    
+  const overlay = document.getElementById('video-overlay');
+  const wrapper = document.getElementById('video-wrapper');
+
+  wrapper.innerHTML = '';
+  overlay.style.opacity = '0';
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    switchTab('account', document.querySelector('[data-tab=account]'));
+
+    // Одразу імітуємо натискання кнопки "Отримати PRO"
+    const getProBtn = document.getElementById('getProBtn');
+    if (getProBtn) getProBtn.click();
+  }, 300);
+}
+
+
+
     
 </script>
 
