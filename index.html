@@ -1010,7 +1010,10 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
   if (btn) btn.classList.add('active');
 
   if (tabId === 'favorites') showFavorites();
-  if (tabId === 'account') window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (tabId === 'account') {
+    closeDonatePopup();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 
@@ -1522,6 +1525,7 @@ document.getElementById('getProBtn').addEventListener('click', () => {
 function showConfirmPaidButton(userId) {
     const btn = document.getElementById("confirmPaidBtn");
     btn.style.display = "block";
+    closeDonatePopup();
 
     btn.onclick = () => {
         notifyPayment(userId);
