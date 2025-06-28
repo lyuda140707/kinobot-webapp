@@ -308,7 +308,10 @@
   <h3>🔒 PRO Доступ</h3>
   <p style="font-size:14px; color:#ccc;">Відкриває доступ до всіх відео</p>
   <button id="getProBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold;">🚀 Отримати PRO</button>
-  
+
+  <button id="confirmPaidBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold; display:none;">
+    ✅ Я оплатив
+  </button>
 
   <button id="lucky-button" class="account-button">🎲 Мені пощастить</button>
 
@@ -419,7 +422,7 @@ async function openVideo(filmName) {
   const film = films.find(f => f['Назва'] === filmName);
 
   if (film?.['Доступ'] === 'PRO' && !isPro) {
-    alert("🔒 Цей фільм доступний лише для PRO користувачів.");
+    showProPrompt();
     return;
   }
 
@@ -1452,31 +1455,32 @@ function goToSeries(seriesTitle) {
 }
 
 document.getElementById('getProBtn').addEventListener('click', () => {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-  if (!user) {
-    alert("❗️ Не вдалося отримати ваш Telegram ID");
-    return;
-  }
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user;
+    if (!user) {
+        alert("❗️ Не вдалося отримати ваш Telegram ID");
+        return;
+    }
 
-  const confirmed = confirm("Після оплати натисніть 'Я оплатив', ми перевіримо оплату і активуємо PRO");
-
-  if (confirmed) {
     const paymentInfo = "💳 Оплата на Monobank: 5375411200000000\nСума: будь-яка (мінімум 25 грн)\nПризначення: PRO RelaxTime";
-
     const paymentLink = "https://send.monobank.ua/jar/2FdmSYjoGo";
 
     alert(paymentInfo);
-
     window.open(paymentLink, "_blank");
 
-    setTimeout(() => {
-      if (confirm("Ви оплатили? Натисніть 'ОК', щоб ми перевірили")) {
-        notifyPayment(user.id);
-      }
-    }, 5000);
-  }
+    showConfirmPaidButton(user.id);
 });
+
+function showConfirmPaidButton(userId) {
+    const btn = document.getElementById("confirmPaidBtn");
+    btn.style.display = "block";
+
+    btn.onclick = () => {
+        notifyPayment(userId);
+        btn.style.display = "none";
+    };
+}
+
 
 
 async function notifyPayment(userId) {
@@ -1498,6 +1502,27 @@ async function notifyPayment(userId) {
   }
 }
 
+function showProPrompt() {
+  const overlay = document.getElementById('video-overlay');
+  const wrapper = document.getElementById('video-wrapper');
+
+  wrapper.innerHTML = `
+    <h3 style="color:#00f7ff;">🔒 Фільм доступний лише для PRO</h3>
+    <p style="margin:15px 0;">Активуй PRO, щоб дивитись усі фільми без обмежень.</p>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button class="watch-btn" onclick="goToPro()">🚀 Перейти до PRO</button>
+      <button class="watch-btn" onclick="closeVideo()">❌ Закрити</button>
+    </div>
+  `;
+
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.style.opacity = '1', 50);
+}
+
+function goToPro() {
+  closeVideo();
+  switchTab('account', document.querySelector('[data-tab=account]'));
+}    
     
 </script>
 
