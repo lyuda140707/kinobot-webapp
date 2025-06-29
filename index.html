@@ -1528,19 +1528,23 @@ function showConfirmPaidButton(userId) {
     closeDonatePopup();
 
     btn.onclick = () => {
-        notifyPayment(userId);
+        notifyPayment(user.id, user.username || '', user.first_name || '');
         btn.style.display = "none";
     };
 }
 
 
 
-async function notifyPayment(userId) {
+async function notifyPayment(userId, username, firstName) {
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId })
+      body: JSON.stringify({
+        user_id: userId,
+        username: username,
+        first_name: firstName
+      })
     });
     const data = await res.json();
     if (data.ok) {
@@ -1553,6 +1557,7 @@ async function notifyPayment(userId) {
     alert("❗ Сталася помилка при надсиланні запиту.");
   }
 }
+
 
 function showProPrompt() {
   const overlay = document.getElementById('video-overlay');
