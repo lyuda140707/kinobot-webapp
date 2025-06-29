@@ -1519,19 +1519,24 @@ document.getElementById('getProBtn').addEventListener('click', () => {
     alert(paymentInfo);
     window.open(paymentLink, "_blank");
 
-    showConfirmPaidButton(user.id);
+    showConfirmPaidButton(user); // ⬅️ Передаємо весь обʼєкт user
 });
 
-function showConfirmPaidButton(userId) {
+
+function showConfirmPaidButton(user) {
     const btn = document.getElementById("confirmPaidBtn");
     btn.style.display = "block";
     closeDonatePopup();
 
     btn.onclick = () => {
-        notifyPayment(user.id, user.username || '', user.first_name || '');
+        const username = (user.username !== undefined) ? user.username : '';
+        const first_name = (user.first_name !== undefined) ? user.first_name : '';
+
+        notifyPayment(user.id, username, first_name);
         btn.style.display = "none";
     };
 }
+
 
 
 
