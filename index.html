@@ -322,18 +322,6 @@
 
 
 
-<h3 onclick="toggleFact()" style="cursor:pointer; display:flex; align-items:center; gap:10px;">
-  🎬 Цікавий факт про кіно
-  <span id="fact-arrow">⬇️</span>
-</h3>
-<div id="fact-box" style="display:none; margin-bottom:15px; background:#1a1a1a; padding:12px 16px; border-left:4px solid #00f7ff; border-radius:8px; color:#ccc;">
-  <div id="fact-text">Завантаження...</div>
-  <button onclick="loadFacts()" style="margin-top:10px; padding:6px 12px; border:none; background:#00f7ff; color:#000; border-radius:6px; cursor:pointer;">🔁 Інший факт</button>
-</div>
-
-
-
-
 <div style="margin: 20px 0;">
   <label for="theme-toggle" style="font-weight: bold;">🌙 Темна тема</label>
   <input type="checkbox" id="theme-toggle" />
@@ -1163,7 +1151,7 @@ if (proData.isPro && getProBtn) {
 
   // Завантажити фільми і факти
   loadFilms();
-  loadFacts();
+ 
 
   // Показати фільтри країн і років
   showCountryFilters();
@@ -1388,16 +1376,7 @@ async function suggestFilm() {
 
 
 
-    async function loadFacts() {
-  try {
-    const res = await fetch("https://opensheet.vercel.app/1K4RYcbUqoA96E2ZkXgkj0836x3H5aleHpz9YDql3Yik/Sheet1");
-    const facts = await res.json();
-    const randomFact = facts[Math.floor(Math.random() * facts.length)];
-    document.getElementById('fact-text').innerText = `🎬 ${randomFact['Факт']}`;
-  } catch (error) {
-    document.getElementById('fact-box').innerText = '⚠️ Не вдалося завантажити факт.';
-  }
-}
+  
 
     function toggleHistory() {
   const container = document.getElementById('history-list');
@@ -1422,13 +1401,7 @@ function clearHistory() {
   showHistory(); // одразу оновлює вивід
 }
       
- function toggleFact() {
-  const box = document.getElementById('fact-box');
-  const arrow = document.getElementById('fact-arrow');
-  const isVisible = box.style.display === 'block';
-  box.style.display = isVisible ? 'none' : 'block';
-  arrow.textContent = isVisible ? '⬇️' : '⬆️';
-}
+ 
 
    function goToCartoons() {
   switchTab('categories', document.querySelector('[data-tab=categories]'));
