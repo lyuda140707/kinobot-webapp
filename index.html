@@ -349,6 +349,29 @@
 
   <script>
     let films = [];
+    let isDataLoaded = false;
+    
+
+window.addEventListener('DOMContentLoaded', () => {
+    console.log("Завантаження даних...");
+
+    // Блокуємо всі кнопки з фільмами
+    document.querySelectorAll('.film-button').forEach(btn => btn.disabled = true);
+
+    fetch('https://твій-бекенд/отримати-таблицю')  // змінити на свій бекенд
+        .then(r => r.json())
+        .then(data => {
+            films = data;
+            isDataLoaded = true;
+            console.log("✅ Дані отримано");
+
+            // Розблоковуємо кнопки
+            document.querySelectorAll('.film-button').forEach(btn => btn.disabled = false);
+        })
+        .catch(err => {
+            console.error("❌ Помилка завантаження", err);
+        });
+});
 
   const placeholderImage = "https://i.postimg.cc/zX3VCwWb/31d2242b-94cb-4301-87fd-c7550ca823f4.png";
 
@@ -1629,6 +1652,40 @@ function goToPro() {
   }, 300);
 }
 
+    
+function sendFilm(film_id) {
+    if (!isDataLoaded) {
+        alert("⏳ Дані ще завантажуються, зачекайте...");
+        return;
+    }
+
+    const film = films.find(f => f.file_id === film_id);
+    if (!film) {
+        alert("❌ Фільм не знайдено, спробуйте пізніше.");
+        return;
+    }
+
+    fetch('https://kinobot-qm9q.onrender.com/send-film-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id,
+            file_id: film_id
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            console.log("✅ Фільм відправлено");
+        } else {
+            alert("❌ Сталася помилка, спробуйте ще раз.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("⚠️ Помилка мережі, спробуйте пізніше.");
+    });
+}
 
 
     
