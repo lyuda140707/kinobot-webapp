@@ -1498,22 +1498,37 @@ document.getElementById('getProBtn').addEventListener('click', () => {
 
 function showConfirmPaidButton(user) {
     const btn = document.getElementById("confirmPaidBtn");
+    if (!btn) return;
+
     btn.style.display = "block";
     closeDonatePopup();
 
-    btn.onclick = () => {
+    // Видаляємо всі старі обробники через клонування кнопки
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.onclick = () => {
         const username = (user.username !== undefined) ? user.username : '';
         const first_name = (user.first_name !== undefined) ? user.first_name : '';
 
         notifyPayment(user.id, username, first_name);
-        btn.style.display = "none";
+        newBtn.style.display = "none";
     };
 }
 
 
 
 
+
+let isPaymentSending = false;
+
 async function notifyPayment(userId, username, firstName) {
+  if (isPaymentSending) {
+    alert("⏳ Запит вже надсилається...");
+    return;
+  }
+
+  isPaymentSending = true;
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
       method: 'POST',
@@ -1533,8 +1548,11 @@ async function notifyPayment(userId, username, firstName) {
   } catch (e) {
     console.error(e);
     alert("❗ Сталася помилка при надсиланні запиту.");
+  } finally {
+    isPaymentSending = false;
   }
 }
+
 
 
 function showProPrompt() {
