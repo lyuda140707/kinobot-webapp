@@ -710,7 +710,7 @@ function showSeries(type = 'Серіал') {
     <div id="series-${title}" style="display:none; padding-left:15px; margin-top:8px;">
       ${grouped[title].map(episode => `
         <div style="margin-bottom:8px;">
-          ▶️ <button class="search-button" onclick="openVideo('${episode['Назва']}')">${episode['Опис'] || 'Серія'} </button>
+          ▶️ <button class="search-button" onclick="openVideoById('${episode['file_id']}')">${episode['Опис'] || 'Серія'} </button>
         </div>
       `).join('')}
     </div>
