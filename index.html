@@ -1687,42 +1687,7 @@ function sendFilm(film_id) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const today = new Date().toDateString();
 
-  if (localStorage.getItem('diana_popup') !== today) {
-    const promo = document.createElement('div');
-    promo.innerHTML = "💋 Дякуємо <b>💋Diana❣️</b> за підтримку! ☕";
-    promo.style.position = "fixed";
-    promo.style.bottom = "300px"; // Трохи вище, щоб не залазило на donate-popup
-    promo.style.left = "50%";
-    promo.style.transform = "translateX(-50%)";
-    promo.style.background = "linear-gradient(135deg, #0f2027, #203a43, #2c5364)";
-    promo.style.color = "#00f7ff";
-    promo.style.padding = "12px 25px";
-    promo.style.borderRadius = "15px";
-    promo.style.boxShadow = "0 0 15px #00f7ff";
-    promo.style.zIndex = "9999";
-    promo.style.fontWeight = "bold";
-    promo.style.textAlign = "center";
-    promo.style.fontSize = "16px";
-    promo.style.opacity = "0";
-    promo.style.transition = "opacity 0.5s ease";
-
-    document.body.appendChild(promo);
-
-    setTimeout(() => {
-      promo.style.opacity = "1";
-    }, 100);
-
-    setTimeout(() => {
-      promo.style.opacity = "0";
-      setTimeout(() => promo.remove(), 500);
-    }, 10000); // Показуємо 5 секунд
-
-    localStorage.setItem('diana_popup', today);
-  }
-});
 
     
 </script>
