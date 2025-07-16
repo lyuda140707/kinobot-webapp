@@ -204,6 +204,10 @@
 }
 
   </style>
+  function safeId(str) {
+  return str.replace(/[^\w\d]/g, '_');
+}
+  
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -1401,8 +1405,8 @@ if (proData.isPro && getProBtn) {
     </div>
 
     <div style="margin-top:6px; display:flex; gap:10px;">
-      <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'like')">👍 <span id="like-count-btn-${f['Назва']}">${f['Лайки'] || 0}</span></button>
-      <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'dislike')">👎 <span id="dislike-count-btn-${f['Назва']}">${f['Дизлайки'] || 0}</span></button>
+      <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'like')">👍 <span id="like-count-btn-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span></button>
+      <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'dislike')">👎 <span id="dislike-count-btn-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span></button>
     </div>
   </div>
 `;
