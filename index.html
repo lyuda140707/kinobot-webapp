@@ -255,6 +255,17 @@
   font-size: 20px;
   cursor: pointer;
 }
+.film-rating {
+  font-weight: bold;
+  color: #00ffff;
+  font-size: 14px;
+  margin: 6px 0;
+  text-shadow: 0 0 5px rgba(0,255,255,0.3);
+  background: rgba(0,255,255,0.1);
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
+}
 
 
   </style>
@@ -871,7 +882,7 @@ function showSeries(type = 'Серіал') {
                   <div class="film-title">${name}</div>
                   <div class="film-description">${desc}</div>
 
-                  <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
+                  <div class="film-rating">
                     IMDb: ${imdb} | 
                     👍 <span id="like-count-${safeKey}">${likes}</span> |
                     👎 <span id="dislike-count-${safeKey}">${dislikes}</span>
@@ -988,7 +999,7 @@ function openSeries(id) {
     <h3>${film['Назва']}</h3>
     <p class="film-desc">${film['Опис']}</p>
 
-    <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
+    <div class="film-rating">
       IMDb: ${film['IMDb'] || "—"} | 
       👍 <span id="like-count-${safeId(film['Назва'])}">${Number(film['Лайки']) || 0}</span> |
       👎 <span id="dislike-count-${safeId(film['Назва'])}">${Number(film['Дизлайки']) || 0}</span>
@@ -1518,7 +1529,7 @@ document.getElementById('searchResults').innerHTML = results.map(f => {
       <h3>${f['Назва']}</h3>
       <p class="film-desc">${f['Опис']}</p>
 
-      <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
+      <div class="film-rating">
         IMDb: ${f['IMDb'] || "—"} | 
         👍 <span id="like-count-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span> |
         👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
