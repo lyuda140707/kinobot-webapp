@@ -161,6 +161,8 @@
 }
 
 
+
+
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -1408,6 +1410,11 @@ async function rateFilm(filmName, action) {
 
   // Зберігаємо нове голосування
   localStorage.setItem(userVoteKey, action);
+
+  document.querySelectorAll(`#like-btn-${filmName}, #dislike-btn-${filmName}`).forEach(btn => {
+    btn.classList.remove("active");
+  });
+  document.getElementById(`${action}-btn-${filmName}`)?.classList.add("active");
 
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/rate', {
