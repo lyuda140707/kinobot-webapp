@@ -1508,37 +1508,49 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
 
 function rateFilm(filmName, action) {
   const key = `rating-${safeId(filmName)}`;
-
   const previousAction = localStorage.getItem(key);
 
-  // Не дозволяємо повторно голосувати однаково
   if (previousAction === action) return;
 
-  // Зберігаємо новий вибір
   localStorage.setItem(key, action);
 
-  // Відправляємо запит на бекенд
+  // ✅ Виправлений запит
   fetch('https://kinobot-qm9q.onrender.com/rate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filmName, action, undoAction: previousAction }),
+    body: JSON.stringify({ film_name: filmName, action: action, undo: previousAction }),
   });
 
-  // Оновлюємо UI
   const likeBtnCount = document.getElementById(`like-count-btn-${safeId(filmName)}`);
   const dislikeBtnCount = document.getElementById(`dislike-count-btn-${safeId(filmName)}`);
 
   if (likeBtnCount && dislikeBtnCount) {
-  if (action === 'like') {
-    likeBtnCount.textContent = Number(likeBtnCount.textContent) + 1;
-    if (previousAction === 'dislike') {
-      dislikeBtnCount.textContent = Math.max(0, Number(dislikeBtnCount.textContent) - 1);
+    if (action === 'like') {
+      likeBtnCount.textContent = Number(likeBtnCount.textContent) + 1;
+      if (previousAction === 'dislike') {
+        dislikeBtnCount.textContent = Math.max(0, Number(dislikeBtnCount.textContent) - 1);
+      }
+    } else {
+      dislikeBtnCount.textContent = Number(dislikeBtnCount.textContent) + 1;
+      if (previousAction === 'like') {
+        likeBtnCount.textContent = Math.max(0, Number(likeBtnCount.textContent) - 1);
+      }
     }
+  }
+
+  const likeEl = document.getElementById(`like-count-${safeId(filmName)}`);
+  const dislikeEl = document.getElementById(`dislike-count-${safeId(filmName)}`);
+  const parent = likeEl.closest(".film-card");
+  const likeBtn = parent.querySelector(".rating-button:nth-child(1)");
+  const dislikeBtn = parent.querySelector(".rating-button:nth-child(2)");
+
+  likeBtn.classList.remove("active-like");
+  dislikeBtn.classList.remove("active-dislike");
+
+  if (action === "like") {
+    likeBtn.classList.add("active-like");
   } else {
-    dislikeBtnCount.textContent = Number(dislikeBtnCount.textContent) + 1;
-    if (previousAction === 'like') {
-      likeBtnCount.textContent = Math.max(0, Number(likeBtnCount.textContent) - 1);
-    }
+    dislikeBtn.classList.add("active-dislike");
   }
 }
 
