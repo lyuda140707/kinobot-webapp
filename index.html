@@ -397,9 +397,6 @@
 
   <script>
 
-    function safeId(str) {
-      return str.replace(/\W/g, '_');
-    }
 
     
     let films = [];
@@ -820,6 +817,11 @@ function showSeries(type = 'Серіал') {
   }
 }
 
+
+  function safeId(str) {
+    return str.replace(/[^\w\d]/g, '_');
+  }
+    
   function filterByGenre(genre) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
@@ -1840,10 +1842,6 @@ function sendFilm(film_id) {
     });
 }
 
-<script>
-  function safeId(str) {
-    return str.replace(/[^\w\d]/g, '_');
-  }
 
     
 </script>
