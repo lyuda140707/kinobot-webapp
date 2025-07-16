@@ -1398,11 +1398,22 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
 
 
 async function rateFilm(filmName, action) {
+  const userVoteKey = `vote_${filmName}`;
+  const previousVote = localStorage.getItem(userVoteKey);
+
+  // Якщо вже натиснув те саме — нічого не робимо
+  if (previousVote === action) {
+    return;
+  }
+
+  // Зберігаємо нове голосування
+  localStorage.setItem(userVoteKey, action);
+
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/rate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ film_name: filmName, action })
+      body: JSON.stringify({ film_name: filmName, action, undo: previousVote })
     });
 
     const data = await res.json();
@@ -1419,6 +1430,7 @@ async function rateFilm(filmName, action) {
     alert("❗ Сталася помилка при голосуванні");
   }
 }
+
 
 
 async function suggestFilm() {
