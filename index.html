@@ -267,15 +267,13 @@
   display: inline-block;
 }
 
-.film-actions {
+.film-buttons {
   display: flex;
   justify-content: center;
-  align-items: center;
   gap: 12px;
   margin-top: 10px;
   flex-wrap: wrap;
-}
-
+}    
 
 
   </style>
@@ -768,51 +766,19 @@ function closeVideo() {
 
 
 function showFilmOfTheDay() {
-  const film = films[Math.floor(Math.random() * films.length)];
-  const user_id = tg?.initDataUnsafe?.user?.id;
-
-  // Показуємо обкладинку і назву
   document.getElementById('film-day-img').classList.remove('skeleton');
   document.getElementById('film-day-img').style.background = 'none';
+
+  const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
-  document.getElementById('film-title').textContent = film['Назва'];
 
-  // Зберігаємо обраний фільм дня
-  localStorage.setItem("filmOfTheDay", JSON.stringify({
-    name: film['Назва'],
-    file_id: film['file_id'],  // переконайся, що є це поле в обʼєкті
-  }));
-
-  // Надсилаємо відео через бекенд
-  if (user_id && film['file_id']) {
-    fetch("/send-film-id", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: user_id,
-        file_id: film['file_id'],
-      }),
-    })
-    .then(res => {
-      if (!res.ok) throw new Error("Помилка надсилання фільму");
-      return res.json();
-    })
-    .then(data => {
-      console.log("✅ Відео надіслано:", data);
-    })
-    .catch(err => {
-      console.error("❌ Помилка надсилання:", err);
-    });
-  }
-
-  // Кнопка: можна лишити якщо хочеш ще діяти
   document.getElementById('film-day-button').onclick = () => {
-    openVideo(film['Назва']); // якщо хочеш відкрити сторінку фільму
+    const videoUrl = film['Посилання']; // ⬅️ тут тепер 'Посилання'
+    openVideo(film['Назва']); // ⬅️ відкриваємо
   };
-}
 
+  document.getElementById('film-title').textContent = film['Назва'];
+}
 
 
     function showSkeletonFilmOfTheDay() {
@@ -930,7 +896,7 @@ function showSeries(type = 'Серіал') {
                     👎 <span id="dislike-count-${safeKey}">${dislikes}</span>
                   </div>
 
-                  <div class="film-actions">
+                  <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     ${button}
                     <button class="fav-button" onclick="addToFavorites('${name}', '${desc}')">💛 Улюблене</button>
                   </div>
@@ -1047,7 +1013,7 @@ function openSeries(id) {
       👎 <span id="dislike-count-${safeId(film['Назва'])}">${Number(film['Дизлайки']) || 0}</span>
     </div>
 
-    <div class="film-actions">
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
       ${buttons}
       <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
     </div>
@@ -1123,7 +1089,7 @@ function restoreRatingsUI() {
       <img src="${imgSrc}" alt="${film['Назва']}">
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
-      <div class="film-actions">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${buttons}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
@@ -1168,8 +1134,7 @@ function filterByYear(year) {
       <img src="${imgSrc}" alt="${film['Назва']}">
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
-      <div class="film-actions">
-      
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${buttons}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
@@ -1578,7 +1543,7 @@ document.getElementById('searchResults').innerHTML = results.map(f => {
         👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
       </div>
 
-      <div class="film-actions">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${buttons}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
       </div>
