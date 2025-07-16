@@ -194,7 +194,14 @@
   box-shadow: 0 0 12px #0ff;
 }
 
-
+.rating-button.active-like {
+  background-color: #2e7d32; /* Зелений */
+  color: #fff;
+}
+.rating-button.active-dislike {
+  background-color: #c62828; /* Червоний */
+  color: #fff;
+}
 
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -416,7 +423,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const placeholderImage = "https://i.postimg.cc/zX3VCwWb/31d2242b-94cb-4301-87fd-c7550ca823f4.png";
 
-  
+
+  document.querySelectorAll('.film-card').forEach(card => {
+  const filmName = card.querySelector('h3').textContent;
+  const saved = localStorage.getItem(`rating-${filmName}`);
+  if (!saved) return;
+
+  const buttons = card.querySelectorAll('.rating-button');
+  buttons.forEach(btn => {
+    if (saved === 'like' && btn.textContent.includes('👍')) {
+      btn.classList.add('active-like');
+    }
+    if (saved === 'dislike' && btn.textContent.includes('👎')) {
+      btn.classList.add('active-dislike');
+    }
+  });
+});
   async function loadFilms() {
   const cachedFilms = localStorage.getItem('films');
 
@@ -869,6 +891,11 @@ function showSeries(type = 'Серіал') {
       ${buttons}
       <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
     </div>
+    <div style="margin-top:6px; display:flex; gap:10px;">
+      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'like')">👍 <span id="like-count-btn-${safeId(film['Назва'])}">${film['Лайки'] || 0}</span></button>
+      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'dislike')">👎 <span id="dislike-count-btn-${safeId(film['Назва'])}">${film['Дизлайки'] || 0}</span></button>
+    </div>
+  
 
   </div>
 `;
@@ -1379,6 +1406,7 @@ if (proData.isPro && getProBtn) {
     </div>
   </div>
 `;
+    
 
 }).join('');
 
@@ -1447,54 +1475,56 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
 }
 
 
-async function rateFilm(filmName, action) {
-  const userVoteKey = `vote_${filmName}`;
-  const previousVote = localStorage.getItem(userVoteKey);
+function rateFilm(filmName, action) {
+  const key = `rating-${filmName}`;
+  const previousAction = localStorage.getItem(key);
 
-  if (previousVote === action) return;
+  // Не дозволяємо повторно голосувати однаково
+  if (previousAction === action) return;
 
-  localStorage.setItem(userVoteKey, action);
+  // Зберігаємо новий вибір
+  localStorage.setItem(key, action);
 
-  // Зняти активність з обох кнопок
-  ['like', 'dislike'].forEach(a => {
-    document.querySelectorAll(`#${a}-btn-${safeId(filmName)}`).forEach(btn => btn.classList.remove('active'));
-
+  // Відправляємо запит на бекенд
+  fetch('/rate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filmName, action, undoAction: previousAction }),
   });
-  // Додати активність до кнопки, що натиснули
-  document.querySelectorAll(`#${action}-btn-${safeId(filmName)}`).forEach(btn => btn.classList.add('active'));
 
-  try {
-    const res = await fetch('https://kinobot-qm9q.onrender.com/rate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ film_name: filmName, action, undo: previousVote })
-    });
-    const data = await res.json();
-    if (data.success) {
-      // Оновити лічильники лайків і дизлайків в обох варіантах id
-      ['like', 'dislike'].forEach(a => {
-        const selectors = [`${a}-count-${safeId(filmName)}`, `${a}-count-btn-${safeId(filmName)}`];
+  // Оновлюємо UI
+  const likeEl = document.getElementById(`like-count-${safeId(filmName)}`);
+  const dislikeEl = document.getElementById(`dislike-count-${safeId(filmName)}`);
 
-        selectors.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) {
-            if (a === action) {
-              el.textContent = data.new_value;
-            } else if (a === previousVote) {
-              // Якщо був попередній голос, зменшуємо на 1
-              el.textContent = data.old_value || el.textContent;
-            }
-          }
-        });
-      });
+  if (likeEl && dislikeEl) {
+    if (action === 'like') {
+      likeEl.textContent = Number(likeEl.textContent) + 1;
+      if (previousAction === 'dislike') {
+        dislikeEl.textContent = Math.max(0, Number(dislikeEl.textContent) - 1);
+      }
     } else {
-      alert("❗ Помилка: " + data.error);
+      dislikeEl.textContent = Number(dislikeEl.textContent) + 1;
+      if (previousAction === 'like') {
+        likeEl.textContent = Math.max(0, Number(likeEl.textContent) - 1);
+      }
     }
-  } catch (e) {
-    console.error(e);
-    alert("❗ Сталася помилка при голосуванні");
+  }
+
+  // Візуально виділяємо
+  const parent = likeEl.closest(".film-card");
+  const likeBtn = parent.querySelector(".rating-button:nth-child(1)");
+  const dislikeBtn = parent.querySelector(".rating-button:nth-child(2)");
+
+  likeBtn.classList.remove("active-like");
+  dislikeBtn.classList.remove("active-dislike");
+
+  if (action === "like") {
+    likeBtn.classList.add("active-like");
+  } else {
+    dislikeBtn.classList.add("active-dislike");
   }
 }
+
 
 
 
