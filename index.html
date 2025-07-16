@@ -1355,16 +1355,29 @@ if (proData.isPro && getProBtn) {
   }
 
   return `
-    <div class="film-card fade-in">
-      <img src="${imgSrc}" alt="${f['Назва']}">
-      <h3>${f['Назва']}</h3>
-      <p class="film-desc">${f['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${buttons}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
-      </div>
+  <div class="film-card fade-in">
+    <img src="${imgSrc}" alt="${f['Назва']}">
+    <h3>${f['Назва']}</h3>
+    <p class="film-desc">${f['Опис']}</p>
+
+    <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
+      IMDb: ${f['IMDb'] || "—"} | 
+      👍 <span id="like-count-${f['Назва']}">${f['Лайки'] || 0}</span> | 
+      👎 <span id="dislike-count-${f['Назва']}">${f['Дизлайки'] || 0}</span>
     </div>
-  `;
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      ${buttons}
+      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
+    </div>
+
+    <div style="margin-top:6px; display:flex; gap:10px;">
+      <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'like')">👍 <span id="like-count-btn-${f['Назва']}">${f['Лайки'] || 0}</span></button>
+      <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'dislike')">👎 <span id="dislike-count-btn-${f['Назва']}">${f['Дизлайки'] || 0}</span></button>
+    </div>
+  </div>
+`;
+
 }).join('');
 
 
@@ -1436,18 +1449,16 @@ async function rateFilm(filmName, action) {
   const userVoteKey = `vote_${filmName}`;
   const previousVote = localStorage.getItem(userVoteKey);
 
-  // Якщо вже натиснув те саме — нічого не робимо
-  if (previousVote === action) {
-    return;
-  }
+  if (previousVote === action) return;
 
-  // Зберігаємо нове голосування
   localStorage.setItem(userVoteKey, action);
 
-  document.querySelectorAll(`#like-btn-${filmName}, #dislike-btn-${filmName}`).forEach(btn => {
-    btn.classList.remove("active");
+  // Зняти активність з обох кнопок
+  ['like', 'dislike'].forEach(a => {
+    document.querySelectorAll(`#${a}-btn-${filmName}`).forEach(btn => btn.classList.remove('active'));
   });
-  document.getElementById(`${action}-btn-${filmName}`)?.classList.add("active");
+  // Додати активність до кнопки, що натиснули
+  document.querySelectorAll(`#${action}-btn-${filmName}`).forEach(btn => btn.classList.add('active'));
 
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/rate', {
@@ -1455,13 +1466,23 @@ async function rateFilm(filmName, action) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ film_name: filmName, action, undo: previousVote })
     });
-
     const data = await res.json();
     if (data.success) {
-      const countSpan = document.getElementById(`${action}-count-${filmName}`);
-      if (countSpan) {
-        countSpan.textContent = data.new_value;
-      }
+      // Оновити лічильники лайків і дизлайків в обох варіантах id
+      ['like', 'dislike'].forEach(a => {
+        const selectors = [`${a}-count-${filmName}`, `${a}-count-btn-${filmName}`];
+        selectors.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            if (a === action) {
+              el.textContent = data.new_value;
+            } else if (a === previousVote) {
+              // Якщо був попередній голос, зменшуємо на 1
+              el.textContent = data.old_value || el.textContent;
+            }
+          }
+        });
+      });
     } else {
       alert("❗ Помилка: " + data.error);
     }
