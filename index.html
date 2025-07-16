@@ -275,6 +275,15 @@
   flex-wrap: wrap;
 }    
 
+.film-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
 
   </style>
  
@@ -896,7 +905,7 @@ function showSeries(type = 'Серіал') {
                     👎 <span id="dislike-count-${safeKey}">${dislikes}</span>
                   </div>
 
-                  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <div class="film-actions">
                     ${button}
                     <button class="fav-button" onclick="addToFavorites('${name}', '${desc}')">💛 Улюблене</button>
                   </div>
@@ -1013,7 +1022,7 @@ function openSeries(id) {
       👎 <span id="dislike-count-${safeId(film['Назва'])}">${Number(film['Дизлайки']) || 0}</span>
     </div>
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <div class="film-actions">
       ${buttons}
       <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
     </div>
@@ -1089,7 +1098,7 @@ function restoreRatingsUI() {
       <img src="${imgSrc}" alt="${film['Назва']}">
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <div class="film-actions">
         ${buttons}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
@@ -1134,7 +1143,7 @@ function filterByYear(year) {
       <img src="${imgSrc}" alt="${film['Назва']}">
       <h3>${film['Назва']}</h3>
       <p>${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <div class="film-actions">
         ${buttons}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
       </div>
@@ -1543,7 +1552,7 @@ document.getElementById('searchResults').innerHTML = results.map(f => {
         👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
       </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <div class="film-actions">
         ${buttons}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
       </div>
