@@ -635,15 +635,6 @@ function openVideoById(fileId) {
 }
     
 
-
-function toggleSeries(title) {
-  document.querySelectorAll('[id^="series-"]').forEach(el => {
-    if (el.id !== `series-${title}`) el.style.display = 'none';
-  });
-  const el = document.getElementById(`series-${title}`);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
     
 function showRedirectButton() {
   const videoWrapper = document.getElementById('video-wrapper');
@@ -846,45 +837,32 @@ function showSeries(type = 'Серіал') {
     grouped[name].push(f);
   });
 
-container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-  const safe = safeId(title);
-  const isPro = localStorage.getItem('isProUser') === 'true';
-
-  return `
-    <div class="series-group">
-      <div class="series-header" onclick="toggleSeries('${safe}')">
-        <span class="series-icon">📺</span>
-        <span class="series-title">${title}</span>
-      </div>
-      <div id="series-${safe}" style="display:none; margin-top:10px;">
-        ${episodes.map(ep => {
-          const isProFilm = ep['Доступ'] === 'PRO';
-          const imgSrc = (isProFilm && !isPro) ? placeholderImage : (ep['Постер'] || 'default.jpg');
-          const btn = isProFilm && !isPro
-            ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-            : `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">▶️ Дивитись</button>`;
-
-          return `
+  container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+    const safe = safeId(title);
+    return `
+      <div class="series-group">
+        <div class="series-header" onclick="toggleSeries('${safe}')">
+          <span class="series-icon">📺</span>
+          <span class="series-title">${title}</span>
+        </div>
+        <div id="series-${safe}" style="display:none; margin-top:10px;">
+          ${episodes.map(ep => `
             <div class="film-card">
-              <img src="${imgSrc}" class="film-img" />
+              <img src="${ep['Постер'] || 'default.jpg'}" class="film-img" />
               <div class="film-info">
                 <div class="film-title">${ep['Назва'] || title}</div>
                 <div class="film-description">${ep['Опис'] || ''}</div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                  ${btn}
-                  <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${ep['Назва']}', '${ep['Опис']}')">💛 Улюблене</button>
-                </div>
+                <button class="search-button" onclick="openVideoById('${ep['file_id']}')">🎬 Дивитись</button>
               </div>
             </div>
-          `;
-        }).join('')}
+          `).join('')}
+        </div>
       </div>
-    </div>
-  `;
-}).join('');
+    `;
+  }).join('');
 
-container.scrollIntoView({ behavior: 'smooth' });
-
+  container.scrollIntoView({ behavior: 'smooth' });
+}
 
 
 
@@ -909,7 +887,7 @@ function openSeries(id) {
     return str.replace(/[^\w\d]/g, '_');
   }
     
-function filterByGenre(genre) {
+  function filterByGenre(genre) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
   const isPro = localStorage.getItem('isProUser') === 'true';
@@ -941,54 +919,67 @@ function filterByGenre(genre) {
           <span class="series-icon">📺</span>
           <span class="series-title">${title}</span>
         </div>
-        <div id="series-${title}" style="display:none;">
+        <div id="series-${title}" class="series-episodes-grid" style="display:none;">
           ${grouped[title].map(episode => {
             const isProFilm = episode['Доступ'] === 'PRO';
-            const imgSrc = (isProFilm && !isPro) ? placeholderImage : episode['Фото'] || episode['Постер'];
-            const btn = isProFilm && !isPro
-              ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-              : `<button class="search-button" onclick="openVideoById('${episode['file_id']}')">▶️ Дивитись</button>`;
-
-            return `
-              <div class="film-card">
-                <img src="${imgSrc}" alt="${episode['Назва']}" class="film-img">
-                <div class="film-info">
-                  <div class="film-title">${episode['Назва']}</div>
-                  <div class="film-description">${episode['Опис'] || ''}</div>
-                  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    ${btn}
-                    <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${episode['Назва']}', '${episode['Опис']}')">💛 Улюблене</button>
-                  </div>
-                </div>
-              </div>
-            `;
+            if (isProFilm && !isPro) {
+              return `<div><button class="search-button" onclick="alert('🔒 Лише для PRO користувачів')">🔒 PRO Доступ</button></div>`;
+            }
+            return `<div><button class="search-button" onclick="openVideoById('${episode['file_id']}')">${episode['Опис'] || 'Серія'}</button>
+            </div>`;
+          
           }).join('')}
         </div>
       </div>
     `).join('');
+
   } else {
     container.innerHTML = filtered.map(film => {
-      const isProFilm = film['Доступ'] === 'PRO';
-      const imgSrc = (isProFilm && !isPro) ? placeholderImage : film['Фото'] || film['Постер'];
-      const btn = isProFilm && !isPro
-        ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-        : `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`;
+  const isProFilm = film['Доступ'] === 'PRO';
+  const isPro = localStorage.getItem('isProUser') === 'true';
 
-      return `
-        <div class="film-card">
-          <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
-          <div class="film-info">
-            <div class="film-title">${film['Назва']}</div>
-            <div class="film-description">${film['Опис'] || ''}</div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              ${btn}
-              <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
+  let buttons = '';
+  if (isProFilm && !isPro) {
+    buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+
+  } else if (film['Посилання']) {
+    buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
   }
+
+  const imgSrc = (isProFilm && !isPro) ? placeholderImage : film['Фото'];
+
+  return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p class="film-desc">${film['Опис']}</p>
+
+    <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
+      IMDb: ${film['IMDb'] || "—"} | 
+      👍 <span id="like-count-${safeId(film['Назва'])}">${Number(film['Лайки']) || 0}</span> |
+      👎 <span id="dislike-count-${safeId(film['Назва'])}">${Number(film['Дизлайки']) || 0}</span>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      ${buttons}
+      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+    </div>
+    <div style="margin-top:6px; display:flex; gap:10px;">
+      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'like')">👍 <span id="like-count-btn-${safeId(film['Назва'])}">${film['Лайки'] || 0}</span></button>
+      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'dislike')">👎 <span id="dislike-count-btn-${safeId(film['Назва'])}">${film['Дизлайки'] || 0}</span></button>
+    </div>
+  
+
+  </div>
+`;
+
+
+
+}).join('');
+
+  }
+
+  container.scrollIntoView({ behavior: 'smooth' });
 }
 
 
@@ -1051,15 +1042,11 @@ function restoreRatingsUI() {
       </div>
     </div>
   `;
-}).join('')}
-        </div>
-      </div>
-    `;
-  }).join('');
+}).join('');
+
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
-
 
 
   
