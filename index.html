@@ -861,8 +861,8 @@ function showSeries(type = 'Серіал') {
 
     <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
       IMDb: ${film['IMDb'] || "—"} | 
-      👍 <span id="like-count-${safeId(film['Назва'])}"">${film['Лайки'] || 0}</span> | 
-      👎 <span id="dislike-count-${safeId(film['Назва'])}">${film['Дизлайки'] || 0}</span>
+      👍 <span id="like-count-${safeId(film['Назва'])}">${Number(film['Лайки']) || 0}</span> |
+      👎 <span id="dislike-count-${safeId(film['Назва'])}">${Number(film['Дизлайки']) || 0}</span>
     </div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -870,14 +870,6 @@ function showSeries(type = 'Серіал') {
       <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
     </div>
 
-    <div style="margin-top:6px; display:flex; gap:10px;">
-      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'like')">
-        👍 <span id="like-count-${safeId(film['Назва'])}">${film['Лайки'] || 0}</span>
-       </button>
-       <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'dislike')">
-         👎 <span id="dislike-count-${safeId(film['Назва'])}">${film['Дизлайки'] || 0}</span>
-        </button>
-      </div> 
   </div>
 `;
 
