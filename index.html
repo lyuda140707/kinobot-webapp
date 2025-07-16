@@ -813,16 +813,31 @@ function showSeries(type = 'Серіал') {
   const imgSrc = (isProFilm && !isPro) ? placeholderImage : film['Фото'];
 
   return `
-    <div class="film-card">
-      <img src="${imgSrc}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p class="film-desc">${film['Опис']}</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        ${buttons}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
-      </div>
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p class="film-desc">${film['Опис']}</p>
+
+    <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
+      IMDb: ${film['IMDb'] || "—"} | 
+      👍 <span id="like-count-${film['Назва']}">${film['Лайки'] || 0}</span> | 
+      👎 <span id="dislike-count-${film['Назва']}">${film['Дизлайки'] || 0}</span>
     </div>
-  `;
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      ${buttons}
+      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+    </div>
+
+    <div style="margin-top:6px; display:flex; gap:10px;">
+      <button onclick="rateFilm('${film['Назва']}', 'like')" style="padding:4px 10px; border-radius:6px;">👍</button>
+      <button onclick="rateFilm('${film['Назва']}', 'dislike')" style="padding:4px 10px; border-radius:6px;">👎</button>
+    </div>
+  </div>
+`;
+
+
+
 }).join('');
 
   }
@@ -1380,6 +1395,31 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
   }
   throw new Error("❌ Усі спроби запиту не вдалися");
 }
+
+
+async function rateFilm(filmName, action) {
+  try {
+    const res = await fetch('https://kinobot-qm9q.onrender.com/rate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ film_name: filmName, action })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      const countSpan = document.getElementById(`${action}-count-${filmName}`);
+      if (countSpan) {
+        countSpan.textContent = data.new_value;
+      }
+    } else {
+      alert("❗ Помилка: " + data.error);
+    }
+  } catch (e) {
+    console.error(e);
+    alert("❗ Сталася помилка при голосуванні");
+  }
+}
+
 
 async function suggestFilm() {
   const val = document.getElementById('searchInput').value.trim();
