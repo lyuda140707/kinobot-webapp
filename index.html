@@ -383,6 +383,12 @@
 </div>
 
   <script>
+
+    function safeId(str) {
+      return str.replace(/\W/g, '_');
+    }
+
+    
     let films = [];
     let isDataLoaded = false;
     
@@ -855,8 +861,8 @@ function showSeries(type = 'Серіал') {
 
     <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
       IMDb: ${film['IMDb'] || "—"} | 
-      👍 <span id="like-count-${film['Назва']}">${film['Лайки'] || 0}</span> | 
-      👎 <span id="dislike-count-${film['Назва']}">${film['Дизлайки'] || 0}</span>
+      👍 <span id="like-count-${safeId(film['Назва'])}"">${film['Лайки'] || 0}</span> | 
+      👎 <span id="dislike-count-${safeId(film['Назва'])}">${film['Дизлайки'] || 0}</span>
     </div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -865,9 +871,13 @@ function showSeries(type = 'Серіал') {
     </div>
 
     <div style="margin-top:6px; display:flex; gap:10px;">
-      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'like')">👍 <span id="like-count-${film['Назва']}">${film['Лайки'] || 0}</span></button>
-      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'dislike')">👎 <span id="dislike-count-${film['Назва']}">${film['Дизлайки'] || 0}</span></button>
-    </div>
+      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'like')">
+        👍 <span id="like-count-${safeId(film['Назва'])}">${film['Лайки'] || 0}</span>
+       </button>
+       <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'dislike')">
+         👎 <span id="dislike-count-${safeId(film['Назва'])}">${film['Дизлайки'] || 0}</span>
+        </button>
+      </div> 
   </div>
 `;
 
@@ -1455,10 +1465,11 @@ async function rateFilm(filmName, action) {
 
   // Зняти активність з обох кнопок
   ['like', 'dislike'].forEach(a => {
-    document.querySelectorAll(`#${a}-btn-${filmName}`).forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll(`#${a}-btn-${safeId(filmName)}`).forEach(btn => btn.classList.remove('active'));
+
   });
   // Додати активність до кнопки, що натиснули
-  document.querySelectorAll(`#${action}-btn-${filmName}`).forEach(btn => btn.classList.add('active'));
+  document.querySelectorAll(`#${action}-btn-${safeId(filmName)}`).forEach(btn => btn.classList.add('active'));
 
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/rate', {
@@ -1470,7 +1481,8 @@ async function rateFilm(filmName, action) {
     if (data.success) {
       // Оновити лічильники лайків і дизлайків в обох варіантах id
       ['like', 'dislike'].forEach(a => {
-        const selectors = [`${a}-count-${filmName}`, `${a}-count-btn-${filmName}`];
+        const selectors = [`${a}-count-${safeId(filmName)}`, `${a}-count-btn-${safeId(filmName)}`];
+
         selectors.forEach(id => {
           const el = document.getElementById(id);
           if (el) {
