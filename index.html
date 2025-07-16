@@ -785,41 +785,41 @@ function showSeries(type = 'Серіал') {
   const seriesFilms = films.filter(f => f['Тип'] === type);
 
   if (seriesFilms.length === 0) {
-    container.innerHTML = '<p>Немає серій 😢</p>';
+    container.innerHTML = '<p>Немає серіалів 😢</p>';
     return;
   }
 
   // Групуємо серії за назвою
   const grouped = {};
   seriesFilms.forEach(f => {
-    if (!grouped[f['Назва']]) grouped[f['Назва']] = [];
+    if (!grouped[f['Назва']]) {
+      grouped[f['Назва']] = [];
+    }
     grouped[f['Назва']].push(f);
   });
 
   container.innerHTML = Object.keys(grouped).map(title => {
-    const first = grouped[title][0];
-    const img = first['Фото'] && first['Фото'].startsWith('http') ? first['Фото'] : 'https://em-content.zobj.net/source/microsoft-teams/363/television_1f4fa.png';
-    const isPro = first['PRO'] === 'так';
+    const episodes = grouped[title];
+    const first = episodes[0];
+    const id = safeId(title);
 
     return `
-      <div class="film-card ${isPro ? 'pro-film' : ''}" data-name="${title}">
-        <img src="${img}" alt="${title}" class="film-image" />
-        <div class="film-info">
-          <h3 class="film-title">${title}</h3>
-          <p class="film-genre">${first['Жанр'] || 'Серіал'}</p>
-          <div class="film-buttons">
-            <button onclick="openSeries('${safeId(title)}')">📺 Серії</button>
-            <button onclick="toggleFavorite('${title}')">❤️</button>
+      <div class="film-card">
+        <img class="film-img" src="${first['Фото'] || 'https://via.placeholder.com/300x150'}" alt="${title}" />
+        <div class="film-content">
+          <h3>${title}</h3>
+          <p>${first['Опис'] || 'Серіал'}</p>
+          <div style="margin-bottom: 8px;">
+            <button onclick="openSeries('${id}')" class="search-button">📺 Серії</button>
+            <button onclick="toggleFavorite('${title}')" class="favorite-btn">❤️</button>
           </div>
-        </div>
-        <div id="series-${safeId(title)}" style="display:none; margin-top:10px; padding:5px 10px;">
-          ${grouped[title].map(ep => `
-            <div style="margin-bottom:6px;">
-              ▶️ <button class="search-button" onclick="openVideoById('${ep['file_id']}')">
-                ${ep['Опис'] || 'Серія'}
-              </button>
-            </div>
-          `).join('')}
+          <div id="series-${id}" style="display:none;">
+            ${episodes.map(ep => `
+              <div style="margin:4px 0;">
+                <button class="search-button" onclick="openVideoById('${ep['file_id']}')">${ep['Опис'] || 'Серія'}</button>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
     `;
@@ -827,6 +827,7 @@ function showSeries(type = 'Серіал') {
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 function openSeries(id) {
   const block = document.getElementById(`series-${id}`);
