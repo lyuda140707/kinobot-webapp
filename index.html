@@ -865,8 +865,8 @@ function showSeries(type = 'Серіал') {
     </div>
 
     <div style="margin-top:6px; display:flex; gap:10px;">
-      <button onclick="rateFilm('${film['Назва']}', 'like')" style="padding:4px 10px; border-radius:6px;">👍</button>
-      <button onclick="rateFilm('${film['Назва']}', 'dislike')" style="padding:4px 10px; border-radius:6px;">👎</button>
+      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'like')">👍 <span id="like-count-${film['Назва']}">${film['Лайки'] || 0}</span></button>
+      <button class="rating-button" onclick="rateFilm('${film['Назва']}', 'dislike')">👎 <span id="dislike-count-${film['Назва']}">${film['Дизлайки'] || 0}</span></button>
     </div>
   </div>
 `;
