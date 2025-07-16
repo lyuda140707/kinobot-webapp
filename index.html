@@ -789,7 +789,6 @@ function showSeries(type = 'Серіал') {
     return;
   }
 
-  // Групуємо серії за назвою
   const grouped = {};
   seriesFilms.forEach(f => {
     if (!grouped[f['Назва']]) {
