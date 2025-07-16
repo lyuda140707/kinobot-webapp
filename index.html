@@ -768,19 +768,51 @@ function closeVideo() {
 
 
 function showFilmOfTheDay() {
+  const film = films[Math.floor(Math.random() * films.length)];
+  const user_id = tg?.initDataUnsafe?.user?.id;
+
+  // Показуємо обкладинку і назву
   document.getElementById('film-day-img').classList.remove('skeleton');
   document.getElementById('film-day-img').style.background = 'none';
-
-  const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
-
-  document.getElementById('film-day-button').onclick = () => {
-    const videoUrl = film['Посилання']; // ⬅️ тут тепер 'Посилання'
-    openVideo(film['Назва']); // ⬅️ відкриваємо
-  };
-
   document.getElementById('film-title').textContent = film['Назва'];
+
+  // Зберігаємо обраний фільм дня
+  localStorage.setItem("filmOfTheDay", JSON.stringify({
+    name: film['Назва'],
+    file_id: film['file_id'],  // переконайся, що є це поле в обʼєкті
+  }));
+
+  // Надсилаємо відео через бекенд
+  if (user_id && film['file_id']) {
+    fetch("/send-film-id", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: user_id,
+        file_id: film['file_id'],
+      }),
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Помилка надсилання фільму");
+      return res.json();
+    })
+    .then(data => {
+      console.log("✅ Відео надіслано:", data);
+    })
+    .catch(err => {
+      console.error("❌ Помилка надсилання:", err);
+    });
+  }
+
+  // Кнопка: можна лишити якщо хочеш ще діяти
+  document.getElementById('film-day-button').onclick = () => {
+    openVideo(film['Назва']); // якщо хочеш відкрити сторінку фільму
+  };
 }
+
 
 
     function showSkeletonFilmOfTheDay() {
