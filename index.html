@@ -163,42 +163,6 @@
 
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-  .react-anim {
-    animation: pop 0.3s ease;
-  }
-
-  @keyframes pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
-  }
-
-
-.reaction-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.emoji-burst {
-  position: absolute;
-  font-size: 20px;
-  animation: burst 0.6s ease forwards;
-  pointer-events: none;
-  z-index: 999;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-@keyframes burst {
-  0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  50% { transform: translate(-50%, -20px) scale(1.5); }
-  100% { opacity: 0; transform: translate(-50%, -40px) scale(0); }
-}
-
-</style>
-  
 </head>
 <body>
   <div id="home" class="section active">
@@ -856,18 +820,6 @@ function showSeries(type = 'Серіал') {
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         ${buttons}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
-        <div class="reaction-wrapper">
-        <button onclick="sendReaction('${film['file_id']}', 'like', this)" data-file="${film['file_id']}" data-type="like">
-          👍 ${film['Лайки'] || 0}
-        </button>
-      </div>
-      <div class="reaction-wrapper">
-        <button onclick="sendReaction('${film['file_id']}', 'dislike', this)" data-file="${film['file_id']}" data-type="dislike">
-          👎 ${film['Дизлайки'] || 0}
-        </button>
-      </div>
-
-          
       </div>
     </div>
   `;
@@ -993,39 +945,6 @@ function filterByYear(year) {
   }
 
   container.style.display = 'block';
-}
-
-function sendReaction(fileId, type) {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-
-  if (!user) {
-    alert("❗️ Не вдалося отримати Telegram ID");
-    return;
-  }
-
-  fetch("https://kinobot-qm9q.onrender.com/rate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: user.id,
-      file_id: fileId,
-      type: type
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.ok) {
-        alert("✅ Дякуємо за оцінку!");
-      } else {
-        alert("⚠️ Не вдалося зберегти реакцію.");
-        console.log(data.error);
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert("⚠️ Сталася помилка.");
-    });
 }
 
 function showProModal() {
@@ -1840,56 +1759,6 @@ function sendFilm(film_id) {
     </div>
   </div>
 </div>
-
-<script>
-  function sendReaction(fileId, type) {
-    const tg = window.Telegram.WebApp;
-    const user = tg.initDataUnsafe?.user;
-
-    if (!user) {
-      alert("❗️ Не вдалося отримати Telegram ID");
-      return;
-    }
-
-    fetch("https://kinobot-qm9q.onrender.com/rate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: user.id,
-        file_id: fileId,
-        type: type
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.ok) {
-        // 🟢 Знайти кнопку за fileId і type
-        const button = document.querySelector(`button[data-file='${fileId}'][data-type='${type}']`);
-        if (button) {
-          const [emoji, number] = button.innerText.split(" ");
-          const newCount = parseInt(number || "0") + 1;
-          button.innerText = `${emoji} ${newCount}`;
-          const wrapper = button.closest(".reaction-wrapper");
-          if (wrapper) {
-            const burst = document.createElement("div");
-            burst.className = "emoji-burst";
-            burst.innerText = (type === "like") ? "💥" : "💣";
-            wrapper.appendChild(burst);
-            setTimeout(() => wrapper.removeChild(burst), 600);
-          }
-          button.classList.add("react-anim");
-          setTimeout(() => button.classList.remove("react-anim"), 300);
-        }
-      } else {
-        alert("⚠️ Не вдалося зберегти реакцію.");
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert("⚠️ Сталася помилка.");
-    });
-  }
-</script>
 
   
 </body>
