@@ -1399,9 +1399,10 @@ if (proData.isPro && getProBtn) {
 
     <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
       IMDb: ${f['IMDb'] || "—"} | 
-      👍 <span id="like-count-${f['Назва']}">${f['Лайки'] || 0}</span> | 
-      👎 <span id="dislike-count-${f['Назва']}">${f['Дизлайки'] || 0}</span>
+      👍 <span id="like-count-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span> |
+      👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
     </div>
+  
 
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
       ${buttons}
