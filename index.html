@@ -846,16 +846,51 @@ function showSeries(type = 'Серіал') {
           <span class="series-title">${title}</span>
         </div>
         <div id="series-${safe}" style="display:none; margin-top:10px;">
-          ${episodes.map(ep => `
-            <div class="film-card">
-              <img src="${ep['Постер'] || 'default.jpg'}" class="film-img" />
-              <div class="film-info">
-                <div class="film-title">${ep['Назва'] || title}</div>
-                <div class="film-description">${ep['Опис'] || ''}</div>
-                <button class="search-button" onclick="openVideoById('${ep['file_id']}')">🎬 Дивитись</button>
+          ${episodes.map(ep => {
+            const isPro = localStorage.getItem('isProUser') === 'true';
+            const isProFilm = ep['Доступ'] === 'PRO';
+            const imgSrc = (isProFilm && !isPro) ? placeholderImage : (ep['Постер'] || 'default.jpg');
+
+            const name = ep['Назва'] || title;
+            const desc = ep['Опис'] || '';
+            const imdb = ep['IMDb'] || "—";
+            const likes = Number(ep['Лайки']) || 0;
+            const dislikes = Number(ep['Дизлайки']) || 0;
+            const safeKey = safeId(name);
+
+            let button = '';
+            if (isProFilm && !isPro) {
+              button = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+            } else {
+              button = `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">🎬 Дивитись</button>`;
+            }
+
+            return `
+              <div class="film-card">
+                <img src="${imgSrc}" class="film-img" />
+                <div class="film-info">
+                  <div class="film-title">${name}</div>
+                  <div class="film-description">${desc}</div>
+
+                  <div style="font-size:13px; color:#ccc; margin: 4px 0 6px;">
+                    IMDb: ${imdb} | 
+                    👍 <span id="like-count-${safeKey}">${likes}</span> |
+                    👎 <span id="dislike-count-${safeKey}">${dislikes}</span>
+                  </div>
+
+                  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    ${button}
+                    <button class="fav-button" onclick="addToFavorites('${name}', '${desc}')">💛 Улюблене</button>
+                  </div>
+
+                  <div style="margin-top:6px; display:flex; gap:10px;">
+                    <button class="rating-button" onclick="rateFilm('${name}', 'like')">👍 <span id="like-count-btn-${safeKey}">${likes}</span></button>
+                    <button class="rating-button" onclick="rateFilm('${name}', 'dislike')">👎 <span id="dislike-count-btn-${safeKey}">${dislikes}</span></button>
+                  </div>
+                </div>
               </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;
