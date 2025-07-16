@@ -832,35 +832,38 @@ function showSeries(type = 'Серіал') {
 
   const grouped = {};
   seriesFilms.forEach(f => {
-    if (!grouped[f['Назва']]) {
-      grouped[f['Назва']] = [];
-    }
-    grouped[f['Назва']].push(f);
+    const name = f['Назва'];
+    if (!grouped[name]) grouped[name] = [];
+    grouped[name].push(f);
   });
 
-  container.innerHTML = Object.keys(grouped).map(title => `
-    <div class="series-block">
-      <div class="series-header" onclick="toggleSeries('${safeId(title)}')">
-        <span class="series-icon">📺</span>
-        <span class="series-title">${title}</span>
-      </div>
-      <div id="series-${safeId(title)}" style="display:none; margin-top:10px;">
-        ${grouped[title].map(episode => `
-          <div class="film-card">
-            <img src="${episode['Постер']}" class="film-img">
-            <div class="film-info">
-              <div class="film-title">${episode['Назва'] || title}</div>
-              <div class="film-description">${episode['Опис'] || ''}</div>
-              <button class="search-button" onclick="openVideoById('${episode['file_id']}')">🎬 Дивитись</button>
+  container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+    const safe = safeId(title);
+    return `
+      <div class="series-group">
+        <div class="series-header" onclick="toggleSeries('${safe}')">
+          <span class="series-icon">📺</span>
+          <span class="series-title">${title}</span>
+        </div>
+        <div id="series-${safe}" style="display:none; margin-top:10px;">
+          ${episodes.map(ep => `
+            <div class="film-card">
+              <img src="${ep['Постер'] || 'default.jpg'}" class="film-img" />
+              <div class="film-info">
+                <div class="film-title">${ep['Назва'] || title}</div>
+                <div class="film-description">${ep['Опис'] || ''}</div>
+                <button class="search-button" onclick="openVideoById('${ep['file_id']}')">🎬 Дивитись</button>
+              </div>
             </div>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
 
