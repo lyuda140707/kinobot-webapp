@@ -938,12 +938,17 @@ function openSeries(id) {
 }
 
 
-    function toggleSeries(title) {
-  const block = document.getElementById(`series-${title}`);
-  if (block) {
-    block.style.display = (block.style.display === 'none') ? 'block' : 'none';
+function toggleSeries(id, buttonEl) {
+  const block = document.getElementById(`series-${id}`);
+  if (block.style.display === 'none') {
+    block.style.display = 'block';
+    if (buttonEl) buttonEl.textContent = '🔽 Сховати серії';
+  } else {
+    block.style.display = 'none';
+    if (buttonEl) buttonEl.textContent = '📺 Показати серії';
   }
 }
+
 
 
   function safeId(str) {
@@ -1001,7 +1006,8 @@ return `
       ${isProFilm && !isPro 
         ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
         : `
-          <button class="search-button" onclick="toggleSeries('${safe}')">📺 Показати серії</button>
+          <button class="search-button" onclick="toggleSeries('${safe}', this)">📺 Показати серії</button>
+
           <div id="series-${safe}" style="display: none; margin-top: 10px;">
             ${episodes.map((ep, i) => {
               return `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
