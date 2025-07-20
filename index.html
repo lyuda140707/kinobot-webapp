@@ -966,40 +966,34 @@ function openSeries(id) {
 
   const hasSeries = filtered.some(f => f['Тип'] === 'Серіал');
 
-if (hasSeries) {
-  const grouped = {};
-  filtered.forEach(f => {
-    if (!grouped[f['Назва']]) grouped[f['Назва']] = [];
-    grouped[f['Назва']].push(f);
-  });
+  if (hasSeries) {
+    const grouped = {};
+    filtered.forEach(f => {
+      if (!grouped[f['Назва']]) {
+        grouped[f['Назва']] = [];
+      }
+      grouped[f['Назва']].push(f);
+    });
 
-  container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-    const poster = episodes[0]['Постер'] || placeholderImage;
-    const description = episodes[0]['Опис'] || '';
-    const imdb = episodes[0]['IMDb'] || '—';
-    const safe = safeId(title);
-
-    return `
-      <div class="film-card">
-        <img src="${poster}" class="film-img" />
-        <div class="film-content">
-          <div class="film-title">${title}</div>
-          <p class="film-desc">${description}</p>
-
-          <div class="film-rating">
-            IMDb: ${imdb}
-          </div>
-
-          <div class="film-actions">
-            <button class="search-button" onclick="goToSeries('${title}')">📺 Перейти до серіалу</button>
-            <button class="fav-button" onclick="addToFavorites('${title}', '${description}')">💛 Улюблене</button>
-          </div>
+    container.innerHTML = Object.keys(grouped).map(title => `
+      <div class="series-card">
+        <div class="series-header" onclick="toggleSeries('${title}')">
+          <span class="series-icon">📺</span>
+          <span class="series-title">${title}</span>
+        </div>
+        <div id="series-${title}" class="series-episodes-grid" style="display:none;">
+          ${grouped[title].map(episode => {
+            const isProFilm = episode['Доступ'] === 'PRO';
+            if (isProFilm && !isPro) {
+              return `<div><button class="search-button" onclick="alert('🔒 Лише для PRO користувачів')">🔒 PRO Доступ</button></div>`;
+            }
+            return `<div><button class="search-button" onclick="openVideoById('${episode['file_id']}')">${episode['Опис'] || 'Серія'}</button>
+            </div>`;
+          
+          }).join('')}
         </div>
       </div>
-    `;
-  }).join('');
-}
-
+    `).join('');
 
   } else {
     container.innerHTML = filtered.map(film => {
@@ -1540,8 +1534,7 @@ document.getElementById('searchResults').innerHTML = results.map(f => {
   let buttons = '';
   if (isProFilm && !isPro) {
     buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-  } else if ((f['Тип'] || '').toLowerCase() === 'серіал') {
-
+  } else if (f['Тип'] === 'Серіал') {
     buttons = `<button class="search-button" onclick="goToSeries('${f['Назва']}')">📺 Перейти до серіалу</button>`;
   } else if (f['Посилання']) {
     buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Назва']}')">▶️ Дивитись</button>`;
@@ -1808,12 +1801,40 @@ function clearHistory() {
   }, 300);
 }
 
+function closeDonatePopup() {
+  const popup = document.getElementById('donate-popup');
+  if (popup) {
+    popup.style.opacity = '0';
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 300);
+  }
+}
+// ✅ Автоматичне стабільне віконце донату через 20 секунд
+setTimeout(() => {
+  const popup = document.getElementById('donate-popup');
+  if (popup) {
+    popup.style.display = 'block';
+    popup.style.opacity = '0';
+    popup.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => popup.style.opacity = '1', 10);
+  }
+}, 20000);
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 function goToSeries(seriesTitle) {
   switchTab('categories', document.querySelector('[data-tab=categories]'));
   openGenreGroup('series');
 
   setTimeout(() => {
     const filtered = films.filter(f => f['Назва'] === seriesTitle && f['Тип'] === 'Серіал');
+
     if (filtered.length === 0) {
       alert('Серіал не знайдено 😢');
       return;
@@ -1824,19 +1845,22 @@ function goToSeries(seriesTitle) {
 
     container.innerHTML = Object.keys(grouped).map(title => `
       <div class="series-card">
-        <h3 style="margin-bottom:10px;">${title}</h3>
-        <div id="series-${safeId(title)}" class="series-episodes-grid" style="display:block;">
-          ${grouped[title].map(episode => {
-            const isPro = localStorage.getItem('isProUser') === 'true';
-            const isProFilm = episode['Доступ'] === 'PRO';
-            const epTitle = episode['Опис'] || 'Серія';
-
-            if (isProFilm && !isPro) {
-              return `<div><button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button></div>`;
-            }
-
-            return `<div><button class="search-button" onclick="openVideoById('${episode['file_id']}')">${epTitle}</button></div>`;
-          }).join('')}
+        <div class="series-header" onclick="toggleSeries('${title}')">
+          <span class="series-icon">📺</span>
+          <span class="series-title">${title}</span>
+        </div>
+        <div id="series-${title}" class="series-episodes-grid" style="display:block;">
+          ${grouped[title].map(episode => `
+            <div class="film-card">
+              <img src="${episode['Постер']}" class="film-img">
+              <div class="film-info">
+              <div class="film-title">${episode['Назва'] || title}</div>
+              <div class="film-description">${episode['Опис'] || ''}</div>
+              <button class="search-button" onclick="openVideoById('${episode['file_id']}')">🎬 Дивитись</button>
+            </div>
+          </div>
+        `).join('')}
+            
         </div>
       </div>
     `).join('');
@@ -1844,7 +1868,6 @@ function goToSeries(seriesTitle) {
     container.scrollIntoView({ behavior: 'smooth' });
   }, 300);
 }
-
 
 document.getElementById('getProBtn').addEventListener('click', () => {
     const tg = window.Telegram.WebApp;
