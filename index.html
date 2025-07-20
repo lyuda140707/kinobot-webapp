@@ -845,7 +845,6 @@ function showYearFilters() {
   }).join('');
   document.getElementById('collections').style.display = 'flex';
 }
-
 function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
   container.innerHTML = '';
@@ -868,10 +867,13 @@ function showSeries(type = 'Серіал') {
     const safe = safeId(title);
     return `
       <div class="series-group">
-        <div class="series-header" onclick="toggleSeries('${safe}')">
+        <div class="series-header">
           <span class="series-icon">📺</span>
           <span class="series-title">${title}</span>
         </div>
+
+        <button class="search-button" onclick="toggleSeries('${safe}', this)">📺 Показати серії</button>
+
         <div id="series-${safe}" style="display:none; margin-top:10px;">
           ${episodes.map(ep => {
             const isPro = localStorage.getItem('isProUser') === 'true';
@@ -2120,6 +2122,43 @@ function sendFilm(film_id) {
     </div>
   </div>
 </div>
+<script>
+  function toggleSeries(id, buttonEl) {
+    const allSeriesBlocks = document.querySelectorAll('[id^="series-"]');
+    const allButtons = document.querySelectorAll('.search-button');
+
+    // Сховати всі блоки серій
+    allSeriesBlocks.forEach(block => {
+      block.style.display = 'none';
+    });
+
+    // Скинути текст усіх кнопок
+    allButtons.forEach(btn => {
+      if (btn.textContent === '🔽 Сховати серії') {
+        btn.textContent = '📺 Показати серії';
+      }
+    });
+
+    const currentBlock = document.getElementById(`series-${id}`);
+    if (currentBlock) {
+      const isHidden = currentBlock.style.display === 'none';
+
+      // Перемикання видимості
+      currentBlock.style.display = isHidden ? 'block' : 'none';
+
+      // Зміна тексту кнопки
+      if (buttonEl) {
+        buttonEl.textContent = isHidden ? '🔽 Сховати серії' : '📺 Показати серії';
+      }
+
+      if (isHidden) {
+        setTimeout(() => {
+          currentBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
+      }
+    }
+  }
+</script>
 
   
 </body>
