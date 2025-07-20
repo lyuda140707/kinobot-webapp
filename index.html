@@ -1338,8 +1338,28 @@ function showSkeletonCollections() {
 
   fetch('https://kinobot-qm9q.onrender.com/ping').catch(console.warn);
   Telegram.WebApp.ready();
+  document.addEventListener("DOMContentLoaded", function () {
   const tg = window.Telegram.WebApp;
+  tg.ready(); // обовʼязково
+  tg.expand();
+
   const user = tg.initDataUnsafe?.user;
+  const userId = user?.id || null;
+
+  if (userId) {
+    fetch('/is-pro?user_id=' + userId)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.is_pro) {
+          alert('❗ Помилка: ⛔ Доступ лише для PRO користувачів');
+        }
+      });
+  } else {
+    console.warn("❗ Користувача не знайдено");
+  }
+});
+
+  
 
   if (!user) {
     alert("Не вдалося отримати ваш Telegram ID");
