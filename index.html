@@ -869,13 +869,13 @@ function showSeries(type = 'Серіал') {
     const safe = safeId(title);
     return `
       <div class="series-group">
-        <div class="series-header" onclick="toggleSeries('${safe}')">
+        <div class="series-header">
           <span class="series-icon">📺</span>
           <span class="series-title">${title}</span>
+          <button class="search-button" onclick="toggleSeries('${safe}', this)" style="margin-left:10px;">📺 Показати серії (${episodes.length})</button>
         </div>
-        <button class="search-button" onclick="toggleSeries('${safe}', this)">📺 Показати серії</button>
-
         <div id="series-${safe}" style="display:none; margin-top:10px;">
+        
           ${episodes.map(ep => {
             const isPro = localStorage.getItem('isProUser') === 'true';
             const isProFilm = ep['Доступ'] === 'PRO';
