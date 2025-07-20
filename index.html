@@ -1016,8 +1016,7 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
     buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
 
   } else if (film['Посилання']) {
-    <button class="search-button" onclick="toggleSeries('${safe}', this)">📺 Показати серії (${episodes.length})</button>
-
+    buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
   }
 
   const imgSrc = (isProFilm && !isPro) ? placeholderImage : film['Фото'];
