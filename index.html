@@ -966,34 +966,37 @@ function openSeries(id) {
 
   const hasSeries = filtered.some(f => f['Тип'] === 'Серіал');
 
-  if (hasSeries) {
-    const grouped = {};
-    filtered.forEach(f => {
-      if (!grouped[f['Назва']]) {
-        grouped[f['Назва']] = [];
-      }
-      grouped[f['Назва']].push(f);
-    });
+if (hasSeries) {
+  const grouped = {};
+  filtered.forEach(f => {
+    if (!grouped[f['Назва']]) {
+      grouped[f['Назва']] = [];
+    }
+    grouped[f['Назва']].push(f);
+  });
 
-    container.innerHTML = Object.keys(grouped).map(title => `
-      <div class="series-card">
-        <div class="series-header" onclick="toggleSeries('${title}')">
-          <span class="series-icon">📺</span>
-          <span class="series-title">${title}</span>
-        </div>
-        <div id="series-${title}" class="series-episodes-grid" style="display:none;">
-          ${grouped[title].map(episode => {
-            const isProFilm = episode['Доступ'] === 'PRO';
-            if (isProFilm && !isPro) {
-              return `<div><button class="search-button" onclick="alert('🔒 Лише для PRO користувачів')">🔒 PRO Доступ</button></div>`;
-            }
-            return `<div><button class="search-button" onclick="openVideoById('${episode['file_id']}')">${episode['Опис'] || 'Серія'}</button>
-            </div>`;
-          
-          }).join('')}
-        </div>
+  container.innerHTML = Object.keys(grouped).map(title => `
+    <div class="series-card">
+      <div class="series-header" onclick="toggleSeries('${title}')">
+        <span class="series-icon">📺</span>
+        <span class="series-title">${title}</span>
       </div>
-    `).join('');
+      <div id="series-${title}" class="series-episodes-grid" style="display:none;">
+        ${grouped[title].map(episode => {
+          const isProFilm = episode['Доступ'] === 'PRO';
+          if (isProFilm && !isPro) {
+            return `<div><button class="search-button" onclick="alert('🔒 Лише для PRO користувачів')">🔒 PRO Доступ</button></div>`;
+          }
+          return `<div>
+            <button class="search-button" onclick="openVideoById('${episode['file_id']}')">
+              ${episode['Опис'] || 'Серія ' + (grouped[title].indexOf(episode) + 1)}
+
+            </button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
 
   } else {
     container.innerHTML = filtered.map(film => {
