@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <style>
 
-  
+    
 
     
     body {
@@ -283,20 +283,6 @@
   margin-top: 10px;
   flex-wrap: wrap;
 }
-.film-title-overlay {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 247, 255, 0.1);
-  padding: 6px 12px;
-  border-radius: 12px;
-  color: #fff;
-  font-weight: bold;
-  text-shadow: 0 0 6px #00f7ff;
-  z-index: 2;
-  pointer-events: none;
-}
 
 
   </style>
@@ -526,7 +512,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const buttons = card.querySelectorAll('.rating-button');
   buttons.forEach(btn => {
-
     if (saved === 'like' && btn.textContent.includes('👍')) {
       btn.classList.add('active-like');
     }
@@ -952,17 +937,12 @@ function openSeries(id) {
 }
 
 
-function toggleSeries(id, buttonEl) {
-  const block = document.getElementById(`series-${id}`);
-  if (block.style.display === 'none') {
-    block.style.display = 'block';
-    if (buttonEl) buttonEl.textContent = '🔽 Сховати серії';
-  } else {
-    block.style.display = 'none';
-    if (buttonEl) buttonEl.textContent = '📺 Показати серії';
+    function toggleSeries(title) {
+  const block = document.getElementById(`series-${title}`);
+  if (block) {
+    block.style.display = (block.style.display === 'none') ? 'block' : 'none';
   }
 }
-
 
 
   function safeId(str) {
@@ -1006,38 +986,31 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
   const dislikes = Number(first['Дизлайки']) || 0;
   const safe = safeId(title);
 
-return `
-  <div class="film-card">
-    <img src="${imgSrc}" alt="${title}">
-    <h3>${title}</h3>
-    <p class="film-desc">${desc}</p>
-    <div class="film-rating">
-      IMDb: ${imdb} |
-      👍 <span id="like-count-${safe}">${likes}</span> |
-      👎 <span id="dislike-count-${safe}">${dislikes}</span>
-    </div>
-    <div class="film-actions">
-      ${isProFilm && !isPro 
-        ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-        : `
-          <button class="search-button" onclick="toggleSeries('${safe}', this)">📺 Показати серії</button>
-
-          <div id="series-${safe}" style="display: none; margin-top: 10px;">
-            ${episodes.map((ep, i) => {
+  return `
+    <div class="film-card">
+      <img src="${imgSrc}" alt="${title}">
+      <h3>${title}</h3>
+      <p class="film-desc">${desc}</p>
+      <div class="film-rating">
+        IMDb: ${imdb} |
+        👍 <span id="like-count-${safe}">${likes}</span> |
+        👎 <span id="dislike-count-${safe}">${dislikes}</span>
+      </div>
+      <div class="film-actions">
+        ${isProFilm && !isPro 
+          ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+          : episodes.map((ep, i) => {
               return `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
             }).join('')}
-          </div>
-        `
-      }
-      <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
+      </div>
+      <div style="margin-top:6px; display:flex; gap:10px;">
+        <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
+        <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
+      </div>
     </div>
-    <div style="margin-top:6px; display:flex; gap:10px;">
-      <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
-      <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
-    </div>
-  </div>
-`;
-
+  `;
+}).join('');
 
 
   } else {
