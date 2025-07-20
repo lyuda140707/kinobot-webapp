@@ -975,28 +975,43 @@ if (hasSeries) {
     grouped[f['Назва']].push(f);
   });
 
-  container.innerHTML = Object.keys(grouped).map(title => `
-    <div class="series-card">
-      <div class="series-header" onclick="toggleSeries('${title}')">
-        <span class="series-icon">📺</span>
-        <span class="series-title">${title}</span>
-      </div>
-      <div id="series-${title}" class="series-episodes-grid" style="display:none;">
-        ${grouped[title].map(episode => {
-          const isProFilm = episode['Доступ'] === 'PRO';
-          if (isProFilm && !isPro) {
-            return `<div><button class="search-button" onclick="alert('🔒 Лише для PRO користувачів')">🔒 PRO Доступ</button></div>`;
-          }
-          return `<div>
-            <button class="search-button" onclick="openVideoById('${episode['file_id']}')">
-              ${episode['Опис'] || 'Серія ' + (grouped[title].indexOf(episode) + 1)}
+container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+  const first = episodes[0];
+  const isPro = localStorage.getItem('isProUser') === 'true';
+  const isProFilm = first['Доступ'] === 'PRO';
+  const imgSrc = (isProFilm && !isPro) ? placeholderImage : first['Фото'];
+  const imdb = first['IMDb'] || "—";
+  const desc = first['Опис'] || '';
+  const likes = Number(first['Лайки']) || 0;
+  const dislikes = Number(first['Дизлайки']) || 0;
+  const safe = safeId(title);
 
-            </button>
-          </div>`;
-        }).join('')}
+  return `
+    <div class="film-card">
+      <img src="${imgSrc}" alt="${title}">
+      <h3>${title}</h3>
+      <p class="film-desc">${desc}</p>
+      <div class="film-rating">
+        IMDb: ${imdb} |
+        👍 <span id="like-count-${safe}">${likes}</span> |
+        👎 <span id="dislike-count-${safe}">${dislikes}</span>
+      </div>
+      <div class="film-actions">
+        ${isProFilm && !isPro 
+          ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+          : episodes.map((ep, i) => {
+              return `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+            }).join('')}
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
+      </div>
+      <div style="margin-top:6px; display:flex; gap:10px;">
+        <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
+        <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
       </div>
     </div>
-  `).join('');
+  `;
+}).join('');
+
 
   } else {
     container.innerHTML = filtered.map(film => {
