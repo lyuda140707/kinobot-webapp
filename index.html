@@ -1377,62 +1377,46 @@ function showSkeletonCollections() {
   localStorage.removeItem('films');
 
 
-  try {
-    const res = await fetch('https://kinobot-qm9q.onrender.com/check-subscription', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id })
-    });
+try {
+  const res = await fetch('https://kinobot-qm9q.onrender.com/check-subscription', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: user.id })
+  });
 
- 
-    const data = await res.json();
+  if (!res.ok) throw new Error(`Сервер повернув помилку: ${res.status}`);
 
-   if (!data.subscribed) {
-  document.body.innerHTML = `
-    <div style="
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #00f7ff;
-      text-align: center;
-      padding: 20px;
-      font-family: 'Russo One', sans-serif;
-    ">
-      <h1 style="font-size: 28px; margin-bottom: 20px;">❗ Щоб користуватись застосунком</h1>
-      <h2 style="font-size: 22px; margin-bottom: 40px;">Підпишіться на канал 🎥</h2>
+  const data = await res.json();
 
-     <h2 style="font-size: 22px; margin-bottom: 40px;">Активуйте доступ до контенту 🎬</h2>
-
-<div style="display: flex; flex-direction: column; gap: 15px;">
-  <a href="https://t.me/KinoTochkaUA" target="_blank" style="
-    background: #00f7ff;
-    color: #000;
-    padding: 15px 30px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 0 15px #00f7ff;
-  ">🎬 Доступ до контенту</a>
-
-  <a href="https://t.me/KinoTochkaFilms" target="_blank" style="
-    background: #00f7ff;
-    color: #000;
-    padding: 15px 30px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 0 15px #00f7ff;
-  ">🎬 Доступ до контенту</a>
-</div>
-
-      <p style="margin-top: 40px; font-size: 16px; color: #ccc;">Після підписки оновіть застосунок 📲</p>
-    </div>
-  `;
+  if (!data.subscribed) {
+    document.body.innerHTML = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: #00f7ff;
+        text-align: center;
+        padding: 20px;
+        font-family: 'Russo One', sans-serif;
+      ">
+        <h1 style="font-size: 28px; margin-bottom: 20px;">❗ Щоб користуватись застосунком</h1>
+        <h2 style="font-size: 22px; margin-bottom: 40px;">Підпишіться на канал 🎥</h2>
+        <h2 style="font-size: 22px; margin-bottom: 40px;">Активуйте доступ до контенту 🎬</h2>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+          <a href="https://t.me/KinoTochkaUA" target="_blank" style="background: #00f7ff; color: #000; padding: 15px 30px; border-radius: 12px; font-size: 18px; font-weight: bold; text-decoration: none; box-shadow: 0 0 15px #00f7ff;">🎬 Доступ до контенту</a>
+          <a href="https://t.me/KinoTochkaFilms" target="_blank" style="background: #00f7ff; color: #000; padding: 15px 30px; border-radius: 12px; font-size: 18px; font-weight: bold; text-decoration: none; box-shadow: 0 0 15px #00f7ff;">🎬 Доступ до контенту</a>
+        </div>
+        <p style="margin-top: 40px; font-size: 16px; color: #ccc;">Після підписки оновіть застосунок 📲</p>
+      </div>
+    `;
+    return;
+  }
+} catch (error) {
+  console.error('❗ Помилка перевірки підписки:', error);
+  alert("❗ Помилка перевірки підписки. Спробуйте ще раз пізніше.");
   return;
 }
 
