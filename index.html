@@ -1546,8 +1546,9 @@ if (proData.isPro && getProBtn) {
     if (results.length === 0) {
       document.getElementById('searchResults').innerHTML = `
         <p>Фільм не знайдено 😢</p>
-        <button class="suggest-button" onclick="suggestFilm()">➕ Замовити фільм для додавання</button>
+        <button class="suggest-button" onclick="requestFilm(currentQuery)">➕ Замовити фільм для додавання</button>
       `;
+    
     } else {
       
 document.getElementById('searchResults').innerHTML = results.map(f => {
@@ -2163,6 +2164,40 @@ function sendFilm(film_id) {
     }
   }
 </script>
+
+<script>
+  async function requestFilm(filmName) {
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (!telegramUser) {
+      alert("⛔ Не вдалося отримати дані користувача Telegram");
+      return;
+    }
+
+    const userId = telegramUser.id;
+
+    try {
+      const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, film_name: filmName })
+      });
+
+      const data = await res.json();
+
+      if (res.status === 403 && data?.remaining_requests === 0) {
+        alert(data.error || "⛔ Ви вичерпали ліміт запитів.");
+      } else if (data.success) {
+        alert(`✅ Запит прийнято!\nЗалишилось запитів: ${data.remaining_requests ?? "∞"}`);
+      } else {
+        alert("⚠️ Сталася помилка: " + (data.error || "Невідомо"));
+      }
+    } catch (err) {
+      console.error("❌ Запит не вдався:", err);
+      alert("❌ Помилка запиту. Перевірте з'єднання.");
+    }
+  }
+</script>
+
 
   
 </body>
