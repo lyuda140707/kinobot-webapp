@@ -1730,19 +1730,31 @@ function rateFilm(filmName, action) {
 async function suggestFilm() {
   const val = document.getElementById('searchInput').value.trim();
   if (!val) {
-    alert("Спочатку введіть назву фільму!");
+    showSuggestResult({
+      success: false,
+      is_pro: false,
+      remaining_requests: 0
+    });
     return;
   }
 
   if (isSending) {
-    alert("⏳ Запит вже надсилається...");
+    showSuggestResult({
+      success: false,
+      is_pro: false,
+      remaining_requests: 0
+    });
     return;
   }
 
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
   if (!user) {
-    alert("❗️Не вдалося отримати ваш Telegram ID");
+    showSuggestResult({
+      success: false,
+      is_pro: false,
+      remaining_requests: 0
+    });
     return;
   }
 
@@ -1750,15 +1762,13 @@ async function suggestFilm() {
   const btn = document.querySelector(".suggest-button");
   if (btn) {
     btn.disabled = true;
-    setTimeout(() => btn.disabled = false, 7000); // довше чекаємо
+    setTimeout(() => btn.disabled = false, 7000);
   }
 
   try {
-    // 🟢 КРОК 1: Пробудити сервер
     await fetch('https://kinobot-qm9q.onrender.com/ping');
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 🕒 1 секунда паузи
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // 🟢 КРОК 2: Основний запит з повтором до 3 разів
     const res = await requestWithRetry('https://kinobot-qm9q.onrender.com/request-film', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1776,17 +1786,24 @@ async function suggestFilm() {
     } else {
       const text = await res.text();
       console.warn("⚠️ Не JSON відповідь:", text.slice(0, 100));
-      alert("⚠️ Сервер ще не готовий. Спробуйте трохи пізніше.");
+      showSuggestResult({
+        success: false,
+        is_pro: false,
+        remaining_requests: 0
+      });
     }
 
   } catch (error) {
     console.error(error);
-    alert('❗️ Сталася помилка при надсиланні запиту.');
+    showSuggestResult({
+      success: false,
+      is_pro: false,
+      remaining_requests: 0
+    });
   } finally {
     isSending = false;
   }
 }
-
 
 
   
