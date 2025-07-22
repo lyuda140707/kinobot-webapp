@@ -2186,15 +2186,29 @@ function sendFilm(film_id) {
       const data = await res.json();
 
       if (res.status === 403 && data?.remaining_requests === 0) {
-        alert(data.error || "⛔ Ви вичерпали ліміт запитів.");
-      } else if (data.success) {
-        alert(`✅ Запит прийнято!\nЗалишилось запитів: ${data.remaining_requests ?? "∞"}`);
+        document.getElementById('searchResults').innerHTML = `
+          <p>⛔ Ви вичерпали ліміт запитів.</p>
+          <button class="suggest-button" onclick="openPro()">🔘 Отримати PRO</button>
+        `;
+      } else if (res.ok && data.success) {
+        document.getElementById('searchResults').innerHTML = `
+          <p>✅ Запит на фільм прийнято!<br>
+          ℹ️ У вас залишилось ${data.remaining_requests} безкоштовних запитів.</p>
+        `;
       } else {
-        alert("⚠️ Сталася помилка: " + (data.error || "Невідомо"));
+        alert(data.error || "⛔ Щось пішло не так.");
       }
-    } catch (err) {
-      console.error("❌ Запит не вдався:", err);
-      alert("❌ Помилка запиту. Перевірте з'єднання.");
+    } catch (error) {
+      alert("⛔ Сталася помилка при надсиланні запиту.");
+      console.error(error);
+    }
+  }
+
+  function openPro() {
+    const profileSection = document.getElementById("section-profile");
+    if (profileSection) {
+      showSection("section-profile");
+      window.scrollTo({ top: profileSection.offsetTop, behavior: "smooth" });
     }
   }
 </script>
