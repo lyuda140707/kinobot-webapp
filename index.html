@@ -1728,64 +1728,72 @@ function rateFilm(filmName, action) {
 
 
 async function suggestFilm() {
-  if (isSending) return;
-  isSending = true;
-
-  // Показуємо прелоадер
-  document.getElementById('suggest-loading').style.display = 'flex';
-
-  const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-  if (!telegramUser) {
-    alert("⛔ Не вдалося отримати дані користувача Telegram");
-    isSending = false;
-    document.getElementById('suggest-loading').style.display = 'none';
+  const val = document.getElementById('searchInput').value.trim();
+  if (!val) {
+    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
     return;
   }
 
-  const userId = telegramUser.id;
+  if (isSending) {
+    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
+    return;
+  }
+
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+  if (!user) {
+    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
+    return;
+  }
+
+  isSending = true;
+  const btn = document.querySelector(".suggest-button");
+  if (btn) {
+    btn.disabled = true;
+    setTimeout(() => btn.disabled = false, 7000);
+  }
 
   try {
-    const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, film_name: currentQuery })
+    // КРОК 1: Пробудження сервера
+    await fetch('https://kinobot-qm9q.onrender.com/ping');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // КРОК 2: Основний запит
+    const res = await requestWithRetry('https://kinobot-qm9q.onrender.com/request-film', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id, film_name: val })
     });
 
-    const data = await res.json();
-
-    if (res.status === 403 && data?.remaining_requests === 0) {
-      showSuggestResult(`
-        <p>⛔ Ви вичерпали ліміт.</p>
-        <button class="get-pro-button">🔘 Отримати PRO</button>
-      `);
-    } else if (res.ok) {
-
-      // ✅ ВСТАВКА: вібрація і звук
-      window.navigator.vibrate?.(100); // Вібрація на 100мс
-
-      const audio = document.getElementById("success-sound");
-      if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(() => {}); // Мовчазно, якщо не можна відтворити
-      }
-
-      showSuggestResult(`
-        <p>✅ Запит на фільм прийнято!</p>
-        <p>ℹ️ У вас залишилось <b>${data.remaining_requests}</b> безкоштовних запитів.</p>
-      `);
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const data = await res.json();
+      showSuggestResult({
+        success: data.ok !== false,
+        remaining_requests: data.remaining_requests || '∞',
+        is_pro: data.is_pro
+      });
     } else {
-      showSuggestResult(`<p>❌ Сталася помилка. Спробуйте пізніше.</p>`);
+      showSuggestResult({
+        success: false,
+        is_pro: false,
+        remaining_requests: 0
+      });
     }
   } catch (error) {
     console.error(error);
-    showSuggestResult(`<p>⚠️ Помилка мережі. Перевірте інтернет-зʼєднання.</p>`);
+    showSuggestResult({
+      success: false,
+      is_pro: false,
+      remaining_requests: 0
+    });
   } finally {
     isSending = false;
-    document.getElementById('suggest-loading').style.display = 'none';
   }
 }
 
 
+  
 
     function toggleHistory() {
   const container = document.getElementById('history-list');
@@ -2271,41 +2279,7 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
 
 
 </div>
-<div id="suggest-loading" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
-  z-index: 99999;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Russo One', sans-serif;
-  color: #00f7ff;
-  font-size: 18px;
-">
-  <div>
-    <div class="loader" style="
-      width: 40px;
-      height: 40px;
-      border: 4px solid #00f7ff;
-      border-top: 4px solid transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    "></div>
-    <div style="margin-top: 10px; text-align: center;">Обробка запиту...</div>
-  </div>
-</div>
 
-<style>
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-</style>
-
-<audio id="success-sound" src="https://cdn.jsdelivr.net/gh/innocenzi/tiny-sounds/success.mp3" preload="auto"></audio>
   
 </body>
 </html>
