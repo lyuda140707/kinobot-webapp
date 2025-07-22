@@ -284,6 +284,30 @@
   flex-wrap: wrap;
 }
 
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #222;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  font-size: 16px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease, bottom 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  bottom: 100px;
+}
+
+.toast.hidden {
+  display: none;
+}
 
   </style>
  
@@ -2213,7 +2237,7 @@ function sendFilm(film_id) {
   }
 </script>
 
-
+<div id="toast" class="toast hidden"></div>
   
 </body>
 </html>
