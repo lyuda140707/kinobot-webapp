@@ -2194,8 +2194,45 @@ function showToast(message) {
     }
   }
 </script>
+<script>
+  // ...твій попередній код
 
-async function requestFilm(filmName) {
+  async function requestFilm(filmName) {
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (!telegramUser) {
+      alert("⛔ Не вдалося отримати дані користувача Telegram");
+      return;
+    }
+
+    const userId = telegramUser.id;
+
+    try {
+      const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, film_name: filmName })
+      });
+
+      const data = await res.json();
+
+      if (res.status === 403 && data?.remaining_requests === 0) {
+        document.getElementById('searchResults').innerHTML = `
+          <p>⛔ Ви вичерпали ліміт.</p>
+          <button class="suggest-button" onclick="openPro()">🔘 Отримати PRO</button>
+        `;
+      } else {
+        document.getElementById('searchResults').innerHTML = `
+          <p>✅ Запит на фільм прийнято!</p>
+          <p>ℹ️ У вас залишилось ${data.remaining_requests} безкоштовних запитів.</p>
+        `;
+      }
+    } catch (error) {
+      console.error("❌ Помилка при запиті фільму:", error);
+      alert("Щось пішло не так. Спробуйте пізніше.");
+    }
+  }
+</script>
+
 
 
 <div id="toast" class="toast hidden"></div>
