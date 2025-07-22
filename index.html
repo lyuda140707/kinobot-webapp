@@ -2192,11 +2192,12 @@ function showToast(message) {
 
 <script>
   async function requestFilm(filmName) {
-    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-    if (!telegramUser) {
+    if (!window.Telegram?.WebApp?.initDataUnsafe?.user) {
       showToast("⛔ Не вдалося отримати дані користувача Telegram");
       return;
     }
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+ 
 
     const userId = telegramUser.id;
 
