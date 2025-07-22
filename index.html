@@ -1730,31 +1730,19 @@ function rateFilm(filmName, action) {
 async function suggestFilm() {
   const val = document.getElementById('searchInput').value.trim();
   if (!val) {
-    showSuggestResult({
-      success: false,
-      is_pro: false,
-      remaining_requests: 0
-    });
+    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
     return;
   }
 
   if (isSending) {
-    showSuggestResult({
-      success: false,
-      is_pro: false,
-      remaining_requests: 0
-    });
+    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
     return;
   }
 
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
   if (!user) {
-    showSuggestResult({
-      success: false,
-      is_pro: false,
-      remaining_requests: 0
-    });
+    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
     return;
   }
 
@@ -1766,9 +1754,11 @@ async function suggestFilm() {
   }
 
   try {
+    // КРОК 1: Пробудження сервера
     await fetch('https://kinobot-qm9q.onrender.com/ping');
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // КРОК 2: Основний запит
     const res = await requestWithRetry('https://kinobot-qm9q.onrender.com/request-film', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1779,20 +1769,17 @@ async function suggestFilm() {
     if (contentType && contentType.includes("application/json")) {
       const data = await res.json();
       showSuggestResult({
-        success: true,
+        success: data.ok !== false,
         remaining_requests: data.remaining_requests || '∞',
         is_pro: data.is_pro
       });
     } else {
-      const text = await res.text();
-      console.warn("⚠️ Не JSON відповідь:", text.slice(0, 100));
       showSuggestResult({
         success: false,
         is_pro: false,
         remaining_requests: 0
       });
     }
-
   } catch (error) {
     console.error(error);
     showSuggestResult({
