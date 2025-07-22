@@ -1346,6 +1346,9 @@ function showSkeletonCollections() {
     return;
   }
 
+  localStorage.removeItem('films');
+
+
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/check-subscription', {
       method: 'POST',
@@ -1463,6 +1466,14 @@ if (proData.isPro && getProBtn) {
 
   // Завантажити фільми і факти
   loadFilms();
+
+    // Якщо через 6 секунд фільми не завантажились — попередження
+  setTimeout(() => {
+    if (!films.length) {
+      alert("⚠️ Можливо, слабкий інтернет. Спробуй ще раз або перезапусти застосунок.");
+    }
+  }, 6000);
+
  
 
   // Показати фільтри країн і років
