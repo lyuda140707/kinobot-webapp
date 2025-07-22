@@ -2209,6 +2209,7 @@ function sendFilm(film_id) {
     setTimeout(() => modal.style.display = 'none', 300);
   }
 
+<script>
   async function requestFilm(filmName) {
     const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
     if (!telegramUser) {
@@ -2235,6 +2236,7 @@ function sendFilm(film_id) {
 
     } catch (error) {
       console.error("❗ Помилка запиту:", error);
+      // 🔻 Тепер показує гарне модальне вікно, а не alert
       showSuggestResult({
         success: false,
         remaining_requests: 0,
