@@ -2203,36 +2203,39 @@ function showToast(message) {
 
 <script>
   async function requestFilm(filmName) {
-  const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-  if (!telegramUser) {
-    showToast("⛔ Не вдалося отримати дані користувача Telegram");
-    return;
-  }
-
-  const userId = telegramUser.id;
-
-  try {
-    const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, film_name: filmName })
-    });
-
-    const data = await res.json();
-
-    if (res.status === 403 && data?.remaining_requests === 0) {
-      showToast("⛔ Ви вичерпали ліміт запитів. 🔘 Отримайте PRO");
-    } else if (res.ok && data.success) {
-      showToast(`✅ Запит прийнято! Залишилось: ${data.remaining_requests}`);
-    } else {
-      showToast(data.error || "⛔ Щось пішло не так.");
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (!telegramUser) {
+      showToast("⛔ Не вдалося отримати дані користувача Telegram");
+      return;
     }
-  } catch (err) {
-    showToast("❌ Сталася помилка при надсиланні запиту.");
-  }
-}
 
+    const userId = telegramUser.id;
+
+    try {
+      const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, film_name: filmName })
+      });
+
+      const data = await res.json();
+      console.log("Response status:", res.status);
+      console.log("Response data:", data);
+
+      if (res.status === 403 || data?.detail?.includes("exceeded")) {
+        showToast("⛔ Ви вичерпали ліміт запитів. 🔘 Отримайте PRO");
+      } else if (res.ok && data.success) {
+        showToast(`✅ Запит прийнято! Залишилось: ${data.remaining_requests}`);
+      } else {
+        showToast(data.error || data.detail || "⛔ Щось пішло не так.");
+      }
+    } catch (err) {
+      showToast("❌ Сталася помилка при надсиланні запиту.");
+      console.error(err);
+    }
+  }
 </script>
+
 <script>
 function showToast(message) {
   const toast = document.getElementById("toast");
