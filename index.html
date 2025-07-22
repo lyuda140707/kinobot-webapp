@@ -1310,19 +1310,10 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
   if (btn) btn.classList.add('active');
 
   if (tabId === 'favorites') showFavorites();
-    
   if (tabId === 'account') {
-  closeDonatePopup();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-
-  // ✅ Якщо раніше натискав "Отримати PRO", покажи кнопку "Я оплатив"
-  if (localStorage.getItem('proPaymentStarted') === 'true' && user) {
-    showConfirmPaidButton(user);
-  }
-}
+    closeDonatePopup();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 
@@ -1911,23 +1902,20 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
 }
 
 document.getElementById('getProBtn').addEventListener('click', () => {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-  if (!user) {
-    alert("❗️ Не вдалося отримати ваш Telegram ID");
-    return;
-  }
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user;
+    if (!user) {
+        alert("❗️ Не вдалося отримати ваш Telegram ID");
+        return;
+    }
 
-  // ✅ Зберігаємо, що користувач почав оплату
-  localStorage.setItem('proPaymentStarted', 'true');
+    const paymentInfo = "💳 PRO доступ — будь-яка сума, щоб бот залишався для своїх 😉";
+    const paymentLink = "https://send.monobank.ua/jar/2FdmSYjoGo";
 
-  const paymentInfo = "💳 PRO доступ — будь-яка сума, щоб бот залишався для своїх 😉";
-  const paymentLink = "https://send.monobank.ua/jar/2FdmSYjoGo";
+    alert(paymentInfo);
+    window.open(paymentLink, "_blank");
 
-  alert(paymentInfo);
-  window.open(paymentLink, "_blank");
-
-  showConfirmPaidButton(user);
+    showConfirmPaidButton(user); // ⬅️ Передаємо весь обʼєкт user
 });
 
 
@@ -1943,15 +1931,13 @@ function showConfirmPaidButton(user) {
     btn.parentNode.replaceChild(newBtn, btn);
 
     newBtn.onclick = () => {
-  // ✅ Видаляємо прапорець, бо користувач натиснув "Я оплатив"
-  localStorage.removeItem('proPaymentStarted');
+        const username = (user.username !== undefined) ? user.username : '';
+        const first_name = (user.first_name !== undefined) ? user.first_name : '';
 
-  const username = (user.username !== undefined) ? user.username : '';
-  const first_name = (user.first_name !== undefined) ? user.first_name : '';
-
-  notifyPayment(user.id, username, first_name);
-  newBtn.style.display = "none";
-};
+        notifyPayment(user.id, username, first_name);
+        newBtn.style.display = "none";
+    };
+}
 
 
 
