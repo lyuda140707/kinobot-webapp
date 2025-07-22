@@ -1759,6 +1759,16 @@ async function suggestFilm() {
         <button class="get-pro-button">🔘 Отримати PRO</button>
       `);
     } else if (res.ok) {
+
+      // ✅ ВСТАВКА: вібрація і звук
+      window.navigator.vibrate?.(100); // Вібрація на 100мс
+
+      const audio = document.getElementById("success-sound");
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {}); // Мовчазно, якщо не можна відтворити
+      }
+
       showSuggestResult(`
         <p>✅ Запит на фільм прийнято!</p>
         <p>ℹ️ У вас залишилось <b>${data.remaining_requests}</b> безкоштовних запитів.</p>
@@ -1774,6 +1784,7 @@ async function suggestFilm() {
     document.getElementById('suggest-loading').style.display = 'none';
   }
 }
+
 
 
     function toggleHistory() {
@@ -2294,6 +2305,7 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
 }
 </style>
 
+<audio id="success-sound" src="https://cdn.jsdelivr.net/gh/innocenzi/tiny-sounds/success.mp3" preload="auto"></audio>
   
 </body>
 </html>
