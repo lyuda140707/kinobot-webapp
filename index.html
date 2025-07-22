@@ -2082,6 +2082,17 @@ function sendFilm(film_id) {
 }
 
 
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 3000);
+}
     
 </script>
 
@@ -2192,50 +2203,50 @@ function sendFilm(film_id) {
 
 <script>
   async function requestFilm(filmName) {
-    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-    if (!telegramUser) {
-      alert("⛔ Не вдалося отримати дані користувача Telegram");
-      return;
-    }
-
-    const userId = telegramUser.id;
-
-    try {
-      const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, film_name: filmName })
-      });
-
-      const data = await res.json();
-
-      if (res.status === 403 && data?.remaining_requests === 0) {
-        document.getElementById('searchResults').innerHTML = `
-          <p>⛔ Ви вичерпали ліміт запитів.</p>
-          <button class="suggest-button" onclick="openPro()">🔘 Отримати PRO</button>
-        `;
-      } else if (res.ok && data.success) {
-        document.getElementById('searchResults').innerHTML = `
-          <p>✅ Запит на фільм прийнято!<br>
-          ℹ️ У вас залишилось ${data.remaining_requests} безкоштовних запитів.</p>
-        `;
-      } else {
-        alert(data.error || "⛔ Щось пішло не так.");
-      }
-    } catch (error) {
-      alert("⛔ Сталася помилка при надсиланні запиту.");
-      console.error(error);
-    }
+  const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+  if (!telegramUser) {
+    showToast("⛔ Не вдалося отримати дані користувача Telegram");
+    return;
   }
 
-  function openPro() {
-    const profileSection = document.getElementById("section-profile");
-    if (profileSection) {
-      showSection("section-profile");
-      window.scrollTo({ top: profileSection.offsetTop, behavior: "smooth" });
+  const userId = telegramUser.id;
+
+  try {
+    const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, film_name: filmName })
+    });
+
+    const data = await res.json();
+
+    if (res.status === 403 && data?.remaining_requests === 0) {
+      showToast("⛔ Ви вичерпали ліміт запитів. 🔘 Отримайте PRO");
+    } else if (res.ok && data.success) {
+      showToast(`✅ Запит прийнято! Залишилось: ${data.remaining_requests}`);
+    } else {
+      showToast(data.error || "⛔ Щось пішло не так.");
     }
+  } catch (err) {
+    showToast("❌ Сталася помилка при надсиланні запиту.");
   }
+}
+
 </script>
+<script>
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 3000);
+}
+</script>
+
 
 <div id="toast" class="toast hidden"></div>
   
