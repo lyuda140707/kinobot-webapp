@@ -1528,28 +1528,31 @@ if (proData.isPro && getProBtn) {
       filterByGenre(genre);
     });
   });
+// Пошук
+document.getElementById('searchInput').addEventListener('input', () => {
+  const val = document.getElementById('searchInput').value.trim();
+  const query = val.toLowerCase();
+  const results = [];
+  const seenTitles = new Set();
 
-  // Пошук
-  document.getElementById('searchInput').addEventListener('input', () => {
-    const val = document.getElementById('searchInput').value.toLowerCase();
-    const results = [];
-    const seenTitles = new Set();
+  films.forEach(f => {
+    const title = f['Назва'].toLowerCase();
+    if (title.includes(query) && !seenTitles.has(title)) {
+      results.push(f);
+      seenTitles.add(title);
+    }
+  });
 
-    films.forEach(f => {
-      const title = f['Назва'].toLowerCase();
-      if (title.includes(val) && !seenTitles.has(title)) {
-        results.push(f);
-        seenTitles.add(title);
-        }
-      });
-    
-    if (results.length === 0) {
-      document.getElementById('searchResults').innerHTML = `
-        <p>Фільм не знайдено 😢</p>
-        <button class="suggest-button" onclick="requestFilm(currentQuery)">➕ Замовити фільм для додавання</button>
-      `;
-    
-    } else {
+  if (results.length === 0) {
+    document.getElementById('searchResults').innerHTML = `
+      <p>Фільм не знайдено 😢</p>
+      <button class="suggest-button" onclick="requestFilm('${val.replace(/'/g, "\\'")}')">➕ Замовити фільм для додавання</button>
+    `;
+  } else {
+    // тут твій код з .map(...) для показу знайдених фільмів
+  }
+});
+
       
 document.getElementById('searchResults').innerHTML = results.map(f => {
   const isProFilm = f['Доступ'] === 'PRO';
