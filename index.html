@@ -1959,11 +1959,16 @@ let isPaymentSending = false;
 
 async function notifyPayment(userId, username, firstName) {
   if (isPaymentSending) {
-    alert("⏳ Запит вже надсилається...");
+    showSuggestResult({
+      success: false,
+      is_pro: false,
+      remaining_requests: 0
+    });
     return;
   }
 
   isPaymentSending = true;
+
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
       method: 'POST',
@@ -1974,15 +1979,30 @@ async function notifyPayment(userId, username, firstName) {
         first_name: firstName
       })
     });
+
     const data = await res.json();
+
     if (data.ok) {
-      alert("✅ Запит на активацію PRO надіслано! Ми перевіримо оплату.");
+      showSuggestResult({
+        success: true,
+        is_pro: true,
+        remaining_requests: 0
+      });
     } else {
-      alert("❗ Помилка: не вдалося надіслати запит.");
+      showSuggestResult({
+        success: false,
+        is_pro: false,
+        remaining_requests: 0
+      });
     }
+
   } catch (e) {
     console.error(e);
-    alert("❗ Сталася помилка при надсиланні запиту.");
+    showSuggestResult({
+      success: false,
+      is_pro: false,
+      remaining_requests: 0
+    });
   } finally {
     isPaymentSending = false;
   }
