@@ -1768,7 +1768,11 @@ async function suggestFilm() {
     const contentType = res.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       const data = await res.json();
-      alert('✅ Запит на додавання фільму надіслано!');
+      showSuggestResult({
+        success: true,
+        remaining_requests: data.remaining_requests || '∞',
+        is_pro: data.is_pro
+      });
     } else {
       const text = await res.text();
       console.warn("⚠️ Не JSON відповідь:", text.slice(0, 100));
@@ -2163,6 +2167,85 @@ function sendFilm(film_id) {
     }
   }
 </script>
+<!-- Модальне вікно -->
+<div id="suggest-modal" style="
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;
+  opacity: 0; transition: opacity 0.3s ease;
+">
+  <div style="background:#222; padding:22px 20px; border-radius:12px; max-width:310px; text-align:center; box-shadow:0 0 15px #0ff;">
+    <div id="suggest-modal-content" style="color:#fff; font-size:16px; line-height:1.5;"></div>
+    <div style="margin-top:20px;">
+      <button onclick="closeSuggestModal()" style="padding:8px 16px; background:#00f7ff; color:#000; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">ОК</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function showSuggestResult({ success, remaining_requests, is_pro }) {
+    const modal = document.getElementById('suggest-modal');
+    const content = document.getElementById('suggest-modal-content');
+
+    if (success) {
+      content.innerHTML = `
+        ✅ Запит на фільм прийнято!<br><br>
+        🆓 Залишилось: <b>${remaining_requests}</b> безкоштовних запитів.
+      `;
+    } else {
+      content.innerHTML = `
+        ⛔ Ви вичерпали ліміт запитів.<br><br>
+        🔓 <b>Отримайте PRO</b> і замовляйте фільми без обмежень!
+      `;
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => modal.style.opacity = '1', 10);
+  }
+
+  function closeSuggestModal() {
+    const modal = document.getElementById('suggest-modal');
+    modal.style.opacity = '0';
+    setTimeout(() => modal.style.display = 'none', 300);
+  }
+
+  async function requestFilm(filmName) {
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (!telegramUser) {
+      alert("⛔ Не вдалося отримати дані користувача Telegram");
+      return;
+    }
+
+    const userId = telegramUser.id;
+
+    try {
+      const res = await fetch("https://kinobot-qm9q.onrender.com/request-film", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, film_name: filmName })
+      });
+
+      const data = await res.json();
+
+      showSuggestResult({
+        success: res.ok,
+        remaining_requests: data?.remaining_requests || 0,
+        is_pro: data?.is_pro || false
+      });
+
+    } catch (error) {
+      console.error("❗ Помилка запиту:", error);
+      showSuggestResult({
+        success: false,
+        remaining_requests: 0,
+        is_pro: false
+      });
+    }
+  }
+</script>
+
+
+</div>
 
   
 </body>
