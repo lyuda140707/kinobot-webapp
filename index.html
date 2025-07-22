@@ -1546,7 +1546,8 @@ if (proData.isPro && getProBtn) {
     if (results.length === 0) {
       document.getElementById('searchResults').innerHTML = `
         <p>Фільм не знайдено 😢</p>
-        <button class="suggest-button" onclick="requestFilm(currentQuery)">➕ Замовити фільм для додавання</button>
+        <button class="suggest-button" onclick="requestFilm('${val.replace(/'/g, "\\'")}')">➕ Замовити фільм для додавання</button>
+
       `;
     
     } else {
