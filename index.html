@@ -1104,6 +1104,7 @@ function filterByGenre(genre) {
   const container = document.getElementById('genre-results');
   if (!filtered.length) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    container.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
@@ -1160,6 +1161,7 @@ function filterByGenre(genre) {
   container.innerHTML = '';
   offset = 0;
   renderBatch();
+  container.scrollIntoView({ behavior: 'smooth' });
 }
 
 
