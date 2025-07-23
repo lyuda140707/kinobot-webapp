@@ -637,9 +637,12 @@ async function loadFilms() {
     showYearFilters();
 
     isDataLoaded = true;
+
+    // Перший батч карток + оновлення їх рейтингів
     currentFilms = films;
     offset = 0;
-
+    renderBatch();
+    restoreRatingsUI();
 
     return;
   }
@@ -647,8 +650,13 @@ async function loadFilms() {
   // Якщо в кеші немає — підтягуємо з мережі
   await fetchAndUpdateFilms();
   isDataLoaded = true;
+
+  // Перший батч карток + оновлення їх рейтингів
   currentFilms = films;
   offset = 0;
+  renderBatch();
+  restoreRatingsUI();
+}
 
 
 
@@ -1450,12 +1458,9 @@ function switchTab(tabId, btn) {
     offset = 0;
   } else if (tabId === 'categories') {
     document.getElementById('genre-results').innerHTML = '';
-    currentFilms = films;
+    currentFilms = [];
     offset = 0;
-    renderBatch();
-    restoreRatingsUI();
   }
-
 
   if (tabId === 'account') {
     if (!isDataLoaded) {
