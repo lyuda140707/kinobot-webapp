@@ -1418,25 +1418,30 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
 
 function switchTab(tabId, btn) {
-  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const sections = document.querySelectorAll('.section');
+  const buttons = document.querySelectorAll('.nav button');
+  sections.forEach((section) => section.classList.remove('active'));
+  buttons.forEach((button) => button.classList.remove('active'));
 
-  const containersToClear = ['genre-results', 'searchResults', 'fav-list'];
-  containersToClear.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '';
-  });
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
 
-  const target = document.getElementById(tabId);
-  if (target) target.classList.add('active');
-  if (btn) btn.classList.add('active');
+  const genreBlock = document.getElementById('genre-results');
 
-  if (tabId === 'favorites') {
-  if (!isDataLoaded) {
-    alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
-    return;
+  if (tabId === 'categories') {
+    if (genreBlock) {
+      genreBlock.innerHTML = '';
+    }
+    currentFilms = films;
+    offset = 0;
+    renderBatch();
+    restoreRatingsUI();
+  } else {
+    // Якщо йдемо не в Категорії — очищаємо genre-results
+    if (genreBlock) {
+      genreBlock.innerHTML = '';
+    }
   }
-  showFavorites();
 }
 
 
@@ -2036,19 +2041,18 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
     <div class="film-card">
       <img src="${imgSrc}" alt="${title}">
       <h3>${title}</h3>
-      <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
+      <p class="film-imdb">IMDb: ${imdb}</p>
       <p class="film-desc">${desc}</p>
-      
-      
-        👍 <span id="like-count-${safe}">${likes}</span> |
-        👎 <span id="dislike-count-${safe}">${dislikes}</span>
-      </div>
+      👍 <span id="like-count-${safe}">${likes}</span> |
+      👎 <span id="dislike-count-${safe}">${dislikes}</span>
       <div class="film-actions">
-        ${isProFilm && !isPro 
-          ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-          : episodes.map((ep, i) => {
-              return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
-            }).join('')}
+        ${
+          isProFilm && !isPro 
+            ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+            : episodes.map((ep, i) => {
+                return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+              }).join('')
+        }
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
       </div>
       <div style="margin-top:6px; display:flex; gap:10px;">
@@ -2058,6 +2062,7 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
     </div>
   `;
 }).join('');
+
 
 
     container.scrollIntoView({ behavior: 'smooth' });
