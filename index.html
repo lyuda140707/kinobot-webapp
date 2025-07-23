@@ -907,7 +907,7 @@ function showSeries(type = 'Серіал') {
   }, {});
 
 // Генеруємо картки
-const html = Object.entries(grouped).map(([title, episodes]) => {
+  const html = Object.entries(grouped).map(([title, episodes]) => {
   const safe      = title.replace(/[^\w\d]/g, '_');
   const isPro     = localStorage.getItem('isProUser') === 'true';
   const isProFilm = episodes[0]['Доступ'] === 'PRO';
