@@ -330,6 +330,11 @@
 }
 
 
+/* маленький шрифт для лічильників лайків/дизлайків */
+.film-rating span {
+  font-size: 12px;
+  vertical-align: middle;
+}
 
   </style>
  
@@ -541,26 +546,45 @@ function renderBatch() {
     const imgSrc    = (isProFilm && !isPro)
                       ? placeholderImage
                       : (film['Фото'] || placeholderImage);
-return `
-  <div class="film-card">
-    <img src="${imgSrc}" alt="${film['Назва']}">
-    <h3>${film['Назва']}</h3>
-    <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
-    <p>${film['Опис'] || ''}</p>
-    ${renderControls(film['Назва'], film['Опис'])}
-    <div class="film-actions">
-      <button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>
-    </div>
-  </div>
-`;
+    const id        = safeId(film['Назва']);
 
+    return `
+      <div class="film-card">
+        <!-- Постер -->
+        <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
+
+        <!-- Назва -->
+        <h3>${film['Назва']}</h3>
+
+        <!-- Лайки / Дизлайки -->
+        <div class="film-rating">
+          👍 <span id="like-count-${id}">${film['Лайки'] || 0}</span> |
+          👎 <span id="dislike-count-${id}">${film['Дизлайки'] || 0}</span>
+        </div>
+
+        <!-- IMDb та опис -->
+        <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
+        <p>${film['Опис'] || ''}</p>
+
+        <!-- Кнопки лайк/дизлайк/улюблене -->
+        ${renderControls(film['Назва'], film['Опис'])}
+
+        <!-- Дивитись / PRO -->
+        <div class="film-actions">
+          ${isProFilm && !isPro
+            ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+            : (film['Посилання']
+                ? `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`
+                : ``)
+          }
+        </div>
+      </div>
+    `;
   }).join('');
 
   container.insertAdjacentHTML('beforeend', html);
   offset += batch.length;
 }
-
-
 
 
 
@@ -588,17 +612,34 @@ async function loadFilms() {
     films = JSON.parse(cached);
     shuffleArray(films);
     console.log('✅ Фільми з кешу');
+
+    // Оновлюємо UI
     showFilmOfTheDay();
     showCollections();
     showGenres();
     showCountryFilters();
     showYearFilters();
-isDataLoaded = true;    // ← додали
+
+    isDataLoaded = true;
+
+    // Перший батч карток + оновлення їх рейтингів
+    currentFilms = films;
+    offset = 0;
+    renderBatch();
+    restoreRatingsUI();
+
     return;
   }
 
+  // Якщо в кеші немає — підтягуємо з мережі
   await fetchAndUpdateFilms();
-isDataLoaded = true;       // ← і тут
+  isDataLoaded = true;
+
+  // Перший батч карток + оновлення їх рейтингів
+  currentFilms = films;
+  offset = 0;
+  renderBatch();
+  restoreRatingsUI();
 }
 
 
@@ -973,22 +1014,25 @@ const grouped = seriesFilms.reduce((acc, ep) => {
       }
     }).join('');
 
-    return `
-      <div class="film-card">
-        <img src="${poster}" class="film-img" alt="${title}">
-        <h3>${title}</h3>
-        <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+const id = safe;
+return `
+  <div class="film-card">
+    <img src="${poster}" class="film-img" alt="${title}">
+    <!-- Лічильники лайків/дизлайків -->
+    <div class="film-rating">
+      👍 <span id="like-count-${id}">${episodes[0]['Лайки']||0}</span> |
+      👎 <span id="dislike-count-${id}">${episodes[0]['Дизлайки']||0}</span>
+    </div>
+    <h3>${title}</h3>
+    <!-- … -->
+    ${btn}
+    <!-- … -->
+  </div>
+`;
 
-        ${renderControls(title, episodes[0]['Опис'])}
-        ${btn}
-        <div id="episodes-${safe}"
-             class="series-episodes-grid"
-             style="display:none;"
-             data-count="${count}">
-          ${epsHtml}
-        </div>
-      </div>
-    `;
+
+
+
   }).join('');
 
   container.innerHTML = html;
@@ -1007,24 +1051,29 @@ function openSeries(id) {
     return str.replace(/[^\w\d]/g, '_');
   }
 
-// ─── Хелпер для рендеру лайків/дизлайків та “Улюблене” ───
 function renderControls(title, description) {
+  const id = safeId(title);
   const prev = localStorage.getItem(`rating-${title}`);
   const likeClass    = prev === 'like'    ? 'active-like'    : '';
   const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
-  const descEscaped = (description||'').replace(/'/g, "\\'");
+  const descEsc = (description||'').replace(/'/g, "\\'");
   return `
     <div style="display:flex; gap:8px; margin:6px 0;">
       <button class="rating-button ${likeClass}"
-              onclick="rateFilm('${title}', 'like')">👍</button>
+              onclick="rateFilm('${title}', 'like')">
+        👍 <span id="like-count-btn-${id}">${0 /* або початкове film['Лайки'] */}</span>
+      </button>
+
       <button class="rating-button ${dislikeClass}"
-              onclick="rateFilm('${title}', 'dislike')">👎</button>
+              onclick="rateFilm('${title}', 'dislike')">
+        👎 <span id="dislike-count-btn-${id}">${0 /* або film['Дизлайки'] */}</span>
+      </button>
     </div>
     <button class="fav-button"
-            onclick="addToFavorites('${title}','${descEscaped}')">💛</button>
+            onclick="addToFavorites('${title}','${descEsc}')">💛</button>
   `;
 }
-// ───────────────────────────────────────────────────
+
 
     
 function filterByGenre(genre) {
@@ -1149,18 +1198,24 @@ function filterByCountry(country) {
       buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
     }
 
+const id = safeId(film['Назва']);
 return `
   <div class="film-card">
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
-    <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
+
+    <div class="film-rating">
+      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
+      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
+    </div>
+
+    <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
     ${renderControls(film['Назва'], film['Опис'])}
-    <div class="film-actions">
-      ${buttons}
-    </div>
+    <div class="film-actions">${buttons}</div>
   </div>
 `;
+
 
   }).join('');
 
@@ -1197,18 +1252,24 @@ function filterByYear(year) {
       buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
     }
 
+const id = safeId(film['Назва']);
 return `
   <div class="film-card">
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
-    <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
+
+    <div class="film-rating">
+      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
+      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
+    </div>
+
+    <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
     ${renderControls(film['Назва'], film['Опис'])}
-    <div class="film-actions">
-      ${buttons}
-    </div>
+    <div class="film-actions">${buttons}</div>
   </div>
 `;
+
 
 
   }).join('');
@@ -1643,7 +1704,10 @@ document.getElementById('searchResults').innerHTML = results.map(f => {
         </div>
         <div class="film-actions">
           ${buttons}
-          <button class="fav-button" onclick="…">💛 Улюблене</button>
+          <button class="fav-button"
+                  onclick="addToFavorites('${f['Назва']}', '${(f['Опис']||'').replace(/'/g, "\\'")}')">
+          💛
+          </button>
         </div>
         <div style="margin-top:6px; display:flex; gap:10px;">
           <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'like')">
