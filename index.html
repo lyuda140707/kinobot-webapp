@@ -423,6 +423,7 @@
   </div>
 
   <div id="genre-results"></div>
+  <div id="list-end-sentinel"></div>
 </div>
 
 
@@ -492,6 +493,33 @@
     
     let films = [];
     let isDataLoaded = false;
+
+    const BATCH_SIZE = 50;
+    let currentFilms = [];
+    let offset = 0;
+
+function renderBatch() {
+  const container = document.getElementById('genre-results');
+  // беремо наступні BATCH_SIZE фільмів
+  const batch = currentFilms.slice(offset, offset + BATCH_SIZE);
+
+  // будуємо HTML-картки
+  const html = batch.map(film => `
+    <div class="film-card">
+      <img src="${film['Фото']}" alt="${film['Назва']}">
+      <h3>${film['Назва']}</h3>
+      <p class="film-desc">${film['Опис'] || ''}</p>
+      <button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>
+    </div>
+  `).join('');
+
+  // додаємо до кінця списку
+  container.insertAdjacentHTML('beforeend', html);
+
+  // зсуваємо offset
+  offset += batch.length;
+}
+
     
 
 
@@ -516,24 +544,25 @@
 async function loadFilms() {
   const cached = localStorage.getItem('films');
   const ts = localStorage.getItem('filmsTimestamp');
-  const maxAge = 1000 * 60 * 60 * 48; // 48 годин у мс
+  const maxAge = 1000 * 60 * 60 * 48; // 48 годин
 
-  // Якщо є кеш і йому менше 48 годин – використовуємо його
   if (cached && ts && (Date.now() - Number(ts) < maxAge)) {
     films = JSON.parse(cached);
     shuffleArray(films);
-    console.log('✅ Фільми завантажені з кешу (<48 год)');
+    console.log('✅ Фільми з кешу');
     showFilmOfTheDay();
     showCollections();
     showGenres();
     showCountryFilters();
     showYearFilters();
+isDataLoaded = true;    // ← додали
     return;
   }
 
-  // Інакше – оновлюємо з сервера
   await fetchAndUpdateFilms();
+isDataLoaded = true;       // ← і тут
 }
+
 
 
 async function fetchAndUpdateFilms() {
@@ -587,9 +616,9 @@ async function openVideo(filmName) {
   document.getElementById("loading-indicator").style.display = "block";
 
   // ⛔ Заблокуємо всі кнопки "Дивитись" на 3 секунди
-  document.querySelectorAll('.watch-button').forEach(btn => btn.disabled = true);
+  document.querySelectorAll('.search-button').forEach(btn => btn.disabled = true);
   setTimeout(() => {
-    document.querySelectorAll('.watch-button').forEach(btn => btn.disabled = false);
+    document.querySelectorAll('.search-button').forEach(btn => btn.disabled = false);
   }, 3000);
 
   // ⏳ Затримка 2 секунди перед запитом
@@ -890,7 +919,7 @@ function showSeries(type = 'Серіал') {
             if (isProFilm && !isPro) {
               button = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
             } else {
-              button = `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">🎬 Дивитись</button>`;
+              button = `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">🎬 Дивитись</button>`;
             }
 
             return `
@@ -942,119 +971,26 @@ function openSeries(id) {
     
 function filterByGenre(genre) {
   switchTab('categories');
-  const container = document.getElementById('genre-results');
-  const isPro = localStorage.getItem('isProUser') === 'true';
-
-  let filtered = films.filter(f =>
+  // відбираємо всі підходящі фільми в currentFilms
+  currentFilms = films.filter(f =>
     f['Жанр']?.toLowerCase() === genre.toLowerCase() ||
     f['Добірка']?.toLowerCase() === genre.toLowerCase()
   );
 
-  if (filtered.length === 0) {
+  const container = document.getElementById('genre-results');
+  // якщо нічого не знайдено — показати повідомлення
+  if (currentFilms.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  const hasSeries = filtered.some(f => f['Тип'] === 'Серіал');
+  // очищаємо список і скидаємо лічильник
+  container.innerHTML = '';
+  offset = 0;
 
-  if (hasSeries) {
-    const grouped = {};
-    filtered.forEach(f => {
-      if (!grouped[f['Назва']]) {
-        grouped[f['Назва']] = [];
-      }
-      grouped[f['Назва']].push(f);
-    });
-
-    container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-      const first = episodes[0];
-      const isProFilm = first['Доступ'] === 'PRO';
-      const imgSrc = (isProFilm && !isPro) ? placeholderImage : first['Фото'];
-      const imdb = first['IMDb'] || "—";
-      const desc = first['Опис'] || '';
-      const likes = Number(first['Лайки']) || 0;
-      const dislikes = Number(first['Дизлайки']) || 0;
-      const safe = safeId(title);
-
-      return `
-        <div class="film-card">
-          <img src="${imgSrc}" alt="${title}">
-          <h3>${title}</h3>
-          <p class="film-desc">${desc}</p>
-          <div class="film-rating">
-            IMDb: ${imdb} |
-            👍 <span id="like-count-${safe}">${likes}</span> |
-            👎 <span id="dislike-count-${safe}">${dislikes}</span>
-          </div>
-
-          <button class="search-button" onclick="toggleSeries('${safe}', this)">📺 Показати серії (${episodes.length})</button>
-
-          <div id="series-${safe}" style="display:none; margin-top:10px;">
-            ${isProFilm && !isPro 
-              ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-              : episodes.map((ep, i) => {
-                  return `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
-                }).join('')}
-          </div>
-
-          <div class="film-actions">
-            <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
-          </div>
-
-          <div style="margin-top:6px; display:flex; gap:10px;">
-            <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
-            <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-  } else {
-    container.innerHTML = filtered.map(film => {
-      const isProFilm = film['Доступ'] === 'PRO';
-      const imgSrc = (isProFilm && !isPro) ? placeholderImage : film['Фото'];
-      const title = film['Назва'];
-      const desc = film['Опис'] || '';
-      const imdb = film['IMDb'] || "—";
-      const likes = Number(film['Лайки']) || 0;
-      const dislikes = Number(film['Дизлайки']) || 0;
-      const safe = safeId(title);
-
-      let buttons = '';
-      if (isProFilm && !isPro) {
-        buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-      } else if (film['Посилання']) {
-        buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${title}')">▶️ Дивитись</button>`;
-      }
-
-      return `
-        <div class="film-card">
-          <img src="${imgSrc}" alt="${title}">
-          <h3>${title}</h3>
-          <p class="film-desc">${desc}</p>
-          <div class="film-rating">
-            IMDb: ${imdb} |
-            👍 <span id="like-count-${safe}">${likes}</span> |
-            👎 <span id="dislike-count-${safe}">${dislikes}</span>
-          </div>
-
-          <div class="film-actions">
-            ${buttons}
-            <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
-          </div>
-
-          <div style="margin-top:6px; display:flex; gap:10px;">
-            <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
-            <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  container.scrollIntoView({ behavior: 'smooth' });
+  // рендеримо перший batch
+  renderBatch();
 }
-
 
 
 function restoreRatingsUI() {
@@ -1463,7 +1399,21 @@ if (proData.isPro && getProBtn) {
   showSkeletonFilmOfTheDay();
 
   // Завантажити фільми і факти
-  loadFilms();
+  await loadFilms();
+
+  // --- Lazy load observer ---
+const sentinel = document.getElementById('list-end-sentinel');
+const observer = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting && offset < currentFilms.length) {
+    renderBatch();
+    restoreRatingsUI();   // оновлюємо рейтинг в нових карточках
+  }
+}, {
+  rootMargin: '200px'
+});
+observer.observe(sentinel);
+
+  
 
     // Якщо через 6 секунд фільми не завантажились — попередження
   setTimeout(() => {
@@ -1889,7 +1839,7 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
         ${isProFilm && !isPro 
           ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
           : episodes.map((ep, i) => {
-              return `<button class="search-button" onclick="openVideoById('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+              return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
             }).join('')}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
       </div>
