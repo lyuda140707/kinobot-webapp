@@ -2011,6 +2011,17 @@ function sendFilm(film_id) {
 }
 
 
+function toggleEpisodes(id, btn) {
+  const grid = document.getElementById(`episodes-${id}`);
+  const isHidden = getComputedStyle(grid).display === 'none';
+
+  grid.style.display = isHidden ? 'grid' : 'none';
+  btn.textContent = isHidden
+    ? `🔽 Сховати серії`
+    : `📺 Показати серії (${grid.dataset.count})`;
+}
+
+
     
 </script>
 
@@ -2082,41 +2093,7 @@ function sendFilm(film_id) {
   </div>
 </div>
 <script>
-  function toggleSeries(id, buttonEl) {
-    const allSeriesBlocks = document.querySelectorAll('[id^="series-"]');
-    const allButtons = document.querySelectorAll('.search-button');
-
-    // Сховати всі блоки серій
-    allSeriesBlocks.forEach(block => {
-      block.style.display = 'none';
-    });
-
-    // Скинути текст усіх кнопок
-    allButtons.forEach(btn => {
-      if (btn.textContent === '🔽 Сховати серії') {
-        btn.textContent = '📺 Показати серії';
-      }
-    });
-
-    const currentBlock = document.getElementById(`series-${id}`);
-    if (currentBlock) {
-      const isHidden = currentBlock.style.display === 'none';
-
-      // Перемикання видимості
-      currentBlock.style.display = isHidden ? 'block' : 'none';
-
-      // Зміна тексту кнопки
-      if (buttonEl) {
-        buttonEl.textContent = isHidden ? '🔽 Сховати серії' : '📺 Показати серії';
-      }
-
-      if (isHidden) {
-        setTimeout(() => {
-          currentBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 200);
-      }
-    }
-  }
+ 
 </script>
 <!-- Модальне вікно -->
 <div id="suggest-modal" style="
@@ -2234,15 +2211,6 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   </div>
 </div>
 
-function toggleEpisodes(id, btn) {
-  const grid = document.getElementById(`episodes-${id}`);
-  const isHidden = getComputedStyle(grid).display === 'none';
-
-  grid.style.display = isHidden ? 'grid' : 'none';
-  btn.textContent = isHidden
-    ? `🔽 Сховати серії`
-    : `📺 Показати серії (${grid.dataset.count})`;
-}
   
 </body>
 </html>
