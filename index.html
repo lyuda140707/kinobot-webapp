@@ -826,12 +826,25 @@ function showFilmOfTheDay() {
 
 
 
-    function showGenres() {
+function showGenres() {
   const genres = ['Новинки', 'Комедії', 'Драми', 'Серіали', 'Мультфільми'];
   document.getElementById('genres').innerHTML = genres.map(g => {
     if (g === 'Мультфільми') {
       return `<button class="genre-btn" onclick="goToCartoons()">👧 ${g}</button>`;
     }
+    if (g === 'Серіали') {
+      // Перехід у вкладку «Категорії» → група «Серіали» → відразу показуємо списки
+      return `
+        <button class="genre-btn"
+                onclick="
+                  switchTab('categories', document.querySelector('[data-tab=categories]'));
+                  openGenreGroup('series');
+                  showSeries('Серіал');
+                ">
+          📺 ${g}
+        </button>`;
+    }
+    // решта жанрів
     return `<button class="genre-btn" onclick="filterByGenre('${g}')">${g}</button>`;
   }).join('');
   document.getElementById('genres').style.display = 'flex';
