@@ -500,7 +500,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Блокуємо всі кнопки з фільмами
     document.querySelectorAll('.film-button').forEach(btn => btn.disabled = true);
 
-    fetch('https://твій-бекенд/отримати-таблицю')  // змінити на свій бекенд
+    fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1')
         .then(r => r.json())
         .then(data => {
             films = data;
