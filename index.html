@@ -494,26 +494,6 @@
     let isDataLoaded = false;
     
 
-window.addEventListener('DOMContentLoaded', () => {
-    console.log("Завантаження даних...");
-
-    // Блокуємо всі кнопки з фільмами
-    document.querySelectorAll('.film-button').forEach(btn => btn.disabled = true);
-
-    fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1')
-        .then(r => r.json())
-        .then(data => {
-            films = data;
-            isDataLoaded = true;
-            console.log("✅ Дані отримано");
-
-            // Розблоковуємо кнопки
-            document.querySelectorAll('.film-button').forEach(btn => btn.disabled = false);
-        })
-        .catch(err => {
-            console.error("❌ Помилка завантаження", err);
-        });
-});
 
   const placeholderImage = "https://i.postimg.cc/zX3VCwWb/31d2242b-94cb-4301-87fd-c7550ca823f4.png";
 
