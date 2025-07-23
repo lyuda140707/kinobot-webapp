@@ -1432,7 +1432,13 @@ function switchTab(tabId, btn) {
   const containersToClear = ['genre-results', 'searchResults', 'fav-list'];
   containersToClear.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.innerHTML = '';
+    if (el && tabId !== 'categories') {
+      el.innerHTML = '';
+      // ⬅️ Ось тут важливо: сховаємо genre-results
+      if (id === 'genre-results') {
+        el.style.display = 'none';
+      }
+    }
   });
 
   const target = document.getElementById(tabId);
@@ -1440,24 +1446,22 @@ function switchTab(tabId, btn) {
   if (btn) btn.classList.add('active');
 
   if (tabId === 'favorites') {
-  if (!isDataLoaded) {
-    alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
-    return;
+    if (!isDataLoaded) {
+      alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
+      return;
+    }
+    showFavorites();
   }
-  showFavorites();
-}
-
 
   if (tabId === 'search') {
     document.getElementById('searchInput').value = '';
     document.getElementById('searchResults').innerHTML = '';
     document.getElementById('searchInput').focus();
-
-    // Очищаємо список поточних фільмів
     currentFilms = [];
     offset = 0;
   } else if (tabId === 'categories') {
     document.getElementById('genre-results').innerHTML = '';
+    document.getElementById('genre-results').style.display = 'block';
     currentFilms = [];
     offset = 0;
   }
@@ -1470,8 +1474,6 @@ function switchTab(tabId, btn) {
     closeDonatePopup();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
-
 }
 
 
