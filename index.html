@@ -217,7 +217,7 @@
     
 /* для всіх контейнерів з результатами фільмів */
 #genre-results,
-#search-results,
+#searchResults,
 #fav-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -366,14 +366,6 @@
   padding: 10px;
 }
 
-/* дво-колонна сітка для списків фільмів */
-.films-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  padding: 10px 0;
-}
-
   </style>
  
   
@@ -442,11 +434,6 @@
     👧 Мультики
   </button>
 </div>
-    <div id="genre-results" class="films-grid" style="display: none;"></div>
-    <div id="list-end-sentinel"></div>
-  </div>
-
-    
 
 
 
@@ -519,7 +506,7 @@
 
   </div>
 
-  <div id="genre-results" class="films-grid" style="display: none;"></div>
+  <div id="genre-results"></div>
   <div id="list-end-sentinel"></div>
 </div>
 
@@ -527,7 +514,7 @@
   <div id="favorites" class="section">
   <h2>Улюблене</h2>
   <button class="back-button" onclick="switchTab('account', document.querySelector('[data-tab=account]'))">⬅️ Назад</button>
-  <div id="fav-list" class="films-grid" style="display: none;"></div>
+  <div id="fav-list" class="film-list" style="display: none;"></div>
 </div>
 
 
@@ -535,8 +522,7 @@
     <h2>Пошук</h2>
     <button class="back-button" onclick="switchTab('home', document.querySelector('[data-tab=home]'))">⬅️ Назад</button>
     <input type="text" id="searchInput" placeholder="Введіть назву або жанр..." style="width:100%;padding:10px;">
-    <div id="search-results" style="margin-top: 20px; display: none;"></div>
-
+    <div id="searchResults" style="margin-top: 20px;"></div>
   </div>
 <!-- ✅ Секція Акаунт -->
 <section id="account" class="section">
@@ -687,8 +673,6 @@ async function loadFilms() {
     offset = 0;
     renderBatch();
     restoreRatingsUI();
-
-    document.getElementById('genre-results').style.display = 'grid';
 
     return;
   }
@@ -1406,7 +1390,7 @@ function removeFromFavorites(index) {
     function searchInBot(query) {
       // 🧹 Повне очищення залишків
 document.getElementById('history-list').innerHTML = '';
-document.getElementById('search-results').innerHTML = '';
+document.getElementById('searchResults').innerHTML = '';
 document.querySelectorAll('.film-card').forEach(card => card.remove());
 
   // ❗️Спочатку ховаємо всі секції (прибирає візуальний "перекіс")
@@ -1425,7 +1409,7 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
   // Очищаємо пошук
   document.getElementById('searchInput').value = '';
-  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('searchResults').innerHTML = '';
 
   fetch('https://kinobot-qm9q.onrender.com/search-in-bot', {
     method: 'POST',
@@ -1472,42 +1456,46 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
 
 function switchTab(tabId, btn) {
-  // 1) Вимикаємо всі секції і знімаємо підсвітку з кнопок
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  // 2) Очищаємо і ховаємо всі три контейнери
-  ['genre-results','search-results','fav-list'].forEach(id => {
+  const containersToClear = ['genre-results', 'searchResults', 'fav-list'];
+  containersToClear.forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = '';
-    el.style.display = 'none';
+    if (el && tabId !== 'categories') {
+      el.innerHTML = '';
+      // ⬅️ Ось тут важливо: сховаємо genre-results
+      if (id === 'genre-results') {
+        el.style.display = 'none';
+      }
+    }
   });
 
-  // 3) Активуємо потрібну секцію і кнопку
-  const targetSection = document.getElementById(tabId);
-  if (targetSection) targetSection.classList.add('active');
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
 
-  // 4) Вмикаємо тільки потрібний контейнер
-  if (tabId === 'categories') {
-    document.getElementById('genre-results').style.display = 'grid';
-  }
-  if (tabId === 'search') {
-    document.getElementById('search-results').style.display = 'block';
-    document.getElementById('searchInput').value = '';
-    document.getElementById('searchInput').focus();
-  }
   if (tabId === 'favorites') {
     if (!isDataLoaded) {
       alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
       return;
     }
     showFavorites();
-    document.getElementById('fav-list').style.display = 'grid';
   }
 
-  // 5) Додаткова логіка для "account"
+  if (tabId === 'search') {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('searchInput').focus();
+    currentFilms = [];
+    offset = 0;
+  } else if (tabId === 'categories') {
+    document.getElementById('genre-results').innerHTML = '';
+    document.getElementById('genre-results').style.display = 'block';
+    currentFilms = [];
+    offset = 0;
+  }
+
   if (tabId === 'account') {
     if (!isDataLoaded) {
       alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
@@ -1757,7 +1745,7 @@ observer.observe(sentinel);
 // Обробник пошуку
 document.getElementById('searchInput').addEventListener('input', () => {
   const val = document.getElementById('searchInput').value.trim().toLowerCase();
-  const container = document.getElementById('search-results');
+  const container = document.getElementById('searchResults');
   container.innerHTML = ''; // спочатку очищаємо завжди
 
   if (!val) return;
