@@ -508,14 +508,18 @@ function renderBatch() {
     const imgSrc    = (isProFilm && !isPro)
                       ? placeholderImage
                       : (film['Фото'] || placeholderImage);
-    return `
-      <div class="film-card">
-        <img src="${imgSrc}" alt="${film['Назва']}">
-        <h3>${film['Назва']}</h3>
-        <p>${film['Опис'] || ''}</p>
-        <button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>
-      </div>
-    `;
+return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p>${film['Опис'] || ''}</p>
+    ${renderControls(film['Назва'], film['Опис'])}
+    <div class="film-actions">
+      <button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>
+    </div>
+  </div>
+`;
+
   }).join('');
 
   container.insertAdjacentHTML('beforeend', html);
@@ -939,6 +943,7 @@ const grouped = seriesFilms.reduce((acc, ep) => {
       <div class="film-card">
         <img src="${poster}" class="film-img" alt="${title}">
         <h3>${title}</h3>
+        ${renderControls(title, episodes[0]['Опис'])}
         ${btn}
         <div id="episodes-${safe}"
              class="series-episodes-grid"
@@ -965,6 +970,26 @@ function openSeries(id) {
   function safeId(str) {
     return str.replace(/[^\w\d]/g, '_');
   }
+
+// ─── Хелпер для рендеру лайків/дизлайків та “Улюблене” ───
+function renderControls(title, description) {
+  const prev = localStorage.getItem(`rating-${title}`);
+  const likeClass    = prev === 'like'    ? 'active-like'    : '';
+  const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
+  const descEscaped = (description||'').replace(/'/g, "\\'");
+  return `
+    <div style="display:flex; gap:8px; margin:6px 0;">
+      <button class="rating-button ${likeClass}"
+              onclick="rateFilm('${title}', 'like')">👍</button>
+      <button class="rating-button ${dislikeClass}"
+              onclick="rateFilm('${title}', 'dislike')">👎</button>
+    </div>
+    <button class="fav-button"
+            onclick="addToFavorites('${title}','${descEscaped}')">💛</button>
+  `;
+}
+// ───────────────────────────────────────────────────
+
     
 function filterByGenre(genre) {
   if (!genre) return;
@@ -1016,6 +1041,7 @@ function filterByGenre(genre) {
         <div class="film-card">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
+          ${renderControls(title, episodes[0]['Опис'])}
           ${btn}
           <div id="episodes-${safe}"
                class="series-episodes-grid"
@@ -1087,17 +1113,18 @@ function filterByCountry(country) {
       buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
     }
 
-    return `
-      <div class="film-card">
-        <img src="${imgSrc}" alt="${film['Назва']}">
-        <h3>${film['Назва']}</h3>
-        <p>${film['Опис']}</p>
-        <div class="film-actions">
-          ${buttons}
-          <button class="fav-button" onclick="addToFavorites('${film['Назва']}','${film['Опис']}')">💛 Улюблене</button>
-        </div>
-      </div>
-    `;
+return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p>${film['Опис']}</p>
+    ${renderControls(film['Назва'], film['Опис'])}
+    <div class="film-actions">
+      ${buttons}
+    </div>
+  </div>
+`;
+
   }).join('');
 
   container.scrollIntoView({ behavior: 'smooth' });
@@ -1133,17 +1160,19 @@ function filterByYear(year) {
       buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
     }
 
-    return `
-      <div class="film-card">
-        <img src="${imgSrc}" alt="${film['Назва']}">
-        <h3>${film['Назва']}</h3>
-        <p>${film['Опис']}</p>
-        <div class="film-actions">
-          ${buttons}
-          <button class="fav-button" onclick="addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
-        </div>
-      </div>
-    `;
+return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${film['Назва']}">
+    <h3>${film['Назва']}</h3>
+    <p>${film['Опис']}</p>
+    ${renderControls(film['Назва'], film['Опис'])}
+    <div class="film-actions">
+      ${buttons}
+    </div>
+  </div>
+`;
+
+
   }).join('');
 
   container.scrollIntoView({ behavior: 'smooth' });
