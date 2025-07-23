@@ -922,7 +922,7 @@ function showSeries(type = 'Серіал') {
     const epsHtml = episodes.map((ep, i) => {
       const label = ep['Опис'] || `Серія ${i+1}`;
       const action = ep.file_id
-        ? `onclick="sendFilm('${ep.file_id}')"`
+        ? `onclick="openVideoById('${ep.file_id}')"`
         : `onclick="openVideo('${title}')"`;
       return `<button class="search-button" ${action}>${label}</button>`;
     }).join('');
