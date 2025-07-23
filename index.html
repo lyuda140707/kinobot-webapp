@@ -970,9 +970,15 @@ function openSeries(id) {
   }
     
 function filterByGenre(genre) {
+  // якщо genre не переданий (наприклад, у кнопки з мультфільмами немає data-genre), 
+  // просто нічого не робимо
+  if (!genre) return;
+
   switchTab('categories');
+
   const normalized = genre.toLowerCase();
   currentFilms = films.filter(f => {
+    // якщо f['Жанр'] або f['Добірка'] — null/undefined, отримаємо порожній рядок
     const filmGenre      = f['Жанр']    ?.toLowerCase() || "";
     const filmCollection = f['Добірка']?.toLowerCase() || "";
     return filmGenre === normalized || filmCollection === normalized;
