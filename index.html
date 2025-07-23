@@ -1607,8 +1607,10 @@ const observer = new IntersectionObserver(entries => {
   }
 }, {
   rootMargin: '200px'
+
 });
 observer.observe(sentinel);
+
 
   
 
@@ -1674,78 +1676,61 @@ observer.observe(sentinel);
     });
   });
 
-// Пошук
+// Обробник пошуку
 document.getElementById('searchInput').addEventListener('input', () => {
   const val = document.getElementById('searchInput').value.trim().toLowerCase();
+  const container = document.getElementById('searchResults');
 
-  // Якщо нічого не введено — чистимо результати і виходимо
+  // Якщо порожній рядок — чистимо результати й виходимо
   if (!val) {
-    document.getElementById('searchResults').innerHTML = '';
+    container.innerHTML = '';
     return;
   }
 
+  // Фільтруємо
   const results = [];
-  const seenTitles = new Set();
-
+  const seen = new Set();
   films.forEach(f => {
-    const title = f['Назва'].toLowerCase();
-    if (title.includes(val) && !seenTitles.has(title)) {
+    const t = (f['Назва'] || '').toLowerCase();
+    if (t.includes(val) && !seen.has(t)) {
       results.push(f);
-      seenTitles.add(title);
+      seen.add(t);
     }
   });
 
-  const container = document.getElementById('searchResults');
-
+  // Рендеримо
   if (results.length === 0) {
     container.innerHTML = `
       <p>Фільм не знайдено 😢</p>
-      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити фільм для додавання</button>
+      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити</button>
     `;
   } else {
     container.innerHTML = results.map(f => {
-      const isProFilm = f['Доступ'] === 'PRO';
       const isPro = localStorage.getItem('isProUser') === 'true';
-      const imgSrc = (isProFilm && !isPro) ? placeholderImage : f['Фото'];
-      let buttons = '';
-
-      if (isProFilm && !isPro) {
-        buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-      } else if (f['Тип'] === 'Серіал') {
-        buttons = `<button class="search-button" onclick="goToSeries('${f['Назва']}')">📺 Перейти до серіалу</button>`;
-      } else if (f['Посилання']) {
-        buttons = `<button class="search-button" onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>`;
-      }
-
+      const locked = f['Доступ'] === 'PRO' && !isPro;
+      const img    = locked ? placeholderImage : (f['Фото'] || placeholderImage);
+      let btn;
+      if (locked)                       btn = `<button onclick="showProModal()">🔒 PRO</button>`;
+      else if (f['Тип'] === 'Серіал')   btn = `<button onclick="goToSeries('${f['Назва']}')">📺</button>`;
+      else if (f['Посилання'])          btn = `<button onclick="openVideo('${f['Назва']}')">▶️</button>`;
       return `
-        <div class="film-card fade-in">
-          <img src="${imgSrc}" alt="${f['Назва']}">
+        <div class="film-card">
+          <img src="${img}" alt="${f['Назва']}">
           <h3>${f['Назва']}</h3>
           <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
-          <div class="film-rating">
-            👍 <span id="like-count-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span> |
-            👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
-          </div>
           <div class="film-actions">
-            ${buttons}
-            <button class="fav-button" onclick="addToFavorites('${f['Назва']}', '${(f['Опис']||'').replace(/'/g, "\\'")}')">💛</button>
-          </div>
-          <div style="margin-top:6px; display:flex; gap:10px;">
-            <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'like')">
-              👍 <span id="like-count-btn-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span>
-            </button>
-            <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'dislike')">
-              👎 <span id="dislike-count-btn-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
-            </button>
+            ${btn}
+            <button class="fav-button" onclick="addToFavorites('${f['Назва']}', '${(f['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
           </div>
         </div>
       `;
     }).join('');
-
-    // Після рендеру оновлюємо підсвічування лайків/дизлайків
     restoreRatingsUI();
   }
 });
+
+
+
 
 
   // Клік по картці
