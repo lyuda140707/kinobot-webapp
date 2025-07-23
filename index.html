@@ -554,12 +554,6 @@
 
 function renderBatch() {
   const container = document.getElementById('genre-results');
-   // ⛔ Не рендеримо, якщо вкладка 'Категорії' не активна
-  const categorySection = document.getElementById('section-categories');
-  if (!categoriesSection || !categoriesSection.classList.contains('active')) {
-    console.log("❌ Пропущено renderBatch — неактивна вкладка");
-    return;
-  }
   const isPro = localStorage.getItem('isProUser') === 'true';
   const batch = currentFilms.slice(offset, offset + BATCH_SIZE);
 
@@ -1462,9 +1456,6 @@ function switchTab(tabId, btn) {
   }
 
   if (tabId === 'account') {
-    if (typeof observer !== 'undefined') observer.disconnect();
-    currentFilms = [];
-    offset = 0;
     closeDonatePopup();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
