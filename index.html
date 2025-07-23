@@ -298,6 +298,13 @@
     100% { transform: rotate(360deg); }
   }
 
+  .film-card .film-imdb {
+  font-size: 12px;
+  color: #aaa;
+  margin: 4px 0;
+}
+
+
   </style>
  
   
@@ -512,6 +519,7 @@ return `
   <div class="film-card">
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
+    <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
     <p>${film['Опис'] || ''}</p>
     ${renderControls(film['Назва'], film['Опис'])}
     <div class="film-actions">
@@ -943,6 +951,8 @@ const grouped = seriesFilms.reduce((acc, ep) => {
       <div class="film-card">
         <img src="${poster}" class="film-img" alt="${title}">
         <h3>${title}</h3>
+        <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+
         ${renderControls(title, episodes[0]['Опис'])}
         ${btn}
         <div id="episodes-${safe}"
@@ -1117,6 +1127,7 @@ return `
   <div class="film-card">
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
+    <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
     <p>${film['Опис']}</p>
     ${renderControls(film['Назва'], film['Опис'])}
     <div class="film-actions">
@@ -1164,6 +1175,7 @@ return `
   <div class="film-card">
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
+    <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
     <p>${film['Опис']}</p>
     ${renderControls(film['Назва'], film['Опис'])}
     <div class="film-actions">
@@ -1594,30 +1606,30 @@ document.getElementById('searchResults').innerHTML = results.map(f => {
     buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${f['Назва']}')">▶️ Дивитись</button>`;
   }
 
-  return `
-    <div class="film-card fade-in">
-      <img src="${imgSrc}" alt="${f['Назва']}">
-      <h3>${f['Назва']}</h3>
-      <p class="film-desc">${f['Опис']}</p>
-
-      <div class="film-rating">
-        IMDb: ${f['IMDb'] || "—"} | 
-        👍 <span id="like-count-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span> |
-        👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
+    return `
+      <div class="film-card fade-in">
+        <img src="${imgSrc}" alt="${f['Назва']}">
+        <h3>${f['Назва']}</h3>
+        <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
+        <div class="film-rating">
+          👍 <span id="like-count-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span> |
+          👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
+        </div>
+        <div class="film-actions">
+          ${buttons}
+          <button class="fav-button" onclick="…">💛 Улюблене</button>
+        </div>
+        <div style="margin-top:6px; display:flex; gap:10px;">
+          <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'like')">
+            👍 <span id="like-count-btn-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span>
+          </button>
+          <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'dislike')">
+            👎 <span id="dislike-count-btn-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span>
+          </button>
+        </div>
       </div>
-
-      <div class="film-actions">
-        ${buttons}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${f['Назва']}', '${f['Опис']}')">💛 Улюблене</button>
-      </div>
-
-      <div style="margin-top:6px; display:flex; gap:10px;">
-        <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'like')">👍 <span id="like-count-btn-${safeId(f['Назва'])}">${f['Лайки'] || 0}</span></button>
-        <button class="rating-button" onclick="rateFilm('${f['Назва']}', 'dislike')">👎 <span id="dislike-count-btn-${safeId(f['Назва'])}">${f['Дизлайки'] || 0}</span></button>
-      </div>
-    </div>
-  `;
-}).join('');
+    `;
+  }).join('');
 
 // ✅ ВСТАВ СЮДИ:
 restoreRatingsUI();
@@ -1912,8 +1924,8 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       <img src="${imgSrc}" alt="${title}">
       <h3>${title}</h3>
       <p class="film-desc">${desc}</p>
-      <div class="film-rating">
-        IMDb: ${imdb} |
+      <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
+      
         👍 <span id="like-count-${safe}">${likes}</span> |
         👎 <span id="dislike-count-${safe}">${dislikes}</span>
       </div>
