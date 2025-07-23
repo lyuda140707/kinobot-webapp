@@ -2286,20 +2286,31 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
 
 <div id="request-loading" style="
   position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0,0,0,0.6);
   z-index: 9999;
-  display: none; /* спочатку приховано */
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  display: none;
   font-size: 18px;
   color: #00f7ff;
   text-align: center;
 ">
-  <div class="loader"></div>
-  <div style="margin-top:12px;">Надсилаємо запит...</div>
+  <div style="
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  ">
+    <div class="loader"></div>
+    <div style="margin-top:12px;">Надсилаємо запит...</div>
+  </div>
 </div>
+
 
   
 </body>
