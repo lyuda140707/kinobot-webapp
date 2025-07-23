@@ -1412,34 +1412,36 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 }
 
 
-  function switchTab(tabId, btn) {
+function switchTab(tabId, btn) {
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  // 🧹 Очищаємо всі основні контейнери
-  const containersToClear = [
-    'genre-results',
-    'searchResults',
-    'fav-list'
-  ];
+  // Контейнери, які очищаємо:
+  const containersToClear = ['genre-results', 'searchResults', 'fav-list'];
   containersToClear.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = '';
   });
 
-  // Прибираємо розгорнуті картки
-  document.querySelectorAll('.film-card.expanded').forEach(el => el.classList.remove('expanded'));
-
+  // Відображаємо активну вкладку:
   const target = document.getElementById(tabId);
   if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
 
+  // Показати обране при переході:
   if (tabId === 'favorites') showFavorites();
+
+  // Фокус на полі пошуку при переході на вкладку Пошук
+  if (tabId === 'search') {
+    document.getElementById('searchInput').focus();
+  }
+
   if (tabId === 'account') {
     closeDonatePopup();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  }
 }
+
 
 
 function showSkeletonCollections() {
@@ -1680,53 +1682,42 @@ observer.observe(sentinel);
 document.getElementById('searchInput').addEventListener('input', () => {
   const val = document.getElementById('searchInput').value.trim().toLowerCase();
   const container = document.getElementById('searchResults');
+  container.innerHTML = ''; // спочатку очищаємо завжди
 
-  // Якщо порожній рядок — чистимо результати й виходимо
-  if (!val) {
-    container.innerHTML = '';
-    return;
-  }
+  if (!val) return;
 
-  // Фільтруємо
-  const results = [];
-  const seen = new Set();
-  films.forEach(f => {
-    const t = (f['Назва'] || '').toLowerCase();
-    if (t.includes(val) && !seen.has(t)) {
-      results.push(f);
-      seen.add(t);
-    }
-  });
+  const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
 
-  // Рендеримо
   if (results.length === 0) {
     container.innerHTML = `
       <p>Фільм не знайдено 😢</p>
       <button class="suggest-button" onclick="suggestFilm()">➕ Замовити</button>
     `;
-  } else {
-    container.innerHTML = results.map(f => {
-      const isPro = localStorage.getItem('isProUser') === 'true';
-      const locked = f['Доступ'] === 'PRO' && !isPro;
-      const img    = locked ? placeholderImage : (f['Фото'] || placeholderImage);
-      let btn;
-      if (locked)                       btn = `<button onclick="showProModal()">🔒 PRO</button>`;
-      else if (f['Тип'] === 'Серіал')   btn = `<button onclick="goToSeries('${f['Назва']}')">📺</button>`;
-      else if (f['Посилання'])          btn = `<button onclick="openVideo('${f['Назва']}')">▶️</button>`;
-      return `
-        <div class="film-card">
-          <img src="${img}" alt="${f['Назва']}">
-          <h3>${f['Назва']}</h3>
-          <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
-          <div class="film-actions">
-            ${btn}
-            <button class="fav-button" onclick="addToFavorites('${f['Назва']}', '${(f['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-    restoreRatingsUI();
+    return;
   }
+
+  container.innerHTML = results.map(f => {
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const locked = f['Доступ'] === 'PRO' && !isPro;
+    const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
+    const btn = locked 
+      ? `<button onclick="showProModal()">🔒 PRO</button>` 
+      : f['Посилання'] ? `<button onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>` : '';
+
+    return `
+      <div class="film-card">
+        <img src="${img}" alt="${f['Назва']}">
+        <h3>${f['Назва']}</h3>
+        <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
+        <div class="film-actions">
+          ${btn}
+          <button class="fav-button" onclick="addToFavorites('${f['Назва']}', '${(f['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  restoreRatingsUI();
 });
 
 
