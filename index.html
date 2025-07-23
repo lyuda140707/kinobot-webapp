@@ -1346,7 +1346,7 @@ function showSkeletonCollections() {
   return;
 }
 
-// ✅ Тут вставляємо перевірку PRO
+  // ✅ Тут вставляємо перевірку PRO
   const proRes = await fetch('https://kinobot-qm9q.onrender.com/check-pro', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1360,8 +1360,18 @@ function showSkeletonCollections() {
     localStorage.removeItem('isProUser');
   }
 
-const getProBtn = document.getElementById('getProBtn');
-if (proData.isPro && getProBtn) {
+  // ← Ось сюди додаємо цей блок:
+  if (
+    localStorage.getItem('paymentPending') === 'true' &&
+    localStorage.getItem('isProUser') !== 'true'
+  ) {
+    // Якщо користувач уже натиснув “Я оплатив”, але PRO ще не підтверджено,
+    // знову показуємо кнопку “Я оплатив”
+    showConfirmPaidButton(user);
+  }
+
+  const getProBtn = document.getElementById('getProBtn');
+  if (proData.isPro && getProBtn) {
     getProBtn.style.display = 'none';
 
     const proNotice = document.createElement('p');
@@ -1369,23 +1379,19 @@ if (proData.isPro && getProBtn) {
     proNotice.style.color = "#00f7ff";
     proNotice.style.marginTop = "15px";
     getProBtn.parentNode.insertBefore(proNotice, getProBtn.nextSibling);
-}
+  }
 
-
-    
   fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: user.id })
   }).catch(console.warn);
 
-  
-
-  } catch (error) {
-    console.error('Помилка перевірки підписки', error);
-    alert("❗ Помилка перевірки підписки");
-    return;
-  }
+} catch (error) {
+  console.error('Помилка перевірки підписки', error);
+  alert("❗ Помилка перевірки підписки");
+  return;
+}
 
   // 🟢 Якщо підписаний, тільки тоді все інше:
   
@@ -1879,25 +1885,22 @@ document.getElementById('getProBtn').addEventListener('click', () => {
 
 
 function showConfirmPaidButton(user) {
-    const btn = document.getElementById("confirmPaidBtn");
-    if (!btn) return;
+  const btn = document.getElementById("confirmPaidBtn");
+  btn.style.display = "block";
+  closeDonatePopup();
 
-    btn.style.display = "block";
-    closeDonatePopup();
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
 
-    // Видаляємо всі старі обробники через клонування кнопки
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-
-    newBtn.onclick = () => {
-        const username = (user.username !== undefined) ? user.username : '';
-        const first_name = (user.first_name !== undefined) ? user.first_name : '';
-
-        notifyPayment(user.id, username, first_name);
-        newBtn.style.display = "none";
-    };
+  newBtn.onclick = () => {
+    // 1) позначаємо, що юзер натиснув “Я оплатив”
+    localStorage.setItem("paymentPending", "true");
+    // 2) відправляємо запит підтвердження
+    notifyPayment(user.id, user.username || "", user.first_name || "");
+    // 3) ховаємо кнопку до відповіді
+    newBtn.style.display = "none";
+  };
 }
-
 
 
 
@@ -1905,33 +1908,43 @@ function showConfirmPaidButton(user) {
 let isPaymentSending = false;
 
 async function notifyPayment(userId, username, firstName) {
-  if (isPaymentSending) return;
-  isPaymentSending = true;
-
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, username, first_name: firstName })
+      body: JSON.stringify({
+        user_id: userId,
+        username: username,
+        first_name: firstName
+      })
     });
     const data = await res.json();
-    // показуємо результат через єдину функцію
-    showPaymentResult(data.ok === true);
+    
+    if (data.ok) {
+      // успішно отримали оплату
+      localStorage.removeItem("paymentPending");
+      document.getElementById("confirmPaidBtn").style.display = "none";
+      showPaymentResult(true);
+    } else {
+      showPaymentResult(false);
+    }
   } catch (e) {
     console.error(e);
     showPaymentResult(false);
-  } finally {
-    isPaymentSending = false;
   }
 }
 
+
 function showPaymentResult(success) {
   if (success) {
-    alert('⏳ Дякуємо! Ваш запит на активацію PRO отримано. Чекайте підтвердження.');
+    // тепер успіх — видаляємо “pending” і показуємо повідомлення
+    localStorage.removeItem('paymentPending');
+    alert('✅ Оплату отримано. Чекайте підтвердження PRO-доступу.');
   } else {
     alert('❌ Сталася помилка при підтвердженні оплати. Спробуйте пізніше.');
   }
 }
+
 
 
 function showProPrompt() {
