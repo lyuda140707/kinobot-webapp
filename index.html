@@ -971,26 +971,24 @@ function openSeries(id) {
     
 function filterByGenre(genre) {
   switchTab('categories');
-  // відбираємо всі підходящі фільми в currentFilms
-  currentFilms = films.filter(f =>
-    f['Жанр']?.toLowerCase() === genre.toLowerCase() ||
-    f['Добірка']?.toLowerCase() === genre.toLowerCase()
-  );
+  const normalized = genre.toLowerCase();
+  currentFilms = films.filter(f => {
+    const filmGenre      = f['Жанр']    ?.toLowerCase() || "";
+    const filmCollection = f['Добірка']?.toLowerCase() || "";
+    return filmGenre === normalized || filmCollection === normalized;
+  });
 
   const container = document.getElementById('genre-results');
-  // якщо нічого не знайдено — показати повідомлення
   if (currentFilms.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  // очищаємо список і скидаємо лічильник
   container.innerHTML = '';
   offset = 0;
-
-  // рендеримо перший batch
   renderBatch();
 }
+
 
 
 function restoreRatingsUI() {
