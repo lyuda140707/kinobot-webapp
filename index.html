@@ -665,12 +665,18 @@ async function fetchAndUpdateFilms() {
     document.getElementById('home-loading').style.display = 'block';
 
     const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
-    films = await res.json();
+    const loadedFilms = await res.json();
+
+    if (!loadedFilms || loadedFilms.length === 0) {
+      throw new Error('Отримано пустий список фільмів');
+    }
+
+    films = loadedFilms;
     shuffleArray(films);
 
-
     localStorage.setItem('films', JSON.stringify(films));
-    localStorage.setItem('filmsTimestamp', Date.now().toString()); // зберегли час оновлення кешу
+    localStorage.setItem('filmsTimestamp', Date.now().toString());
+
     showFilmOfTheDay();
     showCollections();
     showGenres();
@@ -678,6 +684,13 @@ async function fetchAndUpdateFilms() {
     showYearFilters();
   } catch (error) {
     console.error('Помилка завантаження фільмів:', error);
+
+    const cached = localStorage.getItem('films');
+    if (!cached || JSON.parse(cached).length === 0) {
+      alert("⚠️ Виникла проблема з підключенням. Спробуй перезапустити застосунок.");
+      localStorage.removeItem('films');
+      localStorage.removeItem('filmsTimestamp');
+    }
   } finally {
     document.getElementById('home-loading').style.display = 'none';
   }
