@@ -900,63 +900,58 @@ function showSeries(type = 'Серіал') {
     return;
   }
 
-  // Групуємо за назвою
+  // Групуємо за назвою без оператора ||= 
   const grouped = seriesFilms.reduce((acc, ep) => {
-    (acc[ep['Назва']] ||= []).push(ep);
+    const name = ep['Назва'];
+    if (!acc[name]) {
+      acc[name] = [];
+    }
+    acc[name].push(ep);
     return acc;
   }, {});
 
-// Генеруємо картки
+  // Генеруємо картки
   const html = Object.entries(grouped).map(([title, episodes]) => {
-  const safe      = title.replace(/[^\w\d]/g, '_');
-  const isPro     = localStorage.getItem('isProUser') === 'true';
-  const isProFilm = episodes[0]['Доступ'] === 'PRO';
-  const poster    = (isProFilm && !isPro)
-    ? placeholderImage
-    : (episodes[0]['Фото'] || placeholderImage);
-  const count     = episodes.length;
+    const safe      = title.replace(/[^\w\d]/g, '_');
+    const isPro     = localStorage.getItem('isProUser') === 'true';
+    const isProFilm = episodes[0]['Доступ'] === 'PRO';
+    const poster    = (isProFilm && !isPro)
+      ? placeholderImage
+      : (episodes[0]['Фото'] || placeholderImage);
+    const count     = episodes.length;
 
-  // кнопка з data-count
-  const btn = `<button class="search-button"
-                onclick="toggleEpisodes('${safe}', this)"
-                data-count="${count}"
-              >📺 Показати серії (${count})</button>`;
+    const btn = `<button class="search-button"
+                  onclick="toggleEpisodes('${safe}', this)"
+                  data-count="${count}"
+                >📺 Показати серії (${count})</button>`;
 
-  // сам прихований грід: викликаємо openVideoById для file_id
-  const epsHtml = episodes.map((ep, i) => {
-  const label = ep['Опис'] || \`Серія \${i+1}\`;
-    if (ep.file_id) {
-      return \`<button class="search-button" onclick="openVideoById('\${ep.file_id}')">\${label}</button>\`;
-    } else {
-      // якщо це просто посилання–URL
-      return \`<button class="search-button" onclick="openVideo('\${title}')">\${label}</button>\`;
-    }
-  }).join('');
+    const epsHtml = episodes.map((ep, i) => {
+      const label = ep['Опис'] || `Серія ${i+1}`;
+      if (ep.file_id) {
+        return `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`;
+      } else {
+        return `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+      }
+    }).join('');
 
-  return \`
-    <div class="film-card">
-      <img src="\${poster}" class="film-img" alt="\${title}">
-      <h3>\${title}</h3>
-      \${btn}
-      <div id="episodes-\${safe}"
-           class="series-episodes-grid"
-           style="display:none;"
-           data-count="\${count}">
-        \${epsHtml}
+    return `
+      <div class="film-card">
+        <img src="${poster}" class="film-img" alt="${title}">
+        <h3>${title}</h3>
+        ${btn}
+        <div id="episodes-${safe}"
+             class="series-episodes-grid"
+             style="display:none;"
+             data-count="${count}">
+          ${epsHtml}
+        </div>
       </div>
-    </div>
-  \`;
-}).join('');
-
+    `;
+  }).join('');
 
   container.innerHTML = html;
   container.scrollIntoView({ behavior: 'smooth' });
 }
-
-
-
-
-
 
 function openSeries(id) {
   const block = document.getElementById(`series-${id}`);
