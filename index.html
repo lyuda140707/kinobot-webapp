@@ -215,14 +215,16 @@
   vertical-align: middle;
 }
     
+/* для всіх контейнерів з результатами фільмів */
 #genre-results,
-#film-results,
-#search-results {
+#searchResults,
+#fav-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  padding: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;        /* відстань між картками */
+  padding: 10px;    /* при потребі ваші відступи */
 }
+
 
 
 .film-card {
@@ -232,11 +234,11 @@
   box-shadow: 0 0 10px cyan;
   box-sizing: border-box;
   width: 100%;
-  max-width: 180px;
+  max-width: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 auto;
+  margin: 0;
 }
 
 
