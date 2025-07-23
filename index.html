@@ -2011,57 +2011,66 @@ function shuffleArray(array) {
   }
 }
 
-function goToSeries(seriesTitle) {
-  switchTab('categories', document.querySelector('[data-tab=categories]'));
-  openGenreGroup('series');
+function goToSeries() {
+  const container = document.getElementById('genre-results');
+  container.innerHTML = '';
 
-  setTimeout(() => {
-    const filtered = films.filter(f => f['Назва'] === seriesTitle && f['Тип'] === 'Серіал');
+  const type = 'Серіал';
+  const seriesFilms = films.filter(f =>
+    (f['Тип'] || '').trim().toLowerCase() === type.trim().toLowerCase()
+  );
 
-    if (filtered.length === 0) {
-      alert('Серіал не знайдено 😢');
-      return;
-    }
+  if (!seriesFilms.length) {
+    container.innerHTML = '<p>Немає серіалів 😢</p>';
+    return;
+  }
 
-    const container = document.getElementById('genre-results');
-    const grouped = { [seriesTitle]: filtered };
+  const grouped = seriesFilms.reduce((acc, ep) => {
+    (acc[ep['Назва']] ||= []).push(ep);
+    return acc;
+  }, {});
 
-container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-  const first = episodes[0];
-  const isPro = localStorage.getItem('isProUser') === 'true';
-  const isProFilm = first['Доступ'] === 'PRO';
-  const imgSrc = (isProFilm && !isPro) ? placeholderImage : first['Фото'];
-  const imdb = first['IMDb'] || "—";
-  const desc = first['Опис'] || '';
-  const likes = Number(first['Лайки']) || 0;
-  const dislikes = Number(first['Дизлайки']) || 0;
-  const safe = safeId(title);
+  container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+    const first = episodes[0];
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const isProFilm = first['Доступ'] === 'PRO';
+    const imgSrc = (isProFilm && !isPro) ? placeholderImage : first['Фото'];
+    const imdb = first['IMDb'] || "—";
+    const desc = first['Опис'] || '';
+    const likes = Number(first['Лайки']) || 0;
+    const dislikes = Number(first['Дизлайки']) || 0;
+    const safe = safeId(title);
 
-  return `
-    <div class="film-card">
-      <img src="${imgSrc}" alt="${title}">
-      <h3>${title}</h3>
-      <p class="film-imdb">IMDb: ${imdb}</p>
-      <p class="film-desc">${desc}</p>
-      👍 <span id="like-count-${safe}">${likes}</span> |
-      👎 <span id="dislike-count-${safe}">${dislikes}</span>
-      <div class="film-actions">
-        ${
-          isProFilm && !isPro 
-            ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-            : episodes.map((ep, i) => {
-                return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
-              }).join('')
-        }
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
+    return `
+      <div class="film-card">
+        <img src="${imgSrc}" alt="${title}">
+        <h3>${title}</h3>
+        <p class="film-imdb">IMDb: ${imdb}</p>
+        <p class="film-desc">${desc}</p>
+
+        <div class="film-actions">
+          ${
+            isProFilm && !isPro 
+              ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+              : `<button class="search-button" onclick="toggleEpisodes('${safe}', this)">📺 Показати серії (${episodes.length})</button>`
+          }
+          <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
+        </div>
+
+        <div id="episodes-${safe}" class="episode-buttons" data-count="${episodes.length}" style="display: none;">
+          ${episodes.map((ep, i) => {
+            return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+          }).join('')}
+        </div>
+
+        <div style="margin-top:6px; display:flex; gap:10px;">
+          <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
+          <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
+        </div>
       </div>
-      <div style="margin-top:6px; display:flex; gap:10px;">
-        <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
-        <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
-      </div>
-    </div>
-  `;
-}).join('');
+    `;
+  }).join('');
+}
 
 
 
