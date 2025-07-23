@@ -924,7 +924,7 @@ function showSeries(type = 'Серіал') {
 
   // сам прихований грід: викликаємо openVideoById для file_id
   const epsHtml = episodes.map((ep, i) => {
-    const label = ep['Опис'] || \`Серія \${i+1}\`;
+  const label = ep['Опис'] || \`Серія \${i+1}\`;
     if (ep.file_id) {
       return \`<button class="search-button" onclick="openVideoById('\${ep.file_id}')">\${label}</button>\`;
     } else {
