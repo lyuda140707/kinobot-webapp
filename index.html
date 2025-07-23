@@ -1905,56 +1905,33 @@ function showConfirmPaidButton(user) {
 let isPaymentSending = false;
 
 async function notifyPayment(userId, username, firstName) {
-  if (isPaymentSending) {
-    showSuggestResult({
-      success: false,
-      is_pro: false,
-      remaining_requests: 0
-    });
-    return;
-  }
-
+  if (isPaymentSending) return;
   isPaymentSending = true;
 
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: userId,
-        username: username,
-        first_name: firstName
-      })
+      body: JSON.stringify({ user_id: userId, username, first_name: firstName })
     });
-
     const data = await res.json();
-
-    if (data.ok) {
-      showSuggestResult({
-        success: true,
-        is_pro: true,
-        remaining_requests: 0
-      });
-    } else {
-      showSuggestResult({
-        success: false,
-        is_pro: false,
-        remaining_requests: 0
-      });
-    }
-
+    // показуємо результат через єдину функцію
+    showPaymentResult(data.ok === true);
   } catch (e) {
     console.error(e);
-    showSuggestResult({
-      success: false,
-      is_pro: false,
-      remaining_requests: 0
-    });
+    showPaymentResult(false);
   } finally {
     isPaymentSending = false;
   }
 }
 
+function showPaymentResult(success) {
+  if (success) {
+    alert('✅ Дякуємо за оплату! Тепер у вас PRO-доступ.');
+  } else {
+    alert('❌ Сталася помилка при підтвердженні оплати. Спробуйте пізніше.');
+  }
+}
 
 
 function showProPrompt() {
