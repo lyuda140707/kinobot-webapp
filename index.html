@@ -298,11 +298,37 @@
     100% { transform: rotate(360deg); }
   }
 
-  .film-card .film-imdb {
+/* НЕОНОВИЙ СВІТЛЯНИЙ ЕФЕКТ ДЛЯ IMDb */
+.film-card .film-imdb {
   font-size: 12px;
-  color: #aaa;
+  font-weight: bold;
+  color: #00ffff;
   margin: 4px 0;
+  text-shadow:
+    0 0 4px rgba(0,255,255,0.6),
+    0 0 8px rgba(0,255,255,0.4),
+    0 0 12px rgba(0,255,255,0.2);
 }
+
+/* Ключові кадри для пульсації */
+@keyframes glow {
+  from {
+    text-shadow:
+      0 0 2px rgba(0,255,255,0.5),
+      0 0 6px rgba(0,255,255,0.3);
+  }
+  to {
+    text-shadow:
+      0 0 8px rgba(0,255,255,1),
+      0 0 16px rgba(0,255,255,0.8);
+  }
+}
+
+/* Клас для додавання анімації */
+.film-card .film-imdb.pulsate {
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+
 
 
   </style>
