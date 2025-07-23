@@ -1729,36 +1729,26 @@ function rateFilm(filmName, action) {
 
 async function suggestFilm() {
   const val = document.getElementById('searchInput').value.trim();
-  if (!val) {
-    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
-    return;
-  }
-
-  if (isSending) {
-    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
-    return;
-  }
+  if (!val || isSending) return;
 
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
-  if (!user) {
-    showSuggestResult({ success: false, is_pro: false, remaining_requests: 0 });
-    return;
-  }
+  if (!user) return;
 
   isSending = true;
+
   const btn = document.querySelector(".suggest-button");
   if (btn) {
     btn.disabled = true;
     setTimeout(() => btn.disabled = false, 7000);
   }
 
+  document.getElementById('request-loading').style.display = 'flex'; // ⏳ Показати
+
   try {
-    // КРОК 1: Пробудження сервера
     await fetch('https://kinobot-qm9q.onrender.com/ping');
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // КРОК 2: Основний запит
     const res = await requestWithRetry('https://kinobot-qm9q.onrender.com/request-film', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1780,6 +1770,7 @@ async function suggestFilm() {
         remaining_requests: 0
       });
     }
+
   } catch (error) {
     console.error(error);
     showSuggestResult({
@@ -1789,9 +1780,9 @@ async function suggestFilm() {
     });
   } finally {
     isSending = false;
+    document.getElementById('request-loading').style.display = 'none'; // ⛔ Сховати
   }
 }
-
 
   
 
@@ -2280,6 +2271,21 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
 
 </div>
 
+<div id="request-loading" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  color: #00f7ff;
+  flex-direction: column;
+">
+  <div class="loader"></div>
+  <div style="margin-top:12px;">Надсилаємо запит...</div>
+</div>
   
 </body>
 </html>
