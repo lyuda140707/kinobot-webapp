@@ -1439,7 +1439,14 @@ function switchTab(tabId, btn) {
   if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
 
-  if (tabId === 'favorites') showFavorites();
+  if (tabId === 'favorites') {
+  if (!isDataLoaded) {
+    alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
+    return;
+  }
+  showFavorites();
+}
+
 
   if (tabId === 'search') {
     document.getElementById('searchInput').value = '';
@@ -1456,9 +1463,15 @@ function switchTab(tabId, btn) {
   }
 
   if (tabId === 'account') {
+    if (!isDataLoaded) {
+      alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
+      return;
+    }
     closeDonatePopup();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+
 }
 
 
