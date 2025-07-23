@@ -489,7 +489,7 @@
 
   <script>
 
-
+    const placeholderImage = "https://i.postimg.cc/6q9Cd9sQ/d9d66124-1900-49be-a89c-007edc35bd13.png";
     
     let films = [];
     let isDataLoaded = false;
@@ -500,30 +500,30 @@
 
 function renderBatch() {
   const container = document.getElementById('genre-results');
-  // беремо наступні BATCH_SIZE фільмів
+  const isPro = localStorage.getItem('isProUser') === 'true';
   const batch = currentFilms.slice(offset, offset + BATCH_SIZE);
 
-  // будуємо HTML-картки
-  const html = batch.map(film => `
-    <div class="film-card">
-      <img src="${film['Фото']}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p class="film-desc">${film['Опис'] || ''}</p>
-      <button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>
-    </div>
-  `).join('');
+  const html = batch.map(film => {
+    const isProFilm = film['Доступ'] === 'PRO';
+    const imgSrc    = (isProFilm && !isPro)
+                      ? placeholderImage
+                      : (film['Фото'] || placeholderImage);
+    return `
+      <div class="film-card">
+        <img src="${imgSrc}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p>${film['Опис'] || ''}</p>
+        <button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>
+      </div>
+    `;
+  }).join('');
 
-  // додаємо до кінця списку
   container.insertAdjacentHTML('beforeend', html);
-
-  // зсуваємо offset
   offset += batch.length;
 }
 
-    
 
 
-  const placeholderImage = "https://i.postimg.cc/zX3VCwWb/31d2242b-94cb-4301-87fd-c7550ca823f4.png";
 
 
   document.querySelectorAll('.film-card').forEach(card => {
@@ -1019,47 +1019,47 @@ function restoreRatingsUI() {
 
 
     
-    function filterByCountry(country) {
+function filterByCountry(country) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
-
   const filtered = films.filter(f => f['Країна'] === country);
-
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
+  // Очищаємо контейнер і малюємо картки з новим imgSrc
   container.innerHTML = filtered.map(film => {
-  const isProFilm = film['Доступ'] === 'PRO';
-  const isPro = localStorage.getItem('isProUser') === 'true';
+    const isProFilm = film['Доступ'] === 'PRO';
+    const isPro     = localStorage.getItem('isProUser') === 'true';
+    // ← ТУТ УМОВНИЙ ШЛЯХ ДО ЗОБРАЖЕННЯ
+    const imgSrc    = (isProFilm && !isPro)
+                      ? placeholderImage
+                      : (film['Фото'] || placeholderImage);
 
-  let buttons = '';
-  if (isProFilm && !isPro) {
-    buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+    let buttons = '';
+    if (isProFilm && !isPro) {
+      buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+    } else if (film['Посилання']) {
+      buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+    }
 
-  } else if (film['Посилання']) {
-    buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
-  }
-
-  const imgSrc = (isProFilm && !isPro) ? placeholderImage : film['Фото'];
-
-  return `
-    <div class="film-card">
-      <img src="${imgSrc}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <div class="film-actions">
-        ${buttons}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+    return `
+      <div class="film-card">
+        <img src="${imgSrc}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p>${film['Опис']}</p>
+        <div class="film-actions">
+          ${buttons}
+          <button class="fav-button" onclick="addToFavorites('${film['Назва']}','${film['Опис']}')">💛 Улюблене</button>
+        </div>
       </div>
-    </div>
-  `;
-}).join('');
-
+    `;
+  }).join('');
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
   
@@ -1069,6 +1069,7 @@ function filterByYear(year) {
   const container = document.getElementById('genre-results');
   const isPro = localStorage.getItem('isProUser') === 'true';
 
+
   const filtered = films.filter(f => f['Рік']?.toString() === year.toString());
 
   if (filtered.length === 0) {
@@ -1077,31 +1078,30 @@ function filterByYear(year) {
   }
 
   container.innerHTML = filtered.map(film => {
-  const isProFilm = film['Доступ'] === 'PRO';
-  const isPro = localStorage.getItem('isProUser') === 'true';
+    const isProFilm = film['Доступ'] === 'PRO';
+    const imgSrc = (isProFilm && !isPro)
+      ? placeholderImage
+      : (film['Фото'] || placeholderImage);
 
-  let buttons = '';
-  if (isProFilm && !isPro) {
-    buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO користувачів')">🔒 PRO Доступ</button>`;
-  } else if (film['Посилання']) {
-    buttons = `<button class="search-button" onclick="event.stopPropagation(); openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
-  }
+    let buttons = '';
+    if (isProFilm && !isPro) {
+      buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
+    } else if (film['Посилання']) {
+      buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+    }
 
-  const imgSrc = (isProFilm && !isPro) ? placeholderImage : film['Фото'];
-
-  return `
-    <div class="film-card">
-      <img src="${imgSrc}" alt="${film['Назва']}">
-      <h3>${film['Назва']}</h3>
-      <p>${film['Опис']}</p>
-      <div class="film-actions">
-        ${buttons}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+    return `
+      <div class="film-card">
+        <img src="${imgSrc}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p>${film['Опис']}</p>
+        <div class="film-actions">
+          ${buttons}
+          <button class="fav-button" onclick="addToFavorites('${film['Назва']}', '${film['Опис']}')">💛 Улюблене</button>
+        </div>
       </div>
-    </div>
-  `;
-}).join('');
-
+    `;
+  }).join('');
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
