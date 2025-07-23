@@ -900,15 +900,16 @@ function showSeries(type = 'Серіал') {
     return;
   }
 
-  // Групуємо за назвою без оператора ||= 
-  const grouped = seriesFilms.reduce((acc, ep) => {
-    const name = ep['Назва'];
-    if (!acc[name]) {
-      acc[name] = [];
-    }
-    acc[name].push(ep);
-    return acc;
-  }, {});
+// Групуємо за назвою без операторів ||=:
+const grouped = seriesFilms.reduce((acc, ep) => {
+  const title = ep['Назва'];
+  if (!acc[title]) {
+    acc[title] = [];
+  }
+  acc[title].push(ep);
+  return acc;
+}, {});
+
 
   // Генеруємо картки
   const html = Object.entries(grouped).map(([title, episodes]) => {
