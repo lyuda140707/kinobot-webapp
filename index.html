@@ -2275,14 +2275,19 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   display: none;
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,0.6);
   z-index: 9999;
+
+  display: flex;
   justify-content: center;
   align-items: center;
+
   font-size: 18px;
   color: #00f7ff;
   flex-direction: column;
+  text-align: center;
 ">
+
   <div class="loader"></div>
   <div style="margin-top:12px;">Надсилаємо запит...</div>
 </div>
