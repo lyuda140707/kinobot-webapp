@@ -533,24 +533,28 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-  async function loadFilms() {
-  const cachedFilms = localStorage.getItem('films');
+async function loadFilms() {
+  const cached = localStorage.getItem('films');
+  const ts = localStorage.getItem('filmsTimestamp');
+  const maxAge = 1000 * 60 * 60 * 48; // 48 годин у мс
 
-  if (cachedFilms) {
-    films = JSON.parse(cachedFilms);
+  // Якщо є кеш і йому менше 48 годин – використовуємо його
+  if (cached && ts && (Date.now() - Number(ts) < maxAge)) {
+    films = JSON.parse(cached);
     shuffleArray(films);
-    console.log('Фільми завантажені з кешу');
+    console.log('✅ Фільми завантажені з кешу (<48 год)');
     showFilmOfTheDay();
     showCollections();
     showGenres();
     showCountryFilters();
     showYearFilters();
-    fetchAndUpdateFilms(); // фонове оновлення
     return;
   }
 
+  // Інакше – оновлюємо з сервера
   await fetchAndUpdateFilms();
 }
+
 
 async function fetchAndUpdateFilms() {
   try {
@@ -562,6 +566,7 @@ async function fetchAndUpdateFilms() {
 
 
     localStorage.setItem('films', JSON.stringify(films));
+    localStorage.setItem('filmsTimestamp', Date.now().toString()); // зберегли час оновлення кешу
     showFilmOfTheDay();
     showCollections();
     showGenres();
