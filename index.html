@@ -509,7 +509,8 @@
     ✅ Я оплатив
   </button>
 
-  <button id="lucky-button" class="account-button">🎲 Мені пощастить</button>
+  <button id="contact-admin-btn" class="button big-button">💬 Написати адміну</button>
+
 
 
 <hr style="margin: 20px 0; border-color: #444;">
@@ -2406,6 +2407,41 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
     <div style="margin-top:12px;">Надсилаємо запит...</div>
   </div>
 </div>
+document.getElementById('contact-admin-btn').addEventListener('click', () => {
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    alert("Не вдалося визначити користувача.");
+    return;
+  }
+
+  const message = prompt("📩 Напишіть повідомлення адміну:");
+
+  if (message && message.trim().length > 0) {
+    fetch('https://твій-бекенд/message-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.id,
+        username: user.username,
+        message: message.trim()
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert("✅ Повідомлення відправлено адміну!");
+      } else {
+        alert("❌ Помилка при відправці.");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("❗️ Сталась помилка при відправці.");
+    });
+  }
+});
 
   
 </body>
