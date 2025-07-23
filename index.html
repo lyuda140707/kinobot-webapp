@@ -2276,18 +2276,18 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.6);
   z-index: 9999;
+  display: none; /* спочатку приховано */
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   font-size: 18px;
   color: #00f7ff;
-  flex-direction: column;
   text-align: center;
-  display: none; /* <-- лишається внизу і тільки ОДИН display */
 ">
-
   <div class="loader"></div>
   <div style="margin-top:12px;">Надсилаємо запит...</div>
 </div>
+
   
 </body>
 </html>
