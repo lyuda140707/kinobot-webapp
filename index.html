@@ -2490,13 +2490,6 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
     }
   }
 
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('suggest-button')) {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
-    }
-  }
-});
 
 </script>
 
