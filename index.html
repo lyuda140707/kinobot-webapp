@@ -360,12 +360,13 @@
 }
 
 #genre-results {
-  display: none;
-}
-/* коли в батьківському <div id="categories"> є клас active — показуємо сітку */
-#categories.active #genre-results {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 10px;
 }
+
+
   </style>
  
   
@@ -407,21 +408,108 @@
   -webkit-overflow-scrolling: touch;
 "></div>
 
-
+    </div>
   
-<div id="categories" class="section">
-  <h2>Категорії</h2>
-  <button class="back-button" onclick="…">⬅️ Назад</button>
 
- 
+  <div id="categories" class="section">
+<h2>Категорії</h2>
+<button class="back-button" onclick="switchTab('home', document.querySelector('[data-tab=home]'))">
+  ⬅️ Назад
+</button>
 
-  <!-- І тільки тут — результати та сенсоре -->
-  <div id="genre-results"></div>
-  <div id="list-end-sentinel"></div>
+<div class="genre-main-wrapper" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
+  <button class="genre-main-btn" onclick="openGenreGroup('films')">
+    🎯 Фільми за жанром
+  </button>
+  <button
+    class="genre-main-btn"
+    onclick="
+      switchTab('categories', document.querySelector('[data-tab=categories]'));
+      openGenreGroup('series');
+      showSeries('Серіал');
+    "
+  >
+    📺 Серіали
+  </button>
+  <button class="genre-main-btn" onclick="openGenreGroup('cartoons')">
+    👧 Мультики
+  </button>
 </div>
 
 
 
+
+  
+
+   <!-- 🔽 Підкатегорії: За жанром -->
+<div id="group-films" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
+  <button class="genre-btn" data-genre="Екшн(бойовики)">🔫 Екшн</button>
+  <button class="genre-btn" data-genre="Комедії">😂 Комедії</button>
+  <button class="genre-btn" data-genre="Детектив">🕵️ Детектив</button>
+  <button class="genre-btn" data-genre="Драми">🎭 Драми</button>
+  <button class="genre-btn" data-genre="Військові">🪖 Військові</button>
+  <button class="genre-btn" data-genre="Фантастика">👽 Фантастика</button>
+  <button class="genre-btn" data-genre="Документальний">📚 Документальний</button>
+  <button class="genre-btn" data-genre="Трилери">😱 Трилери</button>
+  <button class="genre-btn" data-genre="Сімейні">👨‍👩‍👧 Сімейні</button>
+  <button class="genre-btn" data-genre="Мелодрами">💔 Мелодрами</button>
+  <button class="genre-btn" data-genre="Кримінал">🚔 Кримінал</button>
+  <button class="genre-btn" data-genre="Фентезі">🧝 Фентезі</button>
+  <button class="genre-btn" data-genre="Пригоди">🌍 Пригоди</button>
+  <button class="genre-btn" data-genre="Історичні">🏰 Історичні</button>
+  <button class="genre-btn" data-genre="Романтичні">💘 Романтичні</button>
+  <button class="genre-btn" data-genre="Жахи">👻 Жахи</button>
+</div>
+
+<!-- 🔽 Підкатегорії: Серіали -->
+<div id="group-series" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
+  <button class="genre-btn" data-genre="Українські">🇺🇦 Українські</button>
+  <button class="genre-btn" data-genre="Детективні">🕵️‍♀️ Детективні</button>
+  <button class="genre-btn" data-genre="Драматичні">🎭 Драматичні</button>
+  <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
+  <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
+  <button class="genre-btn" data-genre="Мелодраматичні ">💔 Мелодраматичні </button>
+  <button class="genre-btn" data-genre="Історичні серіали">🏰 Історичні серіали</button>
+  <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
+  <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінальні</button>
+</div>
+
+<!-- 🔽 Підкатегорії: Мультики -->
+<div id="group-cartoons" class="genre-button-container genre-scroll" style="display:none; margin-top:20px;">
+  <button class="genre-btn" data-genre="Мультфільми">🎬 Мультфільми</button>
+  <button class="genre-btn" data-genre="Мультсеріали">📺 Мультсеріали</button>
+</div>
+
+   <!-- 🔍 Фільтр за країною та роком -->
+<details id="filter-details" style="margin-top: 20px; margin-bottom: 20px; background: #1c1c1c; border-radius: 10px; padding: 10px 15px;">
+  <summary style="font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; color: #00f7ff;">🔎 Фільтри</summary>
+  <div style="padding-top: 10px;">
+    <h4 style="margin: 10px 0 5px; color: #ccc;">🌍 Країна</h4>
+    <div id="country-filters" style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+    "></div>
+
+    <h4 style="margin: 10px 0 5px; color: #ccc;">📅 Рік</h4>
+    <div id="year-filters" style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+    "></div>
+  </div>
+</details>
+
+  </div>
+
+  <div id="genre-results"></div>
+  <div id="list-end-sentinel"></div>
+</div>
 
 
   <div id="favorites" class="section">
