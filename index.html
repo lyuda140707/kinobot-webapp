@@ -359,8 +359,10 @@
   vertical-align: middle;
 }
 
+/* ховаємо контейнер з фільмами за замовчуванням */
 #genre-results {
-  display: grid;
+  display: none !important;
+}
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   padding: 10px;
@@ -653,42 +655,36 @@ function renderBatch() {
 });
 async function loadFilms() {
   const cached = localStorage.getItem('films');
-  const ts = localStorage.getItem('filmsTimestamp');
+  const ts     = localStorage.getItem('filmsTimestamp');
   const maxAge = 1000 * 60 * 60 * 48; // 48 годин
 
   if (cached && ts && (Date.now() - Number(ts) < maxAge)) {
     films = JSON.parse(cached);
     shuffleArray(films);
-    console.log('✅ Фільми з кешу');
-
-    // Оновлюємо UI
+    // показуємо скелетони та контент
     showFilmOfTheDay();
     showCollections();
     showGenres();
     showCountryFilters();
     showYearFilters();
 
-    isDataLoaded = true;
-
-    // Перший батч карток + оновлення їх рейтингів
-    currentFilms = films;
-    offset = 0;
-    renderBatch();
+    isDataLoaded  = true;
+    currentFilms  = films;
+    offset        = 0;
+    // renderBatch();      ← закоментовано, щоб не малювало картки одразу
     restoreRatingsUI();
-
     return;
   }
 
-  // Якщо в кеші немає — підтягуємо з мережі
   await fetchAndUpdateFilms();
-  isDataLoaded = true;
 
-  // Перший батч карток + оновлення їх рейтингів
-  currentFilms = films;
-  offset = 0;
-  renderBatch();
+  isDataLoaded  = true;
+  currentFilms  = films;
+  offset        = 0;
+  // renderBatch();      ← закоментовано, щоб не малювало картки одразу
   restoreRatingsUI();
 }
+
 
 
 
