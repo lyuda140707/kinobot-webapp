@@ -578,6 +578,7 @@
     
     let films = [];
     let isDataLoaded = false;
+    let proPollInterval = null;
 
     const BATCH_SIZE = 50;
     let currentFilms = [];
@@ -1613,16 +1614,13 @@ function showSkeletonCollections() {
   } else {
     localStorage.removeItem('isProUser');
   }
-
-  // ← Ось сюди додаємо цей блок:
-  if (
-    localStorage.getItem('paymentPending') === 'true' &&
-    localStorage.getItem('isProUser') !== 'true'
-  ) {
-    // Якщо користувач уже натиснув “Я оплатив”, але PRO ще не підтверджено,
-    // знову показуємо кнопку “Я оплатив”
+  // Якщо користувач вже натиснув «Я оплатив», але PRO ще не підтверджено
+  if (localStorage.getItem("paymentPending") === "true"
+      && localStorage.getItem("isProUser") !== "true") {
     showConfirmPaidButton(user);
+    startProPolling();
   }
+
 
   const getProBtn = document.getElementById('getProBtn');
   if (proData.isPro && getProBtn) {
@@ -2152,7 +2150,9 @@ document.getElementById('getProBtn').addEventListener('click', () => {
 
     alert(paymentInfo);
     window.open(paymentLink, "_blank");
-
+  
+    localStorage.setItem("paymentPending", "true");
+    startProPolling();
     showConfirmPaidButton(user); // ⬅️ Передаємо весь обʼєкт user
 });
 
@@ -2300,6 +2300,37 @@ function toggleEpisodes(id, btn) {
     : `📺 Показати серії (${grid.dataset.count})`;
 }
 
+// Запуск регулярної перевірки PRO-статусу
+function startProPolling() {
+  if (proPollInterval) return;
+  proPollInterval = setInterval(async () => {
+    try {
+      const res = await fetch('https://kinobot-qm9q.onrender.com/check-pro', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: window.Telegram.WebApp.initDataUnsafe.user.id })
+      });
+      const data = await res.json();
+      if (data.isPro) {
+        clearInterval(proPollInterval);
+        proPollInterval = null;
+        localStorage.removeItem("paymentPending");
+        localStorage.setItem("isProUser", "true");
+        updateUIAfterPro(data.expire_date);
+      }
+    } catch (e) { console.warn(e); }
+  }, 5000); // кожні 5 секунд
+}
+
+// Оновити інтерфейс після підтвердження оплати
+function updateUIAfterPro(expireDate) {
+  const btn = document.getElementById("confirmPaidBtn");
+  if (btn) btn.style.display = "none";
+  const notice = document.createElement("p");
+  notice.textContent = `✅ Ваш PRO активний до ${expireDate}`;
+  notice.style.color = "#00f7ff";
+  document.getElementById("getProBtn").after(notice);
+}
 
     
 </script>
