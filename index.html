@@ -1746,12 +1746,49 @@ observer.observe(sentinel);
 document.getElementById('searchInput').addEventListener('input', () => {
   const val = document.getElementById('searchInput').value.trim().toLowerCase();
   const container = document.getElementById('searchResults');
-  container.innerHTML = ''; // спочатку очищаємо завжди
-
+  container.innerHTML = '';
   if (!val) return;
 
   const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
 
+  // Якщо серед результатів є серіали — групуємо їх
+  const seriesResults = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
+  if (seriesResults.length) {
+    const grouped = seriesResults.reduce((acc, ep) => {
+      const title = ep['Назва'];
+      (acc[title] ||= []).push(ep);
+      return acc;
+    }, {});
+    container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+      const safe = safeId(title);
+      const count = episodes.length;
+      const isPro = localStorage.getItem('isProUser') === 'true';
+      const isProSeries = episodes[0]['Доступ'] === 'PRO';
+      const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
+      return `
+        <div class="film-card">
+          <img src="${poster}" class="film-img" alt="${title}">
+          <h3>${title}</h3>
+          <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
+          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+            📺 Показати серії (${count})
+          </button>
+          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+            ${episodes.map((ep,i) => {
+              const label = ep['Опис'] || `Серія ${i+1}`;
+              return ep.file_id
+                ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
+                : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+    restoreRatingsUI();
+    return;
+  }
+
+  // Якщо нічого не знайдено
   if (results.length === 0) {
     container.innerHTML = `
       <p>Фільм не знайдено 😢</p>
@@ -1760,14 +1797,14 @@ document.getElementById('searchInput').addEventListener('input', () => {
     return;
   }
 
+  // Інакше — звичайний рендер фільмів
   container.innerHTML = results.map(f => {
     const isPro = localStorage.getItem('isProUser') === 'true';
     const locked = f['Доступ'] === 'PRO' && !isPro;
     const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
-    const btn = locked 
-      ? `<button onclick="showProModal()">🔒 PRO</button>` 
-      : f['Посилання'] ? `<button onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>` : '';
-
+    const btn = locked
+      ? `<button onclick="showProModal()">🔒 PRO</button>`
+      : (f['Посилання'] ? `<button onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>` : '');
     return `
       <div class="film-card">
         <img src="${img}" alt="${f['Назва']}">
@@ -1780,9 +1817,9 @@ document.getElementById('searchInput').addEventListener('input', () => {
       </div>
     `;
   }).join('');
-
   restoreRatingsUI();
 });
+
 
 
 
