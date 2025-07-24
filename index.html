@@ -1362,7 +1362,7 @@ return `
     `).join('');
   }
 
-  container.style.display = 'block';
+  container.style.display = 'grid';
 }
 
 function showProModal() {
@@ -1492,7 +1492,7 @@ function switchTab(tabId, btn) {
     offset = 0;
   } else if (tabId === 'categories') {
     document.getElementById('genre-results').innerHTML = '';
-    document.getElementById('genre-results').style.display = 'block';
+    document.getElementById('genre-results').style.display = 'grid';
     currentFilms = [];
     offset = 0;
   }
