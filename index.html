@@ -397,15 +397,18 @@
     <div id="genres" style="display:none; flex-wrap:wrap; gap:10px;"></div>
     
 
- <h3 style="margin-top:25px">Добірки</h3>
-<div id="collections" style="
+    <h3 style="margin-top:25px">Добірки</h3>
+  <div id="collections" style="
   display: flex;
-  flex-wrap: wrap;        /* тепер картки обгортаються в кілька рядків */
-  overflow-x: visible;    /* вимикаємо горизонтальну прокрутку */
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 16px;
   padding: 10px 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 "></div>
 
+    </div>
   
 
   <div id="categories" class="section">
@@ -654,15 +657,7 @@ async function loadFilms() {
   const maxAge = 1000 * 60 * 60 * 48; // 48 годин
 
   if (cached && ts && (Date.now() - Number(ts) < maxAge)) {
-     // 1. Завантажили з кешу
-    let loaded = JSON.parse(cached);
-    // 2. Видалили дублікати за назвою (toLowerCase для нечутливості до регістру)
-    films = Array.from(
-      loaded
-        .reduce((map, film) => map.set(film['Назва'].toLowerCase(), film), new Map())
-        .values()
-      );
-    // 3. Перемішуємо
+    films = JSON.parse(cached);
     shuffleArray(films);
     console.log('✅ Фільми з кешу');
 
@@ -701,25 +696,14 @@ async function fetchAndUpdateFilms() {
   try {
     document.getElementById('home-loading').style.display = 'block';
 
-    const res = await fetch(
-      `https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1?cb=${Date.now()}`
-    );
+    const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
     const loadedFilms = await res.json();
-
 
     if (!loadedFilms || loadedFilms.length === 0) {
       throw new Error('Отримано пустий список фільмів');
     }
 
-    // 1. Завантажили з мережі
-    let deduped = Array.from(
-      loadedFilms
-        .reduce((map, film) => map.set(film['Назва'].toLowerCase(), film), new Map())
-        .values()
-      );
-    // 2. Тепер записуємо
-    films = deduped;
-    
+    films = loadedFilms;
     shuffleArray(films);
 
     localStorage.setItem('films', JSON.stringify(films));
@@ -1027,60 +1011,20 @@ function showYearFilters() {
 
     
 
-function showCollections() {
+    function showCollections() {
   const container = document.getElementById('collections');
-  // Очистити перед рендером
-  container.innerHTML = '';
-  container.style.display = 'flex';
-  container.style.gap = '16px';
-  container.style.overflowX = 'auto';
-
-  // Map для унікальних добірок: ключ — lowerCase, значення — оригінальна назва
-  const pickMap = new Map();
-  films.forEach(film => {
-    if (!film['Добірка']) return;
-    film['Добірка']
-      .split(/[,;]+/)              // розділяємо і по комі, і по крапці з комою
-      .map(s => s.trim())          // обрізаємо пробіли
-      .filter(Boolean)             // прибираємо порожні рядки
-      .forEach(name => {
-        const key = name.toLowerCase();
-        if (!pickMap.has(key)) {
-          pickMap.set(key, name);
-        }
-      });
-  });
-
-  // Якщо нічого не знайшли
-  if (pickMap.size === 0) {
-    container.innerHTML = '<p>Добірок не знайдено</p>';
-    return;
-  }
-
-  // Генеруємо карточки
-  pickMap.forEach((displayName, lowerKey) => {
-    // шукаємо перший фільм із цією добіркою, щоб взяти постер
-    const example = films.find(f =>
-      f['Добірка'] &&
-      f['Добірка']
-        .split(/[,;]+/)
-        .map(s => s.trim().toLowerCase())
-        .includes(lowerKey)
-    );
-    const imgSrc = example?.['Фото'] || placeholderImage;
-
-    const card = document.createElement('div');
-    card.className = 'collection-card';
-    card.onclick = () => filterByGenre(displayName);
-    card.innerHTML = `
-      <img src="${imgSrc}" alt="${displayName}">
-      <p>${displayName}</p>
+  const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
+  container.innerHTML = names.map(name => {
+    const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
+    return `
+      <div class="collection-card" onclick="filterByGenre('${name}')">
+        <img src="${img}" alt="${name}">
+        <p>${name}</p>
+      </div>
     `;
-    container.appendChild(card);
-  });
+  }).join('');
+  document.getElementById('collections').style.display = 'flex';
 }
-
-
 
     
 function showSeries(type = 'Серіал') {
@@ -1167,89 +1111,87 @@ function openSeries(id) {
 
 function renderControls(title, description) {
   const id = safeId(title);
-  const film = films.find(f => f['Назва'] === title) || {};
   const prev = localStorage.getItem(`rating-${title}`);
   const likeClass    = prev === 'like'    ? 'active-like'    : '';
   const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
+  const descEsc = (description||'').replace(/'/g, "\\'");
   return `
     <div style="display:flex; gap:8px; margin:6px 0;">
       <button class="rating-button ${likeClass}"
               onclick="rateFilm('${title}', 'like')">
-        👍 <span id="like-count-btn-${id}">${film['Лайки']||0}</span>
+        👍 <span id="like-count-btn-${id}">${0 /* або початкове film['Лайки'] */}</span>
       </button>
+
       <button class="rating-button ${dislikeClass}"
               onclick="rateFilm('${title}', 'dislike')">
-        👎 <span id="dislike-count-btn-${id}">${film['Дизлайки']||0}</span>
+        👎 <span id="dislike-count-btn-${id}">${0 /* або film['Дизлайки'] */}</span>
       </button>
     </div>
-    <button class="fav-button" onclick="addToFavorites('${title}','${(description||'').replace(/'/g,"\\'")}')">💛</button>
+    <button class="fav-button"
+            onclick="addToFavorites('${title}','${descEsc}')">💛</button>
   `;
 }
+
 
     
 function filterByGenre(genre) {
   if (!genre) return;
-
-  // 1) Переключаємося в таб «Категорії»
   switchTab('categories');
+  const normalized = genre.toLowerCase();
 
-  // 2) Готуємо контейнер
-  const container = document.getElementById('genre-results');
-  container.style.display = 'grid';
-  container.innerHTML = '';
-
-  // 3) Нормалізуємо запит
-  const normalized = genre.trim().toLowerCase();
-
-  // 4) Фільтруємо масив films
+  // спочатку відфільтруємо всі фільми за жанром / добіркою
   const filtered = films.filter(f => {
-    // основний жанр
-    const mainGenre = (f['Жанр'] || '').trim().toLowerCase();
-    // усі добірки, розбиті по комі або крапці з комою
-    const picks = (f['Добірка'] || '')
-      .split(/[,;]+/)                // може бути як "A, B" так і "A; B"
-      .map(s => s.trim().toLowerCase())
-      .filter(Boolean);
-    return mainGenre === normalized || picks.includes(normalized);
+    const g1 = (f['Жанр']    || '').toLowerCase();
+    const g2 = (f['Добірка'] || '').toLowerCase();
+    return g1 === normalized || g2 === normalized;
   });
 
-  // 5) Якщо нічого не знайдено
-  if (filtered.length === 0) {
+  const container = document.getElementById('genre-results');
+  if (!filtered.length) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     container.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
-  // 6) Серіали — групуємо по Назві
+  // === Якщо це серіали — зробимо групування ===
   if (filtered[0]['Тип']?.trim().toLowerCase() === 'серіал') {
+    // групуємо по Назві
     const grouped = filtered.reduce((acc, ep) => {
-      acc[ep['Назва']] = acc[ep['Назва']] || [];
-      acc[ep['Назва']].push(ep);
+      const title = ep['Назва'];
+      if (!acc[title]) acc[title] = [];
+      acc[title].push(ep);
       return acc;
     }, {});
-    container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
+    // генеруємо HTML точно так само, як у showSeries
+    container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       const safe = safeId(title);
       const isPro     = localStorage.getItem('isProUser') === 'true';
-      const isProFilm = eps[0]['Доступ'] === 'PRO';
+      const isProFilm = episodes[0]['Доступ'] === 'PRO';
       const poster    = (isProFilm && !isPro)
         ? placeholderImage
-        : (eps[0]['Фото'] || placeholderImage);
-      const count     = eps.length;
-      const btn       = `<button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">📺 Серій: ${count}</button>`;
-      const epsHtml   = eps.map((e,i) => {
-        const label = e['Опис'] || `Серія ${i+1}`;
-        return e.file_id
-          ? `<button class="search-button" onclick="openVideoById('${e.file_id}')">${label}</button>`
+        : (episodes[0]['Фото'] || placeholderImage);
+      const count     = episodes.length;
+      const btn = `<button class="search-button"
+                    onclick="toggleEpisodes('${safe}', this)"
+                    data-count="${count}"
+                  >📺 Показати серії (${count})</button>`;
+      const epsHtml = episodes.map((ep, i) => {
+        const label = ep['Опис'] || `Серія ${i+1}`;
+        return ep.file_id
+          ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
           : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
       }).join('');
       return `
         <div class="film-card">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
-          <p class="film-imdb">IMDb: ${eps[0]['IMDb']||'—'}</p>
-          ${renderControls(title, eps[0]['Опис'])}
+          <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+          ${renderControls(title, episodes[0]['Опис'])}
           ${btn}
-          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+          <div id="episodes-${safe}"
+               class="series-episodes-grid"
+               style="display:none;"
+               data-count="${count}">
             ${epsHtml}
           </div>
         </div>
@@ -1259,12 +1201,15 @@ function filterByGenre(genre) {
     return;
   }
 
-  // 7) Решта — це «звичайні» фільми / мультики
+  // === Інакше — це не серіали, малюємо як фільми ===
   currentFilms = filtered;
+  container.innerHTML = '';
   offset = 0;
   renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
+
 
 
 function restoreRatingsUI() {
