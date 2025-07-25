@@ -397,18 +397,15 @@
     <div id="genres" style="display:none; flex-wrap:wrap; gap:10px;"></div>
     
 
-    <h3 style="margin-top:25px">Добірки</h3>
-  <div id="collections" style="
+ <h3 style="margin-top:25px">Добірки</h3>
+<div id="collections" style="
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap;        /* тепер картки обгортаються в кілька рядків */
+  overflow-x: visible;    /* вимикаємо горизонтальну прокрутку */
   gap: 16px;
   padding: 10px 0;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
 "></div>
 
-    </div>
   
 
   <div id="categories" class="section">
