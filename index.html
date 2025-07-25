@@ -1807,25 +1807,20 @@ container.innerHTML = uniqueResults.map(f => {
   const isPro = localStorage.getItem('isProUser') === 'true';
   const locked = f['Доступ']==='PRO' && !isPro;
   const img = locked ? placeholderImage : (f['Фото']||placeholderImage);
-  // збираємо кнопку “Дивитись”
   const watchBtn = locked
     ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
     : (f['Посилання']
         ? `<button class="search-button" onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>`
         : '');
-  // повертаємо картку з усіма елементами
   return `
     <div class="film-card">
       <img src="${img}" alt="${f['Назва']}" class="film-img">
       <h3>${f['Назва']}</h3>
-      <!-- Лічильники лайків/дизлайків -->
-      <div class="film-rating">
-        👍 <span id="like-count-${safeId(f['Назва'])}">${f['Лайки']||0}</span> |
-        👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки']||0}</span>
-      </div>
       <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
       <p>${f['Опис']||''}</p>
-      <!-- Кнопки Дивитись і Улюблене -->
+      
+      ${renderControls(f['Назва'], f['Опис'])}
+      
       <div class="film-actions">
         ${watchBtn}
         <button class="fav-button" onclick="addToFavorites('${f['Назва']}','${(f['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
@@ -1833,6 +1828,7 @@ container.innerHTML = uniqueResults.map(f => {
     </div>
   `;
 }).join('');
+
 
   restoreRatingsUI();
 });
