@@ -1187,65 +1187,67 @@ function renderControls(title, description) {
     
 function filterByGenre(genre) {
   if (!genre) return;
+
+  // 1) Переключаємося в таб «Категорії»
   switchTab('categories');
+
+  // 2) Готуємо контейнер
+  const container = document.getElementById('genre-results');
+  container.style.display = 'grid';
+  container.innerHTML = '';
+
+  // 3) Нормалізуємо запит
   const normalized = genre.trim().toLowerCase();
 
+  // 4) Фільтруємо масив films
   const filtered = films.filter(f => {
     // основний жанр
-    const g1 = (f['Жанр'] || '').toLowerCase().trim();
-    // добірки, розбиті по комі і крапці з комою
+    const mainGenre = (f['Жанр'] || '').trim().toLowerCase();
+    // усі добірки, розбиті по комі або крапці з комою
     const picks = (f['Добірка'] || '')
-      .split(/[,;]+/)                // розбивка по , і ;
+      .split(/[,;]+/)                // може бути як "A, B" так і "A; B"
       .map(s => s.trim().toLowerCase())
       .filter(Boolean);
-    return g1 === normalized || picks.includes(normalized);
+    return mainGenre === normalized || picks.includes(normalized);
   });
 
-  const container = document.getElementById('genre-results');
-  if (!filtered.length) {
+  // 5) Якщо нічого не знайдено
+  if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     container.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
-  // === Серіали: групування по назві ===
+  // 6) Серіали — групуємо по Назві
   if (filtered[0]['Тип']?.trim().toLowerCase() === 'серіал') {
     const grouped = filtered.reduce((acc, ep) => {
-      const title = ep['Назва'];
-      if (!acc[title]) acc[title] = [];
-      acc[title].push(ep);
+      acc[ep['Назва']] = acc[ep['Назва']] || [];
+      acc[ep['Назва']].push(ep);
       return acc;
     }, {});
-    container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+    container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
       const safe = safeId(title);
       const isPro     = localStorage.getItem('isProUser') === 'true';
-      const isProFilm = episodes[0]['Доступ'] === 'PRO';
+      const isProFilm = eps[0]['Доступ'] === 'PRO';
       const poster    = (isProFilm && !isPro)
         ? placeholderImage
-        : (episodes[0]['Фото'] || placeholderImage);
-      const count     = episodes.length;
-      const btn = `<button class="search-button"
-                    onclick="toggleEpisodes('${safe}', this)"
-                    data-count="${count}">
-                    📺 Показати серії (${count})
-                   </button>`;
-      const epsHtml = episodes.map((ep, i) => {
-        const label = ep['Опис'] || `Серія ${i+1}`;
-        return ep.file_id
-          ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
+        : (eps[0]['Фото'] || placeholderImage);
+      const count     = eps.length;
+      const btn       = `<button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">📺 Серій: ${count}</button>`;
+      const epsHtml   = eps.map((e,i) => {
+        const label = e['Опис'] || `Серія ${i+1}`;
+        return e.file_id
+          ? `<button class="search-button" onclick="openVideoById('${e.file_id}')">${label}</button>`
           : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
       }).join('');
       return `
         <div class="film-card">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
-          <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
-          ${renderControls(title, episodes[0]['Опис'])}
+          <p class="film-imdb">IMDb: ${eps[0]['IMDb']||'—'}</p>
+          ${renderControls(title, eps[0]['Опис'])}
           ${btn}
-          <div id="episodes-${safe}"
-               class="series-episodes-grid"
-               style="display:none;"
-               data-count="${count}">
+          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
             ${epsHtml}
           </div>
         </div>
@@ -1255,14 +1257,12 @@ function filterByGenre(genre) {
     return;
   }
 
-  // === Інші: рендеримо як фільми батчами ===
+  // 7) Решта — це «звичайні» фільми / мультики
   currentFilms = filtered;
-  container.innerHTML = '';
   offset = 0;
   renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
 }
-
 
 
 function restoreRatingsUI() {
