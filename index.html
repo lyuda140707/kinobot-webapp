@@ -1032,52 +1032,57 @@ function showYearFilters() {
 
 function showCollections() {
   const container = document.getElementById('collections');
-  container.innerHTML = '';          // 1) Очистили перед рендером
+  // Очистити перед рендером
+  container.innerHTML = '';
   container.style.display = 'flex';
+  container.style.gap = '16px';
+  container.style.overflowX = 'auto';
 
-  // 2) Збираємо усі “пики” у Map<lowerName, displayName>
-  const pickMap = films.reduce((map, film) => {
-    if (!film['Добірка']) return map;
+  // Map для унікальних добірок: ключ — lowerCase, значення — оригінальна назва
+  const pickMap = new Map();
+  films.forEach(film => {
+    if (!film['Добірка']) return;
     film['Добірка']
-      .split(/[,;]+/)               // розбивка по , та ;
-      .map(s => s.trim())           // обрізати зовнішні пробіли
-      .filter(Boolean)              // прибрати порожні рядки
+      .split(/[,;]+/)              // розділяємо і по комі, і по крапці з комою
+      .map(s => s.trim())          // обрізаємо пробіли
+      .filter(Boolean)             // прибираємо порожні рядки
       .forEach(name => {
         const key = name.toLowerCase();
-        if (!map.has(key)) {
-          map.set(key, name);       // зберігаємо перший зустрінутий оригінальний регістр
+        if (!pickMap.has(key)) {
+          pickMap.set(key, name);
         }
       });
-    return map;
-  }, new Map());
+  });
 
-  const names = Array.from(pickMap.values());
-  if (names.length === 0) {
-    container.innerHTML = '<p>Добірки не знайдено</p>';
+  // Якщо нічого не знайшли
+  if (pickMap.size === 0) {
+    container.innerHTML = '<p>Добірок не знайдено</p>';
     return;
   }
 
-  // 3) Будуємо картки
-  const html = names.map(name => {
-    // знаходимо перший фільм, де в списку picks є наша name (lowercase)
-    const example = films.find(film => {
-      return film['Добірка'] &&
-        film['Добірка']
-          .split(/[,;]+/)
-          .map(s => s.trim().toLowerCase())
-          .includes(name.toLowerCase());
-    });
-    const img = example?.['Фото'] || placeholderImage;
-    return `
-      <div class="collection-card" onclick="filterByGenre('${name}')">
-        <img src="${img}" alt="${name}">
-        <p>${name}</p>
-      </div>
-    `;
-  }).join('');
+  // Генеруємо карточки
+  pickMap.forEach((displayName, lowerKey) => {
+    // шукаємо перший фільм із цією добіркою, щоб взяти постер
+    const example = films.find(f =>
+      f['Добірка'] &&
+      f['Добірка']
+        .split(/[,;]+/)
+        .map(s => s.trim().toLowerCase())
+        .includes(lowerKey)
+    );
+    const imgSrc = example?.['Фото'] || placeholderImage;
 
-  container.innerHTML = html;
+    const card = document.createElement('div');
+    card.className = 'collection-card';
+    card.onclick = () => filterByGenre(displayName);
+    card.innerHTML = `
+      <img src="${imgSrc}" alt="${displayName}">
+      <p>${displayName}</p>
+    `;
+    container.appendChild(card);
+  });
 }
+
 
 
     
