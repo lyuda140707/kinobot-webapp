@@ -1032,24 +1032,34 @@ function showYearFilters() {
 
 function showCollections() {
   const container = document.getElementById('collections');
-  // 1) Зібрати всі рядки «Добірка», розбиваючи через кому
-  const allCollections = films.flatMap(f => {
-    if (!f['Добірка']) return [];
-    return f['Добірка']
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-  });
-  // 2) Прибрати дублікати
-  const names = [...new Set(allCollections)];
-  // 3) Збудувати HTML-картки
-  container.innerHTML = names.map(name => {
-    const img = films.find(f =>
-      (f['Добірка']||'')
+  container.innerHTML = '';       // очистимо перед рендером
+  container.style.display = 'flex';
+
+  // 1) Збираємо усі рядки з поля «Добірка», розбиваючи по комі і прибираючи зайві пробіли
+  const picksSet = films.reduce((set, film) => {
+    if (film['Добірка']) {
+      film['Добірка']
         .split(',')
         .map(s => s.trim())
-        .includes(name)
-    )?.['Фото'] || '';
+        .filter(Boolean)
+        .forEach(name => set.add(name));
+    }
+    return set;
+  }, new Set());
+
+  const names = Array.from(picksSet);
+  if (names.length === 0) {
+    container.innerHTML = '<p>Добірки не знайдено</p>';
+    return;
+  }
+
+  // 2) Для кожної назви добірки знаходимо будь-який фільм, щоб взяти до нього обкладинку
+  const cardsHTML = names.map(name => {
+    const exampleFilm = films.find(f =>
+      f['Добірка'] &&
+      f['Добірка'].split(',').map(s => s.trim()).includes(name)
+    );
+    const img = exampleFilm?.['Фото'] || placeholderImage;
     return `
       <div class="collection-card" onclick="filterByGenre('${name}')">
         <img src="${img}" alt="${name}">
@@ -1057,7 +1067,8 @@ function showCollections() {
       </div>
     `;
   }).join('');
-  container.style.display = 'flex';
+
+  container.innerHTML = cardsHTML;
 }
 
 
