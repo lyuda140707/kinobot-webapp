@@ -360,7 +360,7 @@
 }
 
 #genre-results {
-  display: grid;
+  display: none;      /* приховуємо за замовчуванням */
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   padding: 10px;
@@ -504,11 +504,11 @@
     "></div>
   </div>
 </details>
+    <div id="genre-results"></div>
+    <div id="list-end-sentinel"></div>
 
   </div>
 
-  <div id="genre-results"></div>
-  <div id="list-end-sentinel"></div>
 </div>
 
 
