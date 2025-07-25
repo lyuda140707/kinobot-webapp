@@ -1030,26 +1030,11 @@ function showYearFilters() {
 
     
 
-function showCollections() {
+    function showCollections() {
   const container = document.getElementById('collections');
-  // 1) Зібрати всі рядки «Добірка», розбиваючи через кому
-  const allCollections = films.flatMap(f => {
-    if (!f['Добірка']) return [];
-    return f['Добірка']
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-  });
-  // 2) Прибрати дублікати
-  const names = [...new Set(allCollections)];
-  // 3) Збудувати HTML-картки
+  const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
   container.innerHTML = names.map(name => {
-    const img = films.find(f =>
-      (f['Добірка']||'')
-        .split(',')
-        .map(s => s.trim())
-        .includes(name)
-    )?.['Фото'] || '';
+    const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
     return `
       <div class="collection-card" onclick="filterByGenre('${name}')">
         <img src="${img}" alt="${name}">
@@ -1057,9 +1042,8 @@ function showCollections() {
       </div>
     `;
   }).join('');
-  container.style.display = 'flex';
+  document.getElementById('collections').style.display = 'flex';
 }
-
 
     
 function showSeries(type = 'Серіал') {
@@ -1171,12 +1155,11 @@ function filterByGenre(genre) {
   switchTab('categories');
   const normalized = genre.toLowerCase();
 
+  // спочатку відфільтруємо всі фільми за жанром / добіркою
   const filtered = films.filter(f => {
-    const g1 = (f['Жанр'] || '').toLowerCase();
-    const picks = (f['Добірка'] || '')
-      .split(',')
-      .map(s => s.trim().toLowerCase());
-    return g1 === normalized || picks.includes(normalized);
+    const g1 = (f['Жанр']    || '').toLowerCase();
+    const g2 = (f['Добірка'] || '').toLowerCase();
+    return g1 === normalized || g2 === normalized;
   });
 
   const container = document.getElementById('genre-results');
