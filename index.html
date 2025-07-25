@@ -657,7 +657,15 @@ async function loadFilms() {
   const maxAge = 1000 * 60 * 60 * 48; // 48 годин
 
   if (cached && ts && (Date.now() - Number(ts) < maxAge)) {
-    films = JSON.parse(cached);
+     // 1. Завантажили з кешу
+    let loaded = JSON.parse(cached);
+    // 2. Видалили дублікати за назвою (toLowerCase для нечутливості до регістру)
+    films = Array.from(
+      loaded
+        .reduce((map, film) => map.set(film['Назва'].toLowerCase(), film), new Map())
+        .values()
+      );
+    // 3. Перемішуємо
     shuffleArray(films);
     console.log('✅ Фільми з кешу');
 
@@ -696,14 +704,25 @@ async function fetchAndUpdateFilms() {
   try {
     document.getElementById('home-loading').style.display = 'block';
 
-    const res = await fetch('https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1');
+    const res = await fetch(
+      `https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1?cb=${Date.now()}`
+    );
     const loadedFilms = await res.json();
+
 
     if (!loadedFilms || loadedFilms.length === 0) {
       throw new Error('Отримано пустий список фільмів');
     }
 
-    films = loadedFilms;
+    // 1. Завантажили з мережі
+    let deduped = Array.from(
+      loadedFilms
+        .reduce((map, film) => map.set(film['Назва'].toLowerCase(), film), new Map())
+        .values()
+      );
+    // 2. Тепер записуємо
+    films = deduped;
+    
     shuffleArray(films);
 
     localStorage.setItem('films', JSON.stringify(films));
@@ -1111,27 +1130,24 @@ function openSeries(id) {
 
 function renderControls(title, description) {
   const id = safeId(title);
+  const film = films.find(f => f['Назва'] === title) || {};
   const prev = localStorage.getItem(`rating-${title}`);
   const likeClass    = prev === 'like'    ? 'active-like'    : '';
   const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
-  const descEsc = (description||'').replace(/'/g, "\\'");
   return `
     <div style="display:flex; gap:8px; margin:6px 0;">
       <button class="rating-button ${likeClass}"
               onclick="rateFilm('${title}', 'like')">
-        👍 <span id="like-count-btn-${id}">${0 /* або початкове film['Лайки'] */}</span>
+        👍 <span id="like-count-btn-${id}">${film['Лайки']||0}</span>
       </button>
-
       <button class="rating-button ${dislikeClass}"
               onclick="rateFilm('${title}', 'dislike')">
-        👎 <span id="dislike-count-btn-${id}">${0 /* або film['Дизлайки'] */}</span>
+        👎 <span id="dislike-count-btn-${id}">${film['Дизлайки']||0}</span>
       </button>
     </div>
-    <button class="fav-button"
-            onclick="addToFavorites('${title}','${descEsc}')">💛</button>
+    <button class="fav-button" onclick="addToFavorites('${title}','${(description||'').replace(/'/g,"\\'")}')">💛</button>
   `;
 }
-
 
     
 function filterByGenre(genre) {
