@@ -1749,6 +1749,11 @@ document.getElementById('searchInput').addEventListener('input', () => {
   if (!val) return;
 
   const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
+  // 1. Залишаємо тільки по одному фільму з кожною назвою
+const uniqueResults = results.filter((film, i, arr) =>
+  arr.findIndex(f => f['Назва'] === film['Назва']) === i
+);
+
 
   // Якщо серед результатів є серіали — групуємо їх
   const seriesResults = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
@@ -1797,25 +1802,38 @@ document.getElementById('searchInput').addEventListener('input', () => {
   }
 
   // Інакше — звичайний рендер фільмів
-  container.innerHTML = results.map(f => {
-    const isPro = localStorage.getItem('isProUser') === 'true';
-    const locked = f['Доступ'] === 'PRO' && !isPro;
-    const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
-    const btn = locked
-      ? `<button onclick="showProModal()">🔒 PRO</button>`
-      : (f['Посилання'] ? `<button onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>` : '');
-    return `
-      <div class="film-card">
-        <img src="${img}" alt="${f['Назва']}">
-        <h3>${f['Назва']}</h3>
-        <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
-        <div class="film-actions">
-          ${btn}
-          <button class="fav-button" onclick="addToFavorites('${f['Назва']}', '${(f['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
-        </div>
+// новий код — рендеруємо вже унікальні результати
+container.innerHTML = uniqueResults.map(f => {
+  const isPro = localStorage.getItem('isProUser') === 'true';
+  const locked = f['Доступ']==='PRO' && !isPro;
+  const img = locked ? placeholderImage : (f['Фото']||placeholderImage);
+  // збираємо кнопку “Дивитись”
+  const watchBtn = locked
+    ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+    : (f['Посилання']
+        ? `<button class="search-button" onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>`
+        : '');
+  // повертаємо картку з усіма елементами
+  return `
+    <div class="film-card">
+      <img src="${img}" alt="${f['Назва']}" class="film-img">
+      <h3>${f['Назва']}</h3>
+      <!-- Лічильники лайків/дизлайків -->
+      <div class="film-rating">
+        👍 <span id="like-count-${safeId(f['Назва'])}">${f['Лайки']||0}</span> |
+        👎 <span id="dislike-count-${safeId(f['Назва'])}">${f['Дизлайки']||0}</span>
       </div>
-    `;
-  }).join('');
+      <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
+      <p>${f['Опис']||''}</p>
+      <!-- Кнопки Дивитись і Улюблене -->
+      <div class="film-actions">
+        ${watchBtn}
+        <button class="fav-button" onclick="addToFavorites('${f['Назва']}','${(f['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
+      </div>
+    </div>
+  `;
+}).join('');
+
   restoreRatingsUI();
 });
 
