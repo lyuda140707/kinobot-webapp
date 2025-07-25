@@ -164,7 +164,47 @@
   text-align: center;
 }
 
+.rating-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
 
+.rating-button {
+  background-color: #1b1b1b;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 14px; /* зменшено */
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 4px rgba(0,255,255,0.2);
+  transition: transform 0.2s;
+}
+
+.rating-button:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.rating-button.active {
+  background: #0ff;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 12px #0ff;
+}
+
+.rating-button.active-like {
+  background-color: #2e7d32; /* Зелений */
+  color: #fff;
+}
+.rating-button.active-dislike {
+  background-color: #c62828; /* Червоний */
+  color: #fff;
+}
 
 .series-poster {
   width: 100px;
@@ -564,15 +604,18 @@ function renderBatch() {
         <!-- Назва -->
         <h3>${film['Назва']}</h3>
 
+        <!-- Лайки / Дизлайки -->
+        <div class="film-rating">
+          👍 <span id="like-count-${id}">${film['Лайки'] || 0}</span> |
+          👎 <span id="dislike-count-${id}">${film['Дизлайки'] || 0}</span>
+        </div>
 
         <!-- IMDb та опис -->
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
         <p>${film['Опис'] || ''}</p>
 
         <!-- Кнопки лайк/дизлайк/улюблене -->
-        <button class="fav-button" onclick="addToFavorites('${film['Назва']}','${(film['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
-
-
+        ${renderControls(film['Назва'], film['Опис'])}
 
         <!-- Дивитись / PRO -->
         <div class="film-actions">
@@ -1024,7 +1067,10 @@ const html = Object.entries(grouped).map(([title, episodes]) => {
   return `
     <div class="film-card">
       <img src="${poster}" class="film-img" alt="${title}">
-     
+      <div class="film-rating">
+        👍 <span id="like-count-${safe}">${episodes[0]['Лайки']||0}</span> |
+        👎 <span id="dislike-count-${safe}">${episodes[0]['Дизлайки']||0}</span>
+      </div>
       <h3>${title}</h3>
       <!-- Ось тут додаємо IMDb -->
       <p class="film-imdb">IMDb: ${imdb}</p>
@@ -1066,11 +1112,23 @@ function openSeries(id) {
   }
 
 function renderControls(title, description) {
+  const id = safeId(title);
+  const film = films.find(f => f['Назва'] === title) || {};
+  const prev = localStorage.getItem(`rating-${title}`);
+  const likeClass    = prev === 'like'    ? 'active-like'    : '';
+  const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
   return `
-    <button class="fav-button"
-            onclick="addToFavorites('${title}','${description.replace(/'/g,"\\'")}')">
-      💛
-    </button>
+    <div style="display:flex; gap:8px; margin:6px 0;">
+      <button class="rating-button ${likeClass}"
+              onclick="rateFilm('${title}', 'like')">
+        👍 <span id="like-count-btn-${id}">${film['Лайки']||0}</span>
+      </button>
+      <button class="rating-button ${dislikeClass}"
+              onclick="rateFilm('${title}', 'dislike')">
+        👎 <span id="dislike-count-btn-${id}">${film['Дизлайки']||0}</span>
+      </button>
+    </div>
+    <button class="fav-button" onclick="addToFavorites('${title}','${(description||'').replace(/'/g,"\\'")}')">💛</button>
   `;
 }
 
@@ -1206,13 +1264,14 @@ return `
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
 
-   
+    <div class="film-rating">
+      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
+      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
+    </div>
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
-    <button class="fav-button" onclick="addToFavorites('${film['Назва']}','${(film['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
-
-
+    ${renderControls(film['Назва'], film['Опис'])}
     <div class="film-actions">${buttons}</div>
   </div>
 `;
@@ -1259,13 +1318,14 @@ return `
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
 
-  
+    <div class="film-rating">
+      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
+      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
+    </div>
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
-    <button class="fav-button" onclick="addToFavorites('${film['Назва']}','${(film['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
-
-
+    ${renderControls(film['Назва'], film['Опис'])}
     <div class="film-actions">${buttons}</div>
   </div>
 `;
@@ -2022,39 +2082,58 @@ function shuffleArray(array) {
   }
 }
 
+function goToSeries(seriesTitle) {
+  switchTab('categories', document.querySelector('[data-tab=categories]'));
+  openGenreGroup('series');
+
+  setTimeout(() => {
+    const filtered = films.filter(f => f['Назва'] === seriesTitle && f['Тип'] === 'Серіал');
+
+    if (filtered.length === 0) {
+      alert('Серіал не знайдено 😢');
+      return;
+    }
+
+    const container = document.getElementById('genre-results');
+    const grouped = { [seriesTitle]: filtered };
+
 container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
   const first = episodes[0];
   const isPro = localStorage.getItem('isProUser') === 'true';
   const isProFilm = first['Доступ'] === 'PRO';
   const imgSrc = (isProFilm && !isPro) ? placeholderImage : first['Фото'];
-  const imdb = first['IMDb'] || '—';
+  const imdb = first['IMDb'] || "—";
   const desc = first['Опис'] || '';
+  const likes = Number(first['Лайки']) || 0;
+  const dislikes = Number(first['Дизлайки']) || 0;
   const safe = safeId(title);
 
   return `
     <div class="film-card">
       <img src="${imgSrc}" alt="${title}">
       <h3>${title}</h3>
-      <p class="film-imdb">IMDb: ${imdb}</p>
+      <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
       <p class="film-desc">${desc}</p>
+      
+      
+        👍 <span id="like-count-${safe}">${likes}</span> |
+        👎 <span id="dislike-count-${safe}">${dislikes}</span>
+      </div>
       <div class="film-actions">
-        ${isProFilm && !isPro
+        ${isProFilm && !isPro 
           ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-          : episodes.map((ep, i) =>
-              `<button class="search-button" onclick="sendFilm('${ep.file_id}')">
-                ${ep['Опис'] || 'Серія ' + (i + 1)}
-              </button>`
-            ).join('')
-        }
-        <button class="fav-button"
-                onclick="event.stopPropagation(); addToFavorites('${title}','${desc}')">
-          💛 Улюблене
-        </button>
+          : episodes.map((ep, i) => {
+              return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+            }).join('')}
+        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
+      </div>
+      <div style="margin-top:6px; display:flex; gap:10px;">
+        <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
+        <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
       </div>
     </div>
   `;
 }).join('');
-
 
 
     container.scrollIntoView({ behavior: 'smooth' });
