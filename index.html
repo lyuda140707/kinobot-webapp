@@ -657,7 +657,15 @@ async function loadFilms() {
   const maxAge = 1000 * 60 * 60 * 48; // 48 годин
 
   if (cached && ts && (Date.now() - Number(ts) < maxAge)) {
-    films = JSON.parse(cached);
+     // 1. Завантажили з кешу
+    let loaded = JSON.parse(cached);
+    // 2. Видалили дублікати за назвою (toLowerCase для нечутливості до регістру)
+    films = Array.from(
+      loaded
+        .reduce((map, film) => map.set(film['Назва'].toLowerCase(), film), new Map())
+        .values()
+      );
+    // 3. Перемішуємо
     shuffleArray(films);
     console.log('✅ Фільми з кешу');
 
@@ -701,11 +709,20 @@ async function fetchAndUpdateFilms() {
     );
     const loadedFilms = await res.json();
 
+
     if (!loadedFilms || loadedFilms.length === 0) {
       throw new Error('Отримано пустий список фільмів');
     }
 
-    films = loadedFilms;
+    // 1. Завантажили з мережі
+    let deduped = Array.from(
+      loadedFilms
+        .reduce((map, film) => map.set(film['Назва'].toLowerCase(), film), new Map())
+        .values()
+      );
+    // 2. Тепер записуємо
+    films = deduped;
+    
     shuffleArray(films);
 
     localStorage.setItem('films', JSON.stringify(films));
