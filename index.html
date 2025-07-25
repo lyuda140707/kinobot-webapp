@@ -1903,9 +1903,11 @@ function rateFilm(filmName, action) {
   const key = `rating-${safeId(filmName)}`;
   const previousAction = localStorage.getItem(key);
 
+  // Якщо користувач натиснув ту ж саму кнопку — нічого не робимо
   if (previousAction === action) return;
   localStorage.setItem(key, action);
 
+  // Відправляємо оновлення на бекенд
   fetch('https://kinobot-qm9q.onrender.com/rate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1916,56 +1918,44 @@ function rateFilm(filmName, action) {
     }),
   });
 
-  // ✅ Вставляєш це ↓ замість свого старого блоку оновлення UI
-  const likeBtnCount = document.getElementById(`like-count-btn-${safeId(filmName)}`);
+  // Знаходимо елементи-лічильники
+  const likeBtnCount    = document.getElementById(`like-count-btn-${safeId(filmName)}`);
   const dislikeBtnCount = document.getElementById(`dislike-count-btn-${safeId(filmName)}`);
+  const likeDisplay     = document.getElementById(`like-count-${safeId(filmName)}`);
+  const dislikeDisplay  = document.getElementById(`dislike-count-${safeId(filmName)}`);
 
-  const likeDisplay = document.getElementById(`like-count-${safeId(filmName)}`);
-  const dislikeDisplay = document.getElementById(`dislike-count-${safeId(filmName)}`);
-
-  if (likeBtnCount && dislikeBtnCount) {
-    if (action === 'like') {
-      likeBtnCount.textContent = Number(likeBtnCount.textContent) + 1;
-      if (previousAction === 'dislike') {
-        dislikeBtnCount.textContent = Math.max(0, Number(dislikeBtnCount.textContent) - 1);
-      }
-    } else {
-      dislikeBtnCount.textContent = Number(dislikeBtnCount.textContent) + 1;
-      if (previousAction === 'like') {
-        likeBtnCount.textContent = Math.max(0, Number(likeBtnCount.textContent) - 1);
-      }
-    }
+  // Функція для безпечного оновлення числа
+  function upd(el, delta) {
+    if (!el) return;
+    el.textContent = Math.max(0, Number(el.textContent || 0) + delta);
   }
 
-  if (likeDisplay && dislikeDisplay) {
-    if (action === 'like') {
-      likeDisplay.textContent = Number(likeDisplay.textContent) + 1;
-      if (previousAction === 'dislike') {
-        dislikeDisplay.textContent = Math.max(0, Number(dislikeDisplay.textContent) - 1);
-      }
-    } else {
-      dislikeDisplay.textContent = Number(dislikeDisplay.textContent) + 1;
-      if (previousAction === 'like') {
-        likeDisplay.textContent = Math.max(0, Number(likeDisplay.textContent) - 1);
-      }
+  // Інкремент/декремент відповідно до дії
+  if (action === 'like') {
+    upd(likeBtnCount,    +1);
+    upd(likeDisplay,     +1);
+    if (previousAction === 'dislike') {
+      upd(dislikeBtnCount, -1);
+      upd(dislikeDisplay,  -1);
     }
-  }
-
-  // Виділення кнопок
-  const parent = likeBtnCount?.closest(".film-card");
-  const likeBtn = parent?.querySelector(".rating-button:nth-child(1)");
-  const dislikeBtn = parent?.querySelector(".rating-button:nth-child(2)");
-
-  likeBtn?.classList.remove("active-like");
-  dislikeBtn?.classList.remove("active-dislike");
-
-  if (action === "like") {
-    likeBtn?.classList.add("active-like");
   } else {
-    dislikeBtn?.classList.add("active-dislike");
+    upd(dislikeBtnCount, +1);
+    upd(dislikeDisplay,  +1);
+    if (previousAction === 'like') {
+      upd(likeBtnCount,   -1);
+      upd(likeDisplay,    -1);
+    }
   }
-}
 
+  // Підсвічуємо активну кнопку
+  const card       = likeBtnCount.closest('.film-card');
+  const likeBtn    = card.querySelector('.rating-button:nth-of-type(1)');
+  const dislikeBtn = card.querySelector('.rating-button:nth-of-type(2)');
+  likeBtn.classList.remove('active-like');
+  dislikeBtn.classList.remove('active-dislike');
+  if (action === 'like')    likeBtn.classList.add('active-like');
+  if (action === 'dislike') dislikeBtn.classList.add('active-dislike');
+}
 
 
 
