@@ -1032,34 +1032,42 @@ function showYearFilters() {
 
 function showCollections() {
   const container = document.getElementById('collections');
-  container.innerHTML = '';       // очистимо перед рендером
+  container.innerHTML = '';          // 1) Очистили перед рендером
   container.style.display = 'flex';
 
-  // 1) Збираємо усі рядки з поля «Добірка», розбиваючи по комі і прибираючи зайві пробіли
-  const picksSet = films.reduce((set, film) => {
-    if (film['Добірка']) {
-      film['Добірка']
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean)
-        .forEach(name => set.add(name));
-    }
-    return set;
-  }, new Set());
+  // 2) Збираємо усі “пики” у Map<lowerName, displayName>
+  const pickMap = films.reduce((map, film) => {
+    if (!film['Добірка']) return map;
+    film['Добірка']
+      .split(/[,;]+/)               // розбивка по , та ;
+      .map(s => s.trim())           // обрізати зовнішні пробіли
+      .filter(Boolean)              // прибрати порожні рядки
+      .forEach(name => {
+        const key = name.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, name);       // зберігаємо перший зустрінутий оригінальний регістр
+        }
+      });
+    return map;
+  }, new Map());
 
-  const names = Array.from(picksSet);
+  const names = Array.from(pickMap.values());
   if (names.length === 0) {
     container.innerHTML = '<p>Добірки не знайдено</p>';
     return;
   }
 
-  // 2) Для кожної назви добірки знаходимо будь-який фільм, щоб взяти до нього обкладинку
-  const cardsHTML = names.map(name => {
-    const exampleFilm = films.find(f =>
-      f['Добірка'] &&
-      f['Добірка'].split(',').map(s => s.trim()).includes(name)
-    );
-    const img = exampleFilm?.['Фото'] || placeholderImage;
+  // 3) Будуємо картки
+  const html = names.map(name => {
+    // знаходимо перший фільм, де в списку picks є наша name (lowercase)
+    const example = films.find(film => {
+      return film['Добірка'] &&
+        film['Добірка']
+          .split(/[,;]+/)
+          .map(s => s.trim().toLowerCase())
+          .includes(name.toLowerCase());
+    });
+    const img = example?.['Фото'] || placeholderImage;
     return `
       <div class="collection-card" onclick="filterByGenre('${name}')">
         <img src="${img}" alt="${name}">
@@ -1068,7 +1076,7 @@ function showCollections() {
     `;
   }).join('');
 
-  container.innerHTML = cardsHTML;
+  container.innerHTML = html;
 }
 
 
@@ -1180,13 +1188,16 @@ function renderControls(title, description) {
 function filterByGenre(genre) {
   if (!genre) return;
   switchTab('categories');
-  const normalized = genre.toLowerCase();
+  const normalized = genre.trim().toLowerCase();
 
   const filtered = films.filter(f => {
-    const g1 = (f['Жанр'] || '').toLowerCase();
+    // основний жанр
+    const g1 = (f['Жанр'] || '').toLowerCase().trim();
+    // добірки, розбиті по комі і крапці з комою
     const picks = (f['Добірка'] || '')
-      .split(',')
-      .map(s => s.trim().toLowerCase());
+      .split(/[,;]+/)                // розбивка по , і ;
+      .map(s => s.trim().toLowerCase())
+      .filter(Boolean);
     return g1 === normalized || picks.includes(normalized);
   });
 
@@ -1197,16 +1208,14 @@ function filterByGenre(genre) {
     return;
   }
 
-  // === Якщо це серіали — зробимо групування ===
+  // === Серіали: групування по назві ===
   if (filtered[0]['Тип']?.trim().toLowerCase() === 'серіал') {
-    // групуємо по Назві
     const grouped = filtered.reduce((acc, ep) => {
       const title = ep['Назва'];
       if (!acc[title]) acc[title] = [];
       acc[title].push(ep);
       return acc;
     }, {});
-    // генеруємо HTML точно так само, як у showSeries
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       const safe = safeId(title);
       const isPro     = localStorage.getItem('isProUser') === 'true';
@@ -1217,8 +1226,9 @@ function filterByGenre(genre) {
       const count     = episodes.length;
       const btn = `<button class="search-button"
                     onclick="toggleEpisodes('${safe}', this)"
-                    data-count="${count}"
-                  >📺 Показати серії (${count})</button>`;
+                    data-count="${count}">
+                    📺 Показати серії (${count})
+                   </button>`;
       const epsHtml = episodes.map((ep, i) => {
         const label = ep['Опис'] || `Серія ${i+1}`;
         return ep.file_id
@@ -1245,14 +1255,13 @@ function filterByGenre(genre) {
     return;
   }
 
-  // === Інакше — це не серіали, малюємо як фільми ===
+  // === Інші: рендеримо як фільми батчами ===
   currentFilms = filtered;
   container.innerHTML = '';
   offset = 0;
   renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
 }
-
 
 
 
