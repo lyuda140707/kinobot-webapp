@@ -972,32 +972,31 @@ const html = Object.entries(grouped).map(([title, episodes]) => {
   const count     = episodes.length;
   const imdb      = episodes[0]['IMDb'] || '—';
 
-  return `
-    <div class="film-card">
-      <img src="${poster}" class="film-img" alt="${title}">
-      
-      <h3>${title}</h3>
-      <!-- Ось тут додаємо IMDb -->
-      <p class="film-imdb">IMDb: ${imdb}</p>
-
-      <button class="search-button"
-              onclick="toggleEpisodes('${safe}', this)"
-              data-count="${count}">
-        📺 Показати серії (${count})
-      </button>
-      <div id="episodes-${safe}"
-           class="series-episodes-grid"
-           style="display:none;"
-           data-count="${count}">
-        ${episodes.map((ep, i) => {
-          const label = ep['Опис'] || `Серія ${i+1}`;
-          return ep.file_id
-            ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-            : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
-        }).join('')}
-      </div>
+return `
+  <div class="film-card">
+    <img src="${poster}" class="film-img" alt="${title}">
+    <h3>${title}</h3>
+    <p class="film-imdb">IMDb: ${imdb}</p>
+    ${renderControls(title, episodes[0]['Опис'])}
+    <button class="search-button"
+            onclick="toggleEpisodes('${safe}', this)"
+            data-count="${count}">
+      📺 Показати серії (${count})
+    </button>
+    <div id="episodes-${safe}"
+         class="series-episodes-grid"
+         style="display:none;"
+         data-count="${count}">
+      ${episodes.map((ep, i) => {
+        const label = ep['Опис'] || `Серія ${i+1}`;
+        return ep.file_id
+          ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
+          : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+      }).join('')}
     </div>
-  `;
+  </div>
+`;
+
 }).join('');
 
   container.innerHTML = html;
@@ -1015,13 +1014,15 @@ function openSeries(id) {
   function safeId(str) {
     return str.replace(/[^\w\d]/g, '_');
   }
-
+    
 function renderControls(title, description) {
   return `<button class="fav-button" onclick="addToFavorites(
     '${title}',
     '${(description||'').replace(/'/g,"\\'")}'
   )">💛</button>`;
 }
+
+
 
 
     
@@ -1072,21 +1073,24 @@ function filterByGenre(genre) {
           ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
           : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
       }).join('');
-      return `
-        <div class="film-card">
-          <img src="${poster}" class="film-img" alt="${title}">
-          <h3>${title}</h3>
-          <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
-          ${renderControls(title, episodes[0]['Опис'])}
-          ${btn}
-          <div id="episodes-${safe}"
-               class="series-episodes-grid"
-               style="display:none;"
-               data-count="${count}">
-            ${epsHtml}
-          </div>
-        </div>
-      `;
+return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
+    <h3>${film['Назва']}</h3>
+    <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
+    <p>${film['Опис'] || ''}</p>
+    ${renderControls(film['Назва'], film['Опис'])}
+    <div class="film-actions">
+      ${isProFilm && !isPro
+        ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+        : (film['Посилання']
+            ? `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`
+            : ``)
+      }
+    </div>
+  </div>
+`;
+
     }).join('');
     container.scrollIntoView({ behavior: 'smooth' });
     return;
@@ -1195,6 +1199,7 @@ return `
     <div class="film-actions">${buttons}</div>
   </div>
 `;
+
 
 
 
@@ -1634,24 +1639,26 @@ const uniqueResults = results.filter((film, i, arr) =>
       const isPro = localStorage.getItem('isProUser') === 'true';
       const isProSeries = episodes[0]['Доступ'] === 'PRO';
       const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
-      return `
-        <div class="film-card">
-          <img src="${poster}" class="film-img" alt="${title}">
-          <h3>${title}</h3>
-          <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
-          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-            📺 Показати серії (${count})
-          </button>
-          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-            ${episodes.map((ep,i) => {
-              const label = ep['Опис'] || `Серія ${i+1}`;
-              return ep.file_id
-                ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
-            }).join('')}
-          </div>
-        </div>
-      `;
+return `
+  <div class="film-card">
+    <img src="${poster}" class="film-img" alt="${title}">
+    <h3>${title}</h3>
+    <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
+    ${renderControls(title, episodes[0]['Опис'])}
+    <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+      📺 Показати серії (${count})
+    </button>
+    <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+      ${episodes.map((ep,i) => {
+        const label = ep['Опис'] || `Серія ${i+1}`;
+        return ep.file_id
+          ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
+          : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+      }).join('')}
+    </div>
+  </div>
+`;
+
     }).join('');
   
     return;
@@ -1677,21 +1684,19 @@ container.innerHTML = uniqueResults.map(f => {
     : (f['Посилання']
         ? `<button class="search-button" onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>`
         : '');
-  return `
-    <div class="film-card">
-      <img src="${img}" alt="${f['Назва']}" class="film-img">
-      <h3>${f['Назва']}</h3>
-      <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
-      <p>${f['Опис']||''}</p>
-      
-      ${renderControls(f['Назва'], f['Опис'])}
-      
-      <div class="film-actions">
-        ${watchBtn}
-        <button class="fav-button" onclick="addToFavorites('${f['Назва']}','${(f['Опис']||'').replace(/'/g,"\\'")}')">💛</button>
-      </div>
+return `
+  <div class="film-card">
+    <img src="${img}" alt="${f['Назва']}" class="film-img">
+    <h3>${f['Назва']}</h3>
+    <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
+    <p>${f['Опис']||''}</p>
+    ${renderControls(f['Назва'], f['Опис'])}
+    <div class="film-actions">
+      ${watchBtn}
     </div>
-  `;
+  </div>
+`;
+
 }).join('');
 
 });
@@ -1893,23 +1898,23 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
   const desc = first['Опис'] || '';
   const safe = safeId(title);
 
-  return `
-    <div class="film-card">
-      <img src="${imgSrc}" alt="${title}">
-      <h3>${title}</h3>
-      <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
-      <p class="film-desc">${desc}</p>
-      
-      <div class="film-actions">
-        ${isProFilm && !isPro 
-          ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-          : episodes.map((ep, i) => {
-              return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
-            }).join('')}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
-      </div>
-      
+ return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${title}">
+    <h3>${title}</h3>
+    <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
+    <p class="film-desc">${desc}</p>
+    ${renderControls(title, desc)}
+    <div class="film-actions">
+      ${isProFilm && !isPro 
+        ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+        : episodes.map((ep, i) => {
+            return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+          }).join('')}
     </div>
+  </div>
+`;
+
   `;
 }).join('');
 
