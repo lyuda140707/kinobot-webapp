@@ -81,19 +81,21 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    .loader {
-      border: 4px solid #444;
-      border-top: 4px solid #fff;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+.loader {
+  border: 4px solid #444;
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
     .skeleton {
   background-color: #333;
   border-radius: 8px;
@@ -164,47 +166,6 @@
   text-align: center;
 }
 
-.rating-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.rating-button {
-  background-color: #1b1b1b;
-  border: 1px solid #444;
-  border-radius: 12px;
-  padding: 4px 10px;
-  font-size: 14px; /* зменшено */
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 0 4px rgba(0,255,255,0.2);
-  transition: transform 0.2s;
-}
-
-.rating-button:hover {
-  transform: scale(1.05);
-  cursor: pointer;
-}
-
-.rating-button.active {
-  background: #0ff;
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 0 12px #0ff;
-}
-
-.rating-button.active-like {
-  background-color: #2e7d32; /* Зелений */
-  color: #fff;
-}
-.rating-button.active-dislike {
-  background-color: #c62828; /* Червоний */
-  color: #fff;
-}
 
 .series-poster {
   width: 100px;
@@ -307,19 +268,7 @@
   flex-wrap: wrap;
 }
 
-  .loader {
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-top: 4px solid #00f7ff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-  }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 
 /* НЕОНОВИЙ СВІТЛЯНИЙ ЕФЕКТ ДЛЯ IMDb */
 .film-card .film-imdb {
@@ -604,11 +553,7 @@ function renderBatch() {
         <!-- Назва -->
         <h3>${film['Назва']}</h3>
 
-        <!-- Лайки / Дизлайки -->
-        <div class="film-rating">
-          👍 <span id="like-count-${id}">${film['Лайки'] || 0}</span> |
-          👎 <span id="dislike-count-${id}">${film['Дизлайки'] || 0}</span>
-        </div>
+      
 
         <!-- IMDb та опис -->
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
@@ -1067,10 +1012,7 @@ const html = Object.entries(grouped).map(([title, episodes]) => {
   return `
     <div class="film-card">
       <img src="${poster}" class="film-img" alt="${title}">
-      <div class="film-rating">
-        👍 <span id="like-count-${safe}">${episodes[0]['Лайки']||0}</span> |
-        👎 <span id="dislike-count-${safe}">${episodes[0]['Дизлайки']||0}</span>
-      </div>
+      
       <h3>${title}</h3>
       <!-- Ось тут додаємо IMDb -->
       <p class="film-imdb">IMDb: ${imdb}</p>
@@ -1264,10 +1206,7 @@ return `
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
 
-    <div class="film-rating">
-      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
-      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
-    </div>
+    
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
@@ -1318,10 +1257,7 @@ return `
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
 
-    <div class="film-rating">
-      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
-      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
-    </div>
+   
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
@@ -1759,9 +1695,11 @@ const uniqueResults = results.filter((film, i, arr) =>
   if (seriesResults.length) {
     const grouped = seriesResults.reduce((acc, ep) => {
       const title = ep['Назва'];
-      (acc[title] ||= []).push(ep);
+      if (!acc[title]) acc[title] = [];
+      acc[title].push(ep);
       return acc;
     }, {});
+    
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       const safe = safeId(title);
       const count = episodes.length;
