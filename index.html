@@ -164,47 +164,6 @@
   text-align: center;
 }
 
-.rating-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.rating-button {
-  background-color: #1b1b1b;
-  border: 1px solid #444;
-  border-radius: 12px;
-  padding: 4px 10px;
-  font-size: 14px; /* зменшено */
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 0 4px rgba(0,255,255,0.2);
-  transition: transform 0.2s;
-}
-
-.rating-button:hover {
-  transform: scale(1.05);
-  cursor: pointer;
-}
-
-.rating-button.active {
-  background: #0ff;
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 0 12px #0ff;
-}
-
-.rating-button.active-like {
-  background-color: #2e7d32; /* Зелений */
-  color: #fff;
-}
-.rating-button.active-dislike {
-  background-color: #c62828; /* Червоний */
-  color: #fff;
-}
 
 .series-poster {
   width: 100px;
@@ -278,17 +237,7 @@
   font-size: 20px;
   cursor: pointer;
 }
-.film-rating {
-  font-weight: bold;
-  color: #00ffff;
-  font-size: 14px;
-  margin: 6px 0;
-  text-shadow: 0 0 5px rgba(0,255,255,0.3);
-  background: rgba(0,255,255,0.1);
-  padding: 4px 8px;
-  border-radius: 8px;
-  display: inline-block;
-}
+
 
 .film-buttons {
   display: flex;
@@ -307,19 +256,6 @@
   flex-wrap: wrap;
 }
 
-  .loader {
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-top: 4px solid #00f7ff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 
 /* НЕОНОВИЙ СВІТЛЯНИЙ ЕФЕКТ ДЛЯ IMDb */
 .film-card .film-imdb {
@@ -353,11 +289,6 @@
 }
 
 
-/* маленький шрифт для лічильників лайків/дизлайків */
-.film-rating span {
-  font-size: 12px;
-  vertical-align: middle;
-}
 
 #genre-results {
   display: none;      /* приховуємо за замовчуванням */
@@ -591,10 +522,9 @@ function renderBatch() {
 
   const html = batch.map(film => {
     const isProFilm = film['Доступ'] === 'PRO';
-    const imgSrc    = (isProFilm && !isPro)
-                      ? placeholderImage
-                      : (film['Фото'] || placeholderImage);
-    const id        = safeId(film['Назва']);
+    const imgSrc = (isProFilm && !isPro)
+      ? placeholderImage
+      : (film['Фото'] || placeholderImage);
 
     return `
       <div class="film-card">
@@ -603,12 +533,6 @@ function renderBatch() {
 
         <!-- Назва -->
         <h3>${film['Назва']}</h3>
-
-        <!-- Лайки / Дизлайки -->
-        <div class="film-rating">
-          👍 <span id="like-count-${id}">${film['Лайки'] || 0}</span> |
-          👎 <span id="dislike-count-${id}">${film['Дизлайки'] || 0}</span>
-        </div>
 
         <!-- IMDb та опис -->
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
@@ -635,22 +559,6 @@ function renderBatch() {
 }
 
 
-
-  document.querySelectorAll('.film-card').forEach(card => {
-  const filmName = card.querySelector('h3').textContent;
-  const saved = localStorage.getItem(`rating-${filmName}`);
-  if (!saved) return;
-
-  const buttons = card.querySelectorAll('.rating-button');
-  buttons.forEach(btn => {
-    if (saved === 'like' && btn.textContent.includes('👍')) {
-      btn.classList.add('active-like');
-    }
-    if (saved === 'dislike' && btn.textContent.includes('👎')) {
-      btn.classList.add('active-dislike');
-    }
-  });
-});
 async function loadFilms() {
   const cached = localStorage.getItem('films');
   const ts = localStorage.getItem('filmsTimestamp');
@@ -674,7 +582,7 @@ async function loadFilms() {
     currentFilms = films;
     offset = 0;
     renderBatch();
-    restoreRatingsUI();
+   
 
     return;
   }
@@ -687,7 +595,7 @@ async function loadFilms() {
   currentFilms = films;
   offset = 0;
   renderBatch();
-  restoreRatingsUI();
+  
 }
 
 
@@ -1067,10 +975,7 @@ const html = Object.entries(grouped).map(([title, episodes]) => {
   return `
     <div class="film-card">
       <img src="${poster}" class="film-img" alt="${title}">
-      <div class="film-rating">
-        👍 <span id="like-count-${safe}">${episodes[0]['Лайки']||0}</span> |
-        👎 <span id="dislike-count-${safe}">${episodes[0]['Дизлайки']||0}</span>
-      </div>
+      
       <h3>${title}</h3>
       <!-- Ось тут додаємо IMDb -->
       <p class="film-imdb">IMDb: ${imdb}</p>
@@ -1112,25 +1017,12 @@ function openSeries(id) {
   }
 
 function renderControls(title, description) {
-  const id = safeId(title);
-  const film = films.find(f => f['Назва'] === title) || {};
-  const prev = localStorage.getItem(`rating-${title}`);
-  const likeClass    = prev === 'like'    ? 'active-like'    : '';
-  const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
-  return `
-    <div style="display:flex; gap:8px; margin:6px 0;">
-      <button class="rating-button ${likeClass}"
-              onclick="rateFilm('${title}', 'like')">
-        👍 <span id="like-count-btn-${id}">${film['Лайки']||0}</span>
-      </button>
-      <button class="rating-button ${dislikeClass}"
-              onclick="rateFilm('${title}', 'dislike')">
-        👎 <span id="dislike-count-btn-${id}">${film['Дизлайки']||0}</span>
-      </button>
-    </div>
-    <button class="fav-button" onclick="addToFavorites('${title}','${(description||'').replace(/'/g,"\\'")}')">💛</button>
-  `;
+  return `<button class="fav-button" onclick="addToFavorites(
+    '${title}',
+    '${(description||'').replace(/'/g,"\\'")}'
+  )">💛</button>`;
 }
+
 
     
 function filterByGenre(genre) {
@@ -1211,26 +1103,6 @@ function filterByGenre(genre) {
 
 
 
-function restoreRatingsUI() {
-  document.querySelectorAll('.film-card').forEach(card => {
-    const filmName = card.querySelector('h3')?.textContent;
-    const saved = localStorage.getItem(`rating-${filmName}`);
-    if (!saved) return;
-
-    const likeBtn = card.querySelector('.rating-button:nth-child(1)');
-    const dislikeBtn = card.querySelector('.rating-button:nth-child(2)');
-
-    if (likeBtn && dislikeBtn) {
-      if (saved === 'like') {
-        likeBtn.classList.add('active-like');
-      }
-      if (saved === 'dislike') {
-        dislikeBtn.classList.add('active-dislike');
-      }
-    }
-  });
-}
-
 
     
 function filterByCountry(country) {
@@ -1264,10 +1136,7 @@ return `
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
 
-    <div class="film-rating">
-      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
-      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
-    </div>
+   
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
@@ -1318,10 +1187,7 @@ return `
     <img src="${imgSrc}" alt="${film['Назва']}">
     <h3>${film['Назва']}</h3>
 
-    <div class="film-rating">
-      👍 <span id="like-count-${id}">${film['Лайки']||0}</span> |
-      👎 <span id="dislike-count-${id}">${film['Дизлайки']||0}</span>
-    </div>
+   
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
@@ -1667,7 +1533,7 @@ const sentinel = document.getElementById('list-end-sentinel');
 const observer = new IntersectionObserver(entries => {
   if (entries[0].isIntersecting && offset < currentFilms.length) {
     renderBatch();
-    restoreRatingsUI();   // оновлюємо рейтинг в нових карточках
+   
   }
 }, {
   rootMargin: '200px'
@@ -1787,7 +1653,7 @@ const uniqueResults = results.filter((film, i, arr) =>
         </div>
       `;
     }).join('');
-    restoreRatingsUI();
+  
     return;
   }
 
@@ -1828,8 +1694,6 @@ container.innerHTML = uniqueResults.map(f => {
   `;
 }).join('');
 
-
-  restoreRatingsUI();
 });
 
 
@@ -1898,64 +1762,6 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
 }
 
 
-function rateFilm(filmName, action) {
-  const key = `rating-${safeId(filmName)}`;
-  const previousAction = localStorage.getItem(key);
-
-  // Якщо користувач натиснув ту ж саму кнопку — нічого не робимо
-  if (previousAction === action) return;
-  localStorage.setItem(key, action);
-
-  // Відправляємо оновлення на бекенд
-  fetch('https://kinobot-qm9q.onrender.com/rate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      film_name: filmName,
-      action: action,
-      undo: previousAction
-    }),
-  });
-
-  // Знаходимо елементи-лічильники
-  const likeBtnCount    = document.getElementById(`like-count-btn-${safeId(filmName)}`);
-  const dislikeBtnCount = document.getElementById(`dislike-count-btn-${safeId(filmName)}`);
-  const likeDisplay     = document.getElementById(`like-count-${safeId(filmName)}`);
-  const dislikeDisplay  = document.getElementById(`dislike-count-${safeId(filmName)}`);
-
-  // Функція для безпечного оновлення числа
-  function upd(el, delta) {
-    if (!el) return;
-    el.textContent = Math.max(0, Number(el.textContent || 0) + delta);
-  }
-
-  // Інкремент/декремент відповідно до дії
-  if (action === 'like') {
-    upd(likeBtnCount,    +1);
-    upd(likeDisplay,     +1);
-    if (previousAction === 'dislike') {
-      upd(dislikeBtnCount, -1);
-      upd(dislikeDisplay,  -1);
-    }
-  } else {
-    upd(dislikeBtnCount, +1);
-    upd(dislikeDisplay,  +1);
-    if (previousAction === 'like') {
-      upd(likeBtnCount,   -1);
-      upd(likeDisplay,    -1);
-    }
-  }
-
-  // Підсвічуємо активну кнопку
-  const card       = likeBtnCount.closest('.film-card');
-  const likeBtn    = card.querySelector('.rating-button:nth-of-type(1)');
-  const dislikeBtn = card.querySelector('.rating-button:nth-of-type(2)');
-  likeBtn.classList.remove('active-like');
-  dislikeBtn.classList.remove('active-dislike');
-  if (action === 'like')    likeBtn.classList.add('active-like');
-  if (action === 'dislike') dislikeBtn.classList.add('active-dislike');
-}
-
 
 
 async function suggestFilm() {
@@ -2013,25 +1819,6 @@ async function suggestFilm() {
     isSending = false;
     document.getElementById('request-loading').style.display = 'none'; // ⛔ Сховати
   }
-}
-
-  
-
-    function toggleHistory() {
-  const container = document.getElementById('history-list');
-  if (container.style.display === 'block') {
-    container.style.display = 'none';
-  } else {
-    showHistory();
-  }
-}
-
-
-
-// ✅ ВИНЕСИ окремо функцію rate() після showHistory
-function rate(title, stars) {
-  localStorage.setItem(`rating_${title}`, stars);
-  showHistory();
 }
 
 
@@ -2104,8 +1891,6 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
   const imgSrc = (isProFilm && !isPro) ? placeholderImage : first['Фото'];
   const imdb = first['IMDb'] || "—";
   const desc = first['Опис'] || '';
-  const likes = Number(first['Лайки']) || 0;
-  const dislikes = Number(first['Дизлайки']) || 0;
   const safe = safeId(title);
 
   return `
@@ -2115,10 +1900,6 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
       <p class="film-desc">${desc}</p>
       
-      
-        👍 <span id="like-count-${safe}">${likes}</span> |
-        👎 <span id="dislike-count-${safe}">${dislikes}</span>
-      </div>
       <div class="film-actions">
         ${isProFilm && !isPro 
           ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
@@ -2127,10 +1908,7 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
             }).join('')}
         <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
       </div>
-      <div style="margin-top:6px; display:flex; gap:10px;">
-        <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
-        <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
-      </div>
+      
     </div>
   `;
 }).join('');
