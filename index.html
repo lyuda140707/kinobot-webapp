@@ -559,8 +559,7 @@ function renderBatch() {
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
         <p>${film['Опис'] || ''}</p>
 
-        <!-- Кнопки лайк/дизлайк/улюблене -->
-        ${renderControls(film['Назва'], film['Опис'])}
+      
 
         <!-- Дивитись / PRO -->
         <div class="film-actions">
@@ -579,23 +578,6 @@ function renderBatch() {
   offset += batch.length;
 }
 
-
-
-  document.querySelectorAll('.film-card').forEach(card => {
-  const filmName = card.querySelector('h3').textContent;
-  const saved = localStorage.getItem(`rating-${filmName}`);
-  if (!saved) return;
-
-  const buttons = card.querySelectorAll('.rating-button');
-  buttons.forEach(btn => {
-    if (saved === 'like' && btn.textContent.includes('👍')) {
-      btn.classList.add('active-like');
-    }
-    if (saved === 'dislike' && btn.textContent.includes('👎')) {
-      btn.classList.add('active-dislike');
-    }
-  });
-});
 async function loadFilms() {
   const cached = localStorage.getItem('films');
   const ts = localStorage.getItem('filmsTimestamp');
@@ -619,7 +601,8 @@ async function loadFilms() {
     currentFilms = films;
     offset = 0;
     renderBatch();
-    restoreRatingsUI();
+   
+
 
     return;
   }
@@ -632,7 +615,7 @@ async function loadFilms() {
   currentFilms = films;
   offset = 0;
   renderBatch();
-  restoreRatingsUI();
+  
 }
 
 
@@ -1060,18 +1043,9 @@ function renderControls(title, description) {
   const likeClass    = prev === 'like'    ? 'active-like'    : '';
   const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
   return `
-    <div style="display:flex; gap:8px; margin:6px 0;">
-      <button class="rating-button ${likeClass}"
-              onclick="rateFilm('${title}', 'like')">
-        👍 <span id="like-count-btn-${id}">${film['Лайки']||0}</span>
-      </button>
-      <button class="rating-button ${dislikeClass}"
-              onclick="rateFilm('${title}', 'dislike')">
-        👎 <span id="dislike-count-btn-${id}">${film['Дизлайки']||0}</span>
-      </button>
-    </div>
-    <button class="fav-button" onclick="addToFavorites('${title}','${(description||'').replace(/'/g,"\\'")}')">💛</button>
-  `;
+  <button class="fav-button" onclick="addToFavorites('${title}','${(description||'').replace(/'/g,"\\'")}')">💛</button>
+`;
+
 }
 
     
@@ -1151,29 +1125,6 @@ function filterByGenre(genre) {
 }
 
 
-
-
-function restoreRatingsUI() {
-  document.querySelectorAll('.film-card').forEach(card => {
-    const filmName = card.querySelector('h3')?.textContent;
-    const saved = localStorage.getItem(`rating-${filmName}`);
-    if (!saved) return;
-
-    const likeBtn = card.querySelector('.rating-button:nth-child(1)');
-    const dislikeBtn = card.querySelector('.rating-button:nth-child(2)');
-
-    if (likeBtn && dislikeBtn) {
-      if (saved === 'like') {
-        likeBtn.classList.add('active-like');
-      }
-      if (saved === 'dislike') {
-        dislikeBtn.classList.add('active-dislike');
-      }
-    }
-  });
-}
-
-
     
 function filterByCountry(country) {
   switchTab('categories');
@@ -1210,7 +1161,7 @@ return `
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
-    ${renderControls(film['Назва'], film['Опис'])}
+    
     <div class="film-actions">${buttons}</div>
   </div>
 `;
@@ -1261,7 +1212,7 @@ return `
 
     <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
     <p>${film['Опис']}</p>
-    ${renderControls(film['Назва'], film['Опис'])}
+    
     <div class="film-actions">${buttons}</div>
   </div>
 `;
@@ -1603,7 +1554,7 @@ const sentinel = document.getElementById('list-end-sentinel');
 const observer = new IntersectionObserver(entries => {
   if (entries[0].isIntersecting && offset < currentFilms.length) {
     renderBatch();
-    restoreRatingsUI();   // оновлюємо рейтинг в нових карточках
+    
   }
 }, {
   rootMargin: '200px'
@@ -1725,7 +1676,8 @@ const uniqueResults = results.filter((film, i, arr) =>
         </div>
       `;
     }).join('');
-    restoreRatingsUI();
+
+  
     return;
   }
 
@@ -1766,8 +1718,6 @@ container.innerHTML = uniqueResults.map(f => {
   `;
 }).join('');
 
-
-  restoreRatingsUI();
 });
 
 
@@ -2046,31 +1996,25 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
   const dislikes = Number(first['Дизлайки']) || 0;
   const safe = safeId(title);
 
-  return `
-    <div class="film-card">
-      <img src="${imgSrc}" alt="${title}">
-      <h3>${title}</h3>
-      <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
-      <p class="film-desc">${desc}</p>
-      
-      
-        👍 <span id="like-count-${safe}">${likes}</span> |
-        👎 <span id="dislike-count-${safe}">${dislikes}</span>
-      </div>
-      <div class="film-actions">
-        ${isProFilm && !isPro 
-          ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-          : episodes.map((ep, i) => {
-              return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
-            }).join('')}
-        <button class="fav-button" onclick="event.stopPropagation(); addToFavorites('${title}', '${desc}')">💛 Улюблене</button>
-      </div>
-      <div style="margin-top:6px; display:flex; gap:10px;">
-        <button class="rating-button" onclick="rateFilm('${title}', 'like')">👍 <span id="like-count-btn-${safe}">${likes}</span></button>
-        <button class="rating-button" onclick="rateFilm('${title}', 'dislike')">👎 <span id="dislike-count-btn-${safe}">${dislikes}</span></button>
-      </div>
+return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${title}">
+    <h3>${title}</h3>
+    <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
+    <p class="film-desc">${desc}</p>
+
+    ${renderControls(title, desc)}
+
+    <div class="film-actions">
+      ${isProFilm && !isPro 
+        ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+        : episodes.map((ep, i) => {
+            return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+          }).join('')}
     </div>
-  `;
+  </div>
+`;
+
 }).join('');
 
 
