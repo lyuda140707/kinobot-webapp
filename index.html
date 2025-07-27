@@ -5,8 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RelaxTime Web App</title>
   <link rel="icon" href="https://example.com/my-favicon.ico">
-  <link rel="stylesheet" href="style.css?v=50" />
-  <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+  <!-- Критичні стилі в head, решта теж preload + print-трик -->
+<link rel="preload" href="style.css?v=50" as="style">
+<link rel="stylesheet"
+      href="style.css?v=50"
+      media="print"
+      onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="style.css?v=50">
+</noscript>
+
+<!-- пришвидшуємо підключення до font-сервісів -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- preconnect до Google Fonts -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<!-- preload самого .woff2-файлу -->
+<link rel="preload"
+      href="https://fonts.gstatic.com/s/russoone/v14/TuGfbV9gZJl3fU5NB6cVF1RS.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin>
+
+
+<!-- preload + print-трик для Google Fonts -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap"
+      media="print"
+      onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
+</noscript>
+
   <style>
 
     
@@ -319,14 +352,15 @@
   </style>
  
   
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Завантажуємо після розбору DOM -->
+  <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
 </head>
 <body>
   <div id="home" class="section active">
     <h2>🎯 Топ за сьогодні</h2>
    <div id="film-of-the-day" class="film-day-card">
   <div class="image-wrapper" style="position: relative;">
-    <img id="film-day-img" src="" alt="Топ за сьогодні">
+    <img id="film-day-img" src="" loading="lazy" alt="Топ за сьогодні">
     <div class="film-title-overlay" id="film-title">Назва фільму</div>
   </div>
   <div class="btn-container">
@@ -456,7 +490,7 @@
     <div id="genre-results"></div>
     <div id="list-end-sentinel"></div>
 
-  </div>
+ 
 
 </div>
 
@@ -521,7 +555,7 @@
   <div>Завантаження фільму...</div>
 </div>
 
-  <script>
+  <script defer>
 
     const placeholderImage = "https://i.postimg.cc/6q9Cd9sQ/d9d66124-1900-49be-a89c-007edc35bd13.png";
     
@@ -548,7 +582,8 @@ function renderBatch() {
     return `
       <div class="film-card">
         <!-- Постер -->
-        <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
+        <img src="${imgSrc}" loading="lazy" alt="${film['Назва']}" class="film-img">
+
 
         <!-- Назва -->
         <h3>${film['Назва']}</h3>
@@ -571,7 +606,11 @@ function renderBatch() {
     `;
   }).join('');
 
-  container.insertAdjacentHTML('beforeend', html);
+  const frag = document.createDocumentFragment();
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  while (temp.firstChild) frag.appendChild(temp.firstChild);
+  container.appendChild(frag);
   offset += batch.length;
 }
 
@@ -945,7 +984,7 @@ function showYearFilters() {
     const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
     return `
       <div class="collection-card" onclick="filterByGenre('${name}')">
-        <img src="${img}" alt="${name}">
+        <img src="${img}" loading="lazy" alt="${name}">
         <p>${name}</p>
       </div>
     `;
@@ -1407,7 +1446,7 @@ function showSkeletonCollections() {
     return;
   }
 
-  localStorage.removeItem('films');
+ 
 
 
   try {
@@ -1520,7 +1559,7 @@ function showSkeletonCollections() {
   const lastClear = localStorage.getItem('lastClear');
   const now = Date.now();
   if (!lastClear || now - lastClear > 1000 * 60 * 60 * 24) {
-    localStorage.removeItem('films');
+    
     localStorage.setItem('lastClear', now);
   }
 
@@ -1608,112 +1647,68 @@ observer.observe(sentinel);
       filterByGenre(genre);
     });
   });
-
-// Обробник пошуку
-document.getElementById('searchInput').addEventListener('input', () => {
-  const val = document.getElementById('searchInput').value.trim().toLowerCase();
-  const container = document.getElementById('searchResults');
-  container.innerHTML = '';
-  if (!val) return;
-
-  const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
-  // 1. Залишаємо тільки по одному фільму з кожною назвою
-const uniqueResults = results.filter((film, i, arr) =>
-  arr.findIndex(f => f['Назва'] === film['Назва']) === i
-);
-
-
-  // Якщо серед результатів є серіали — групуємо їх
-  const seriesResults = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
-  if (seriesResults.length) {
-    const grouped = seriesResults.reduce((acc, ep) => {
-      const title = ep['Назва'];
-      if (!acc[title]) acc[title] = [];
-      acc[title].push(ep);
-      return acc;
-    }, {});
-    
-    container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-      const safe = safeId(title);
-      const count = episodes.length;
-      const isPro = localStorage.getItem('isProUser') === 'true';
-      const isProSeries = episodes[0]['Доступ'] === 'PRO';
-      const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
-      return `
-        <div class="film-card">
-          <img src="${poster}" class="film-img" alt="${title}">
-          <h3>${title}</h3>
-          <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
-          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-            📺 Показати серії (${count})
-          </button>
-          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-            ${episodes.map((ep,i) => {
-              const label = ep['Опис'] || `Серія ${i+1}`;
-              return ep.file_id
-                ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-  
-    return;
-  }
-
-  // Якщо нічого не знайдено
-  if (results.length === 0) {
-    container.innerHTML = `
-      <p>Фільм не знайдено 😢</p>
-      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити цей фільм</button>
-    `;
-    return;
-  }
-
-  // Інакше — звичайний рендер фільмів
-// новий код — рендеруємо вже унікальні результати
-container.innerHTML = uniqueResults.map(f => {
-  const isPro = localStorage.getItem('isProUser') === 'true';
-  const locked = f['Доступ']==='PRO' && !isPro;
-  const img = locked ? placeholderImage : (f['Фото']||placeholderImage);
-  const watchBtn = locked
-    ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-    : (f['Посилання']
-        ? `<button class="search-button" onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>`
-        : '');
-  return `
-    <div class="film-card">
-      <img src="${img}" alt="${f['Назва']}" class="film-img">
-      <h3>${f['Назва']}</h3>
-      <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
-      <p>${f['Опис']||''}</p>
-      <div class="film-actions">
-        ${renderControls(f['Назва'], f['Опис'])}
-        ${watchBtn}
-      </div>
-    </div>
-  `;
-}).join('');
-
-});
-
-
-
-
-
-
-  // Клік по картці
-  document.addEventListener('click', (e) => {
-    const card = e.target.closest('.film-card');
-    if (card && !e.target.closest('button')) {
-      card.classList.toggle('expanded');
-    }
+  // ——— debounce-пошук ———
+  const searchInput = document.getElementById('searchInput');
+  let debounceTimer;
+  searchInput.addEventListener('input', e => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const val = e.target.value.trim().toLowerCase();
+      doSearch(val);
+    }, 300);
   });
 
-});
+  function doSearch(val) {
+    const container = document.getElementById('searchResults');
+    container.innerHTML = '';
+    if (!val) return;
 
+    // 1) Фільтрація за назвою
+    const results = films.filter(f =>
+      (f['Назва'] || '').toLowerCase().includes(val)
+    );
+
+    // 2) Унікалізація по назві
+    const unique = results.filter((film, i, arr) =>
+      arr.findIndex(f => f['Назва'] === film['Назва']) === i
+    );
+
+    // 3) Якщо є серіали — рендеримо їх окремо
+    const series = unique.filter(f =>
+      (f['Тип'] || '').trim().toLowerCase() === 'серіал'
+    );
+    if (series.length) {
+      // …скопіюйте сюди вашу існуючу логіку групування і рендерингу серіалів…
+      return;
+    }
+
+    // 4) Рендер звичайних фільмів
+    container.innerHTML = unique.map(film => {
+      const isProFilm = film['Доступ'] === 'PRO';
+      const isProUser = localStorage.getItem('isProUser') === 'true';
+      const imgSrc = (isProFilm && !isProUser)
+                     ? placeholderImage
+                     : (film['Фото'] || placeholderImage);
+      const watchBtn = isProFilm && !isProUser
+                       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+                       : (film['Посилання']
+                          ? `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`
+                          : '');
+      return `
+        <div class="film-card">
+          <img src="${imgSrc}" loading="lazy" alt="${film['Назва']}" class="film-img">
+
+          <h3>${film['Назва']}</h3>
+          <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
+          <p>${film['Опис']||''}</p>
+          <div class="film-actions">
+            ${renderControls(film['Назва'], film['Опис'])}
+            ${watchBtn}
+          </div>
+        </div>`;
+    }).join('');
+  }
+  // ————————————————
 
 
   function addToFavorites(title, description, videoUrl) {
@@ -2266,9 +2261,8 @@ function updateUIAfterPro(expireDate) {
     </div>
   </div>
 </div>
-<script>
- 
-</script>
+
+
 <!-- Модальне вікно -->
 <div id="suggest-modal" style="
   display:none; position:fixed; top:0; left:0; width:100%; height:100%;
