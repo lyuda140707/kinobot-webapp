@@ -662,11 +662,6 @@ async function fetchAndUpdateFilms() {
 let pendingLink = "";
 
 async function openVideo(filmName) {
-  // ——— Перевірка: чи є з'єднання з Інтернетом ———
-  if (!navigator.onLine) {
-    alert('⚠️ Ви офлайн. Перевірте з’єднання та спробуйте знову.');
-    return;
-  }
   const tg = window.Telegram.WebApp;
 
   if (!tg || !tg.initDataUnsafe || !tg.initDataUnsafe.user || !tg.initDataUnsafe.user.id) {
@@ -723,46 +718,41 @@ async function openVideo(filmName) {
 }
 
 function openVideoById(fileId) {
-  
-  const user = tg.initDataUnsafe?.user;
-  if (!navigator.onLine) {
-    alert('⚠️ Ви офлайн. Перевірте з’єднання та спробуйте знову.');
-    return;
-  }
   const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
 
   if (!user) {
     alert("❗️Не вдалося отримати ваш Telegram ID");
     return;
   }
 
-document.getElementById("loading-indicator").style.display = "block";
-setTimeout(async () => {
-  try {
-    const res = await requestWithRetry(
-      'https://kinobot-qm9q.onrender.com/send-film-id',
-      {
+  document.getElementById("loading-indicator").style.display = "block";
+
+  setTimeout(async () => {
+    try {
+      const response = await fetch('https://kinobot-qm9q.onrender.com/send-film-id', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, file_id: fileId })
-      },
-      3,
-      1000
-    );
-    const data = await res.json();
-    if (data.success) {
-      showRedirectButton();
-    } else {
-      throw new Error(data.error || 'Невідома помилка');
+        body: JSON.stringify({
+          user_id: user.id,
+          file_id: fileId
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showRedirectButton();
+      } else {
+        alert(`❗️ Помилка: ${data.error || 'Невідома помилка'}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("❗️ Сталася помилка при надсиланні фільму");
+    } finally {
+      document.getElementById("loading-indicator").style.display = "none";
     }
-  } catch (err) {
-    console.error('❗️ Помилка відправки фільму по ID:', err);
-    showSendError(fileId);
-  } finally {
-    document.getElementById("loading-indicator").style.display = "none";
-  }
-}, 2000);
-    
+  }, 2000);
 }
     
 
@@ -831,17 +821,6 @@ function showRedirectButton() {
   }, 50);
 }
 
-function showSendError(filmName) {
-  const overlay = document.getElementById('video-overlay');
-  const wrapper = document.getElementById('video-wrapper');
-  wrapper.innerHTML = `
-    <h3 style="color:#f55;">❌ Не вдалося надіслати фільм</h3>
-    <button class="watch-btn" onclick="openVideo('${filmName}')">🔄 Спробувати ще раз</button>
-    <button class="watch-btn" onclick="closeVideo()">❌ Закрити</button>
-  `;
-  overlay.style.display = 'flex';
-  setTimeout(() => overlay.style.opacity = '1', 50);
-}
 
 
 function confirmOpen() {
@@ -1409,30 +1388,86 @@ function showSkeletonCollections() {
 }
 
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
-  if (!user) {
-    alert("❗ Не вдалося отримати ваш Telegram ID");
-    return;
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Прокидаємо бекенд Render, щоб не спав
+  try {
+    await fetch('https://kinobot-qm9q.onrender.com/ping');
+    console.log('✅ Бекенд прокинувся');
+  } catch (e) {
+    console.warn('⚠️ Бекенд не прокинувся:', e);
   }
 
-  // Оновлюємо статус підписки
-  try {
-    await fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id })
-    });
-  } catch (error) {
-    console.error('Помилка перевірки підписки', error);
-    alert("❗ Помилка перевірки PRO-доступу");
+  fetch('https://kinobot-qm9q.onrender.com/ping').catch(console.warn);
+  Telegram.WebApp.ready();
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    alert("Не вдалося отримати ваш Telegram ID");
     return;
   }
 
   localStorage.removeItem('films');
 
 
+  try {
+    const res = await fetch('https://kinobot-qm9q.onrender.com/check-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id })
+    });
+
+ 
+    const data = await res.json();
+
+   if (!data.subscribed) {
+  document.body.innerHTML = `
+    <div style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #00f7ff;
+      text-align: center;
+      padding: 20px;
+      font-family: 'Russo One', sans-serif;
+    ">
+      <h1 style="font-size: 28px; margin-bottom: 20px;">❗ Щоб користуватись застосунком</h1>
+      <h2 style="font-size: 22px; margin-bottom: 40px;">Підпишіться на канал 🎥</h2>
+
+     <h2 style="font-size: 22px; margin-bottom: 40px;">Активуйте доступ до контенту 🎬</h2>
+
+<div style="display: flex; flex-direction: column; gap: 15px;">
+  <a href="https://t.me/KinoTochkaUA" target="_blank" style="
+    background: #00f7ff;
+    color: #000;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 0 15px #00f7ff;
+  ">🎬 Доступ до контенту</a>
+
+  <a href="https://t.me/KinoTochkaFilms" target="_blank" style="
+    background: #00f7ff;
+    color: #000;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 0 15px #00f7ff;
+  ">🎬 Доступ до контенту</a>
+</div>
+
+      <p style="margin-top: 40px; font-size: 16px; color: #ccc;">Після підписки оновіть застосунок 📲</p>
+    </div>
+  `;
+  return;
+}
 
   // ✅ Тут вставляємо перевірку PRO
   const proRes = await fetch('https://kinobot-qm9q.onrender.com/check-pro', {
@@ -1466,8 +1501,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     getProBtn.parentNode.insertBefore(proNotice, getProBtn.nextSibling);
   }
 
+  fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: user.id })
+  }).catch(console.warn);
 
-   
+} catch (error) {
+  console.error('Помилка перевірки підписки', error);
+  alert("❗ Помилка перевірки підписки");
+  return;
+}
 
   // 🟢 Якщо підписаний, тільки тоді все інше:
   
@@ -1479,7 +1523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.removeItem('films');
     localStorage.setItem('lastClear', now);
   }
-    
+
   // Показати скелетони
   showSkeletonCollections();
   showSkeletonFilmOfTheDay();
