@@ -1410,8 +1410,8 @@ function showSkeletonCollections() {
 
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // Прокидаємо бекенд Render, щоб не спав
-  try {
+
+ try {
     await fetch('https://kinobot-qm9q.onrender.com/ping');
     console.log('✅ Бекенд прокинувся');
   } catch (e) {
@@ -1464,16 +1464,17 @@ function showSkeletonCollections() {
     getProBtn.parentNode.insertBefore(proNotice, getProBtn.nextSibling);
   }
 
-  fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
+try {
+  await fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: user.id })
-  }).catch(console.warn);
+  });
 } catch (error) {
   console.error('Помилка перевірки підписки', error);
-    alert("❗ Помилка перевірки PRO-доступу");
-    return;
-  }
+  alert("❗ Помилка перевірки PRO-доступу");
+  return;
+}
 
    
 
