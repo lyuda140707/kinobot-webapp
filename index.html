@@ -1469,12 +1469,13 @@ function showSkeletonCollections() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: user.id })
   }).catch(console.warn);
-
 } catch (error) {
   console.error('Помилка перевірки підписки', error);
-  alert("❗ Помилка перевірки PRO-доступу");
-  return;
-}
+    alert("❗ Помилка перевірки PRO-доступу");
+    return;
+  }
+
+   
 
   // 🟢 Якщо підписаний, тільки тоді все інше:
   
@@ -1484,6 +1485,7 @@ function showSkeletonCollections() {
   const now = Date.now();
   if (!lastClear || now - lastClear > 1000 * 60 * 60 * 24) {
     localStorage.removeItem('films');
+    + try {
     localStorage.setItem('lastClear', now);
   }
 
