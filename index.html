@@ -1485,10 +1485,9 @@ function showSkeletonCollections() {
   const now = Date.now();
   if (!lastClear || now - lastClear > 1000 * 60 * 60 * 24) {
     localStorage.removeItem('films');
-    + try {
     localStorage.setItem('lastClear', now);
   }
-
+    
   // Показати скелетони
   showSkeletonCollections();
   showSkeletonFilmOfTheDay();
