@@ -1409,22 +1409,24 @@ function showSkeletonCollections() {
 }
 
 
-  document.addEventListener('DOMContentLoaded', async () => {
-
- try {
-    await fetch('https://kinobot-qm9q.onrender.com/ping');
-    console.log('✅ Бекенд прокинувся');
-  } catch (e) {
-    console.warn('⚠️ Бекенд не прокинувся:', e);
-  }
-
-  fetch('https://kinobot-qm9q.onrender.com/ping').catch(console.warn);
-  Telegram.WebApp.ready();
+document.addEventListener('DOMContentLoaded', async () => {
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
-
   if (!user) {
-    alert("Не вдалося отримати ваш Telegram ID");
+    alert("❗ Не вдалося отримати ваш Telegram ID");
+    return;
+  }
+
+  // Оновлюємо статус підписки
+  try {
+    await fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id })
+    });
+  } catch (error) {
+    console.error('Помилка перевірки підписки', error);
+    alert("❗ Помилка перевірки PRO-доступу");
     return;
   }
 
@@ -1464,17 +1466,6 @@ function showSkeletonCollections() {
     getProBtn.parentNode.insertBefore(proNotice, getProBtn.nextSibling);
   }
 
-try {
-  await fetch('https://kinobot-qm9q.onrender.com/reactivate-user', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: user.id })
-  });
-} catch (error) {
-  console.error('Помилка перевірки підписки', error);
-  alert("❗ Помилка перевірки PRO-доступу");
-  return;
-}
 
    
 
