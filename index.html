@@ -519,7 +519,27 @@
   <div id="loading-indicator" style="display: none;">
   <div class="loader"></div>
   <div>Завантаження фільму...</div>
+    
 </div>
+<div id="payment-loading" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.55);
+  z-index: 9999;
+  display: none;
+  justify-content: center;
+  align-items: center;
+">
+  <div style="text-align:center;">
+    <div class="loader"></div>
+    <div style="margin-top: 12px; color: #00f7ff;">
+      Перевіряємо оплату...<br>
+      <span style="font-size:13px;color:#aaa;">Якщо не спрацює — зачекайте 10-15 сек і повторіть ще раз.</span>
+    </div>
+  </div>
+</div>
+
 
   <script>
 
@@ -2049,6 +2069,8 @@ function showConfirmPaidButton(user) {
 let isPaymentSending = false;
 
 async function notifyPayment(userId, username, firstName) {
+  // Показуємо loader
+  document.getElementById("payment-loading").style.display = "flex";
   try {
     const res = await fetch('https://kinobot-qm9q.onrender.com/notify-payment', {
       method: 'POST',
@@ -2060,9 +2082,8 @@ async function notifyPayment(userId, username, firstName) {
       })
     });
     const data = await res.json();
-    
+
     if (data.ok) {
-      // успішно отримали оплату
       localStorage.removeItem("paymentPending");
       document.getElementById("confirmPaidBtn").style.display = "none";
       showPaymentResult(true);
@@ -2074,6 +2095,9 @@ async function notifyPayment(userId, username, firstName) {
     console.error(e);
     showPaymentResult(false);
     document.getElementById("confirmPaidBtn").style.display = "block";
+  } finally {
+    // Ховаємо loader у будь-якому випадку
+    document.getElementById("payment-loading").style.display = "none";
   }
 }
 
@@ -2081,13 +2105,17 @@ async function notifyPayment(userId, username, firstName) {
 
 function showPaymentResult(success) {
   if (success) {
-    // тепер успіх — видаляємо “pending” і показуємо повідомлення
     localStorage.removeItem('paymentPending');
     alert('✅ Оплату отримано. Чекайте підтвердження PRO-доступу.');
   } else {
-    alert('❌ Сталася помилка при підтвердженні оплати. Спробуйте пізніше.');
+    alert(
+      '❌ Сталася помилка при підтвердженні оплати.\n\n' +
+      '🔄 Зачекайте 10-15 сек і натисніть "Я оплатив" ще раз.\n' +
+      'Якщо все одно не працює — напишіть адміну в бот.'
+    );
   }
 }
+
 
 
 
