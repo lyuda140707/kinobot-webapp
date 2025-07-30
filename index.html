@@ -573,23 +573,33 @@ function renderBatch() {
 
   const html = batch.map(film => {
     const isProFilm = film['Доступ'] === 'PRO';
-    const imgSrc = (isProFilm && !isPro)
-      ? placeholderImage
-      : (film['Фото'] || placeholderImage);
-
-    // тут тільки один виклик — ніяких else if
-    const watchBtn = buildWatchButton(film, film['Назва']);
+    const imgSrc    = (isProFilm && !isPro)
+                      ? placeholderImage
+                      : (film['Фото'] || placeholderImage);
+    const id        = safeId(film['Назва']);
 
     return `
       <div class="film-card">
+        <!-- Постер -->
         <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
+
+        <!-- Назва -->
         <h3>${film['Назва']}</h3>
+
+        <!-- IMDb та опис -->
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
         <p>${film['Опис'] || ''}</p>
+
+        <!-- Дивитись / PRO та Улюблене -->
         <div class="film-actions">
-          ${renderControls(film['Назва'], film['Опис'])}
-          ${watchBtn}
-        </div>
+  ${renderControls(film['Назва'], film['Опис'])}
+  ${isProFilm && !isPro
+    ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+    : (film['Посилання']
+        ? `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`
+        : ``)
+  }
+</div>
       </div>
     `;
   }).join('');
@@ -597,8 +607,6 @@ function renderBatch() {
   container.insertAdjacentHTML('beforeend', html);
   offset += batch.length;
 }
-
-
 
 async function loadFilms() {
   const cached = localStorage.getItem('films');
@@ -688,88 +696,94 @@ let pendingLink = "";
 
 async function openVideo(filmName) {
   const tg = window.Telegram.WebApp;
-  if (!tg.initDataUnsafe?.user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Перезавантажте WebApp у Telegram.");
+  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+    alert("⛔️ Не вдалося отримати ваш Telegram ID.\n🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");
+    // alert("🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");  // більше не перезавантажуєм
     return;
   }
+  
+
+ 
+
   const user = tg.initDataUnsafe.user;
 
-  // PRO-перевірка
+  // 🔒 Перевірка доступу PRO
+  const isPro = localStorage.getItem('isProUser') === 'true';
   const film = films.find(f => f['Назва'] === filmName);
-  if (film?.['Доступ'] === 'PRO' && localStorage.getItem('isProUser') !== 'true') {
-    showProModal();
+
+  if (film?.['Доступ'] === 'PRO' && !isPro) {
+    showProPrompt();
     return;
   }
 
-  // Показати лоадер
-  const loader = document.getElementById("loading-indicator");
-  loader.style.display = "flex";
+  document.getElementById("loading-indicator").style.display = "block";
 
-  try {
-    const res = await fetch('https://relax-time2.onrender.com/search-in-bot', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ user_id: user.id, query: filmName })
-    });
-    const data = await res.json();
+  // ⛔ Заблокуємо всі кнопки "Дивитись" на 3 секунди
+  document.querySelectorAll('.search-button').forEach(btn => btn.disabled = true);
+  setTimeout(() => {
+    document.querySelectorAll('.search-button').forEach(btn => btn.disabled = false);
+  }, 3000);
 
-    if (data.found && data.videoUrl) {
-      // Відкрити через WebApp або в новій вкладці
-      if (typeof tg.openLink === 'function') {
-        tg.openLink(data.videoUrl);
+  // ⏳ Затримка 2 секунди перед запитом
+  setTimeout(async () => {
+    try {
+      const data     = await response.json();
+  
+      const data = await response.json();
+      console.log("🎬 Відповідь сервера:", data);
+
+      if (data.success) {
+        showRedirectButton();
       } else {
-        window.open(data.videoUrl, '_blank');
+        alert(`❗️ Помилка: ${data.error || 'Невідома помилка'}`);
       }
-    } else {
-      alert("Фільм не знайдено 😢");
+    } catch (error) {
+      console.error('❗️ Помилка при запиті:', error);
+      alert("❗️ Сталася помилка при надсиланні фільму");
+    } finally {
+      document.getElementById("loading-indicator").style.display = "none";
     }
-
-  } catch (err) {
-    console.error('❗️ Помилка при пошуку відео:', err);
-    alert("❗️ Сталася помилка при запиті відео.");
-  } finally {
-    loader.style.display = "none";
-  }
+  }, 2000);
 }
 
-
-
-async function openVideoById(fileId) {
+function openVideoById(fileId) {
   const tg = window.Telegram.WebApp;
-  if (!tg.initDataUnsafe?.user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Перезавантажте WebApp у Telegram.");
+  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+    alert("⛔️ Не вдалося отримати ваш Telegram ID.\n🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");
+    // window.location.reload();  // більше не перезавантажуємо
     return;
   }
   const user = tg.initDataUnsafe.user;
 
-  const loader = document.getElementById("loading-indicator");
-  loader.style.display = "flex";
+  document.getElementById("loading-indicator").style.display = "block";
 
-  try {
-    const res = await fetch('https://relax-time2.onrender.com/send-film-id', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ user_id: user.id, file_id: fileId })
-    });
-    const data = await res.json();
+  setTimeout(async () => {
+    try {
+      const response = await fetch('https://relax-time2.onrender.com/send-film-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          file_id: fileId
+        })
+      });
 
-    if (data.success && data.videoUrl) {
-      if (typeof tg.openLink === 'function') {
-        tg.openLink(data.videoUrl);
+      const data = await response.json();
+
+      if (data.success) {
+        showRedirectButton();
       } else {
-        window.open(data.videoUrl, '_blank');
+        alert(`❗️ Помилка: ${data.error || 'Невідома помилка'}`);
       }
-    } else {
-      alert(`❗️ Помилка: ${data.error || 'Невідома помилка'}`);
+    } catch (error) {
+      console.error(error);
+      alert("❗️ Сталася помилка при надсиланні фільму");
+    } finally {
+      document.getElementById("loading-indicator").style.display = "none";
     }
-  } catch (e) {
-    console.error('❗️ Помилка при надсиланні file_id:', e);
-    alert("❗️ Сталася помилка при запиті відео.");
-  } finally {
-    loader.style.display = "none";
-  }
+  }, 2000);
 }
-
+    
 
     
 function showRedirectButton() {
@@ -973,6 +987,7 @@ function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
   container.innerHTML = '';
 
+  // Фільтруємо епізоди потрібного типу
   const seriesFilms = films.filter(f =>
     (f['Тип']||'').trim().toLowerCase() === type.trim().toLowerCase()
   );
@@ -981,52 +996,47 @@ function showSeries(type = 'Серіал') {
     return;
   }
 
+  // Групуємо за назвою
   const grouped = seriesFilms.reduce((acc, ep) => {
-    (acc[ep['Назва']] = acc[ep['Назва']]||[]).push(ep);
+    const title = ep['Назва'];
+    if (!acc[title]) acc[title] = [];
+    acc[title].push(ep);
     return acc;
   }, {});
 
+  // Генеруємо картки
   const html = Object.entries(grouped).map(([title, episodes]) => {
-    const safe      = safeId(title);
+    const safe = safeId(title);
     const isPro     = localStorage.getItem('isProUser') === 'true';
-    const isProShow = episodes[0]['Доступ'] === 'PRO';
-    const poster    = isProShow && !isPro
-                      ? placeholderImage
-                      : (episodes[0]['Фото'] || placeholderImage);
+    const isProFilm = episodes[0]['Доступ'] === 'PRO';
+    const poster    = (isProFilm && !isPro)
+      ? placeholderImage
+      : (episodes[0]['Фото'] || placeholderImage);
+    const count     = episodes.length;
     const imdb      = episodes[0]['IMDb'] || '—';
 
-    // Кнопка “Показати серії”
-    const toggleBtn = `
-      <button class="search-button"
-              onclick="toggleEpisodes('${safe}', this)"
-              data-count="${episodes.length}">
-        📺 Показати серії (${episodes.length})
-      </button>`;
-
-    // Список епізодів
-    const epsHtml = episodes.map(ep => {
-      let btn;
-      if (isProShow && !isPro) {
-        btn = `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`;
-      } else if (ep.file_id) {
-        btn = `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${ep['Опис']||'Серія'}</button>`;
-      } else if (ep['Посилання']) {
-        btn = `<button class="search-button" onclick="openVideo('${title}')">${ep['Опис']||'Серія'}</button>`;
-      } else {
-        btn = ''; 
-      }
-      return btn;
-    }).join('');
-
+    // === Додаємо renderControls після назви ===
     return `
       <div class="film-card">
         <img src="${poster}" class="film-img" alt="${title}">
         <h3>${title}</h3>
         ${renderControls(title, episodes[0]['Опис'])}
         <p class="film-imdb">IMDb: ${imdb}</p>
-        ${toggleBtn}
-        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;">
-          ${epsHtml}
+        <button class="search-button"
+                onclick="toggleEpisodes('${safe}', this)"
+                data-count="${count}">
+          📺 Показати серії (${count})
+        </button>
+        <div id="episodes-${safe}"
+             class="series-episodes-grid"
+             style="display:none;"
+             data-count="${count}">
+          ${episodes.map((ep, i) => {
+            const label = ep['Опис'] || `Серія ${i+1}`;
+            return ep.file_id
+              ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
+              : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+          }).join('')}
         </div>
       </div>
     `;
@@ -1060,39 +1070,14 @@ function renderControls(title, description) {
 `;
 
 }
-function buildWatchButton(item, title) {
-  const isPro = localStorage.getItem('isProUser') === 'true';
-
-  // 1) Для PRO-контенту
-  if (item['Доступ'] === 'PRO' && !isPro) {
-    return `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`;
-  }
-
-  // 2) Якщо є file_id — надсилаємо саме його
-  if (item.file_id) {
-    return `
-      <button class="search-button" onclick="openVideoById('${item.file_id}')">
-        ▶️ Дивитись
-      </button>
-    `;
-  }
-
-  // 3) Інакше — шукаємо по назві через search-in-bot
-  return `
-    <button class="search-button" onclick="openVideo('${title}')">
-      ▶️ Дивитись
-    </button>
-  `;
-}
-
 
     
-// 1) Фільтрація за жанром/добіркою
 function filterByGenre(genre) {
   if (!genre) return;
   switchTab('categories');
   const normalized = genre.toLowerCase();
 
+  // спочатку відфільтруємо всі фільми за жанром / добіркою
   const filtered = films.filter(f => {
     const g1 = (f['Жанр']    || '').toLowerCase();
     const g2 = (f['Добірка'] || '').toLowerCase();
@@ -1106,46 +1091,55 @@ function filterByGenre(genre) {
     return;
   }
 
-  // Якщо серіали — групуємо
+  // === Якщо це серіали — зробимо групування ===
   if (filtered[0]['Тип']?.trim().toLowerCase() === 'серіал') {
+    // групуємо по Назві
     const grouped = filtered.reduce((acc, ep) => {
-      (acc[ep['Назва']] = acc[ep['Назва']] || []).push(ep);
+      const title = ep['Назва'];
+      if (!acc[title]) acc[title] = [];
+      acc[title].push(ep);
       return acc;
     }, {});
-
+    // генеруємо HTML точно так само, як у showSeries
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-      const safe   = safeId(title);
-      const poster = (!localStorage.getItem('isProUser') && episodes[0]['Доступ']==='PRO')
-                     ? placeholderImage
-                     : (episodes[0]['Фото'] || placeholderImage);
-      const btn    = `<button class="search-button"
-                              onclick="toggleEpisodes('${safe}', this)"
-                              data-count="${episodes.length}">
-                        📺 Показати серії (${episodes.length})
-                      </button>`;
-      const epsHtml = episodes.map(ep =>
-        buildWatchButton(ep, title)
-      ).join('');
-
+      const safe = safeId(title);
+      const isPro     = localStorage.getItem('isProUser') === 'true';
+      const isProFilm = episodes[0]['Доступ'] === 'PRO';
+      const poster    = (isProFilm && !isPro)
+        ? placeholderImage
+        : (episodes[0]['Фото'] || placeholderImage);
+      const count     = episodes.length;
+      const btn = `<button class="search-button"
+                    onclick="toggleEpisodes('${safe}', this)"
+                    data-count="${count}"
+                  >📺 Показати серії (${count})</button>`;
+      const epsHtml = episodes.map((ep, i) => {
+        const label = ep['Опис'] || `Серія ${i+1}`;
+        return ep.file_id
+          ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
+          : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+      }).join('');
       return `
         <div class="film-card">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
-          ${renderControls(title, episodes[0]['Опис'])}
           <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+          ${renderControls(title, episodes[0]['Опис'])}
           ${btn}
-          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${episodes.length}">
+          <div id="episodes-${safe}"
+               class="series-episodes-grid"
+               style="display:none;"
+               data-count="${count}">
             ${epsHtml}
           </div>
         </div>
       `;
     }).join('');
-
     container.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
-  // Інакше — звичайні фільми (batch-render)
+  // === Інакше — це не серіали, малюємо як фільми ===
   currentFilms = filtered;
   container.innerHTML = '';
   offset = 0;
@@ -1154,38 +1148,94 @@ function filterByGenre(genre) {
 }
 
 
-
     
-// 2) Фільтрація за країною
 function filterByCountry(country) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
   const filtered = films.filter(f => f['Країна'] === country);
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    return;
+  }
 
-  container.innerHTML = filtered.length
-    ? filtered.map(film => {
-        const poster = film['Доступ'] === 'PRO' && !isProUser()
-          ? placeholderImage
-          : (film['Фото'] || placeholderImage);
-        return `
-          <div class="film-card">
-            <img src="${poster}" alt="${film['Назва']}" class="film-img">
-            <h3>${film['Назва']}</h3>
-            <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
-            <p>${film['Опис'] || ''}</p>
-            <div class="film-actions">
-              ${renderControls(film['Назва'], film['Опис'])}
-              ${buildWatchButton(film, film['Назва'])}
-            </div>
-          </div>
-        `;
-      }).join('')
-    : '<p>Нічого не знайдено 😢</p>';
+  container.innerHTML = filtered.map(film => {
+    const isProFilm = film['Доступ'] === 'PRO';
+    const isPro     = localStorage.getItem('isProUser') === 'true';
+    const imgSrc    = (isProFilm && !isPro)
+                      ? placeholderImage
+                      : (film['Фото'] || placeholderImage);
+
+    let buttons = '';
+    if (isProFilm && !isPro) {
+      buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+    } else if (film['Посилання']) {
+      buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+    }
+
+    // === Додаємо renderControls у film-actions ===
+    return `
+      <div class="film-card">
+        <img src="${imgSrc}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
+        <p>${film['Опис']}</p>
+        <div class="film-actions">
+          ${renderControls(film['Назва'], film['Опис'])}
+          ${buttons}
+        </div>
+      </div>
+    `;
+  }).join('');
+
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
+
   
 
 function filterByYear(year) {
+  switchTab('categories');
+  const container = document.getElementById('genre-results');
+  const isPro = localStorage.getItem('isProUser') === 'true';
+
+  const filtered = films.filter(f => f['Рік']?.toString() === year.toString());
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>Нічого не знайдено 😢</p>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(film => {
+    const isProFilm = film['Доступ'] === 'PRO';
+    const imgSrc = (isProFilm && !isPro)
+      ? placeholderImage
+      : (film['Фото'] || placeholderImage);
+
+    let buttons = '';
+    if (isProFilm && !isPro) {
+      buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
+    } else if (film['Посилання']) {
+      buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+    }
+
+    // === Додаємо renderControls у film-actions ===
+    return `
+      <div class="film-card">
+        <img src="${imgSrc}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
+        <p>${film['Опис']}</p>
+        <div class="film-actions">
+          ${renderControls(film['Назва'], film['Опис'])}
+          ${buttons}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
 
 
    function showFavorites() {
@@ -1611,94 +1661,96 @@ observer.observe(sentinel);
   });
 
 // Обробник пошуку
-
-
-
 document.getElementById('searchInput').addEventListener('input', () => {
-  const val = document.getElementById('searchInput')
-                      .value.trim().toLowerCase();
+  const val = document.getElementById('searchInput').value.trim().toLowerCase();
   const container = document.getElementById('searchResults');
   container.innerHTML = '';
   if (!val) return;
 
-  // 1) Фільтруємо та робимо унікальний список за назвою
-  const results = films.filter(f => 
-    (f['Назва'] || '').toLowerCase().includes(val)
-  );
-  const uniqueResults = results.filter((f, i, arr) =>
-    arr.findIndex(x => x['Назва'] === f['Назва']) === i
-  );
+  const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
+  // 1. Залишаємо тільки по одному фільму з кожною назвою
+const uniqueResults = results.filter((film, i, arr) =>
+  arr.findIndex(f => f['Назва'] === film['Назва']) === i
+);
 
-  // 2) Якщо є серіали — групуємо і відображаємо їх
-  const seriesResults = uniqueResults.filter(f =>
-    (f['Тип'] || '').trim().toLowerCase() === 'серіал'
-  );
+
+  // Якщо серед результатів є серіали — групуємо їх
+  const seriesResults = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
   if (seriesResults.length) {
     const grouped = seriesResults.reduce((acc, ep) => {
-      (acc[ep['Назва']] = acc[ep['Назва']] || []).push(ep);
+      const title = ep['Назва'];
+      if (!acc[title]) acc[title] = [];
+      acc[title].push(ep);
       return acc;
     }, {});
-    container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
-      const safe  = safeId(title);
+    
+    container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+      const safe = safeId(title);
+      const count = episodes.length;
       const isPro = localStorage.getItem('isProUser') === 'true';
-      const isLocked = eps[0]['Доступ'] === 'PRO' && !isPro;
-      const poster   = isLocked
-                       ? placeholderImage
-                       : (eps[0]['Фото'] || placeholderImage);
-      const imdb     = eps[0]['IMDb'] || '—';
-      // зібрати кнопки для всіх епізодів
-      const epsHtml = eps.map(ep => buildWatchButton(ep, title)).join('');
+      const isProSeries = episodes[0]['Доступ'] === 'PRO';
+      const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
       return `
         <div class="film-card">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
-          <p class="film-imdb">IMDb: ${imdb}</p>
-          <button class="search-button"
-                  onclick="toggleEpisodes('${safe}', this)"
-                  data-count="${eps.length}">
-            📺 Показати серії (${eps.length})
+          <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
+          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+            📺 Показати серії (${count})
           </button>
-          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;">
-            ${epsHtml}
+          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+            ${episodes.map((ep,i) => {
+              const label = ep['Опис'] || `Серія ${i+1}`;
+              return ep.file_id
+                ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
+                : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+            }).join('')}
           </div>
         </div>
       `;
     }).join('');
+
+  
     return;
   }
 
-  // 3) Якщо нічого не знайдено — повідомлення + кнопка замовлення
-  if (uniqueResults.length === 0) {
+  // Якщо нічого не знайдено
+  if (results.length === 0) {
     container.innerHTML = `
       <p>Фільм не знайдено 😢</p>
-      <button class="suggest-button" onclick="suggestFilm()">
-        ➕ Замовити цей фільм
-      </button>
+      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити цей фільм</button>
     `;
     return;
   }
 
-  // 4) Звичайний рендер фільмів
+  // Інакше — звичайний рендер фільмів
+// новий код — рендеруємо вже унікальні результати
+container.innerHTML = uniqueResults.map(f => {
   const isPro = localStorage.getItem('isProUser') === 'true';
-  container.innerHTML = uniqueResults.map(film => {
-    const locked = film['Доступ'] === 'PRO' && !isPro;
-    const poster = locked
-                   ? placeholderImage
-                   : (film['Фото'] || placeholderImage);
-    return `
-      <div class="film-card">
-        <img src="${poster}" class="film-img" alt="${film['Назва']}">
-        <h3>${film['Назва']}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
-        <p>${film['Опис'] || ''}</p>
-        <div class="film-actions">
-          ${renderControls(film['Назва'], film['Опис'])}
-          ${buildWatchButton(film, film['Назва'])}
-        </div>
+  const locked = f['Доступ']==='PRO' && !isPro;
+  const img = locked ? placeholderImage : (f['Фото']||placeholderImage);
+  const watchBtn = locked
+    ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+    : (f['Посилання']
+        ? `<button class="search-button" onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>`
+        : '');
+  return `
+    <div class="film-card">
+      <img src="${img}" alt="${f['Назва']}" class="film-img">
+      <h3>${f['Назва']}</h3>
+      <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
+      <p>${f['Опис']||''}</p>
+      <div class="film-actions">
+        ${renderControls(f['Назва'], f['Опис'])}
+        ${watchBtn}
       </div>
-    `;
-  }).join('');
+    </div>
+  `;
+}).join('');
+
 });
+
+
 
 
 
@@ -1958,54 +2010,52 @@ function goToSeries(seriesTitle) {
   openGenreGroup('series');
 
   setTimeout(() => {
-    const filtered = films.filter(f =>
-      f['Назва'] === seriesTitle && f['Тип'] === 'Серіал'
-    );
-    if (!filtered.length) {
+    const filtered = films.filter(f => f['Назва'] === seriesTitle && f['Тип'] === 'Серіал');
+
+    if (filtered.length === 0) {
       alert('Серіал не знайдено 😢');
       return;
     }
 
-    const safe      = safeId(seriesTitle);
-    const first     = filtered[0];
-    const isPro     = localStorage.getItem('isProUser') === 'true';
-    const isProShow = first['Доступ'] === 'PRO';
-    const poster    = isProShow && !isPro
-                      ? placeholderImage
-                      : (first['Фото'] || placeholderImage);
-    const desc      = first['Опис'] || '';
-    const imdb      = first['IMDb'] || '—';
+    const container = document.getElementById('genre-results');
+    const grouped = { [seriesTitle]: filtered };
 
-    const epsHtml = filtered.map(ep => {
-      if (isProShow && !isPro) {
-        return `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`;
-      } else if (ep.file_id) {
-        return `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${ep['Опис']||'Серія'}</button>`;
-      } else if (ep['Посилання']) {
-        return `<button class="search-button" onclick="openVideo('${seriesTitle}')">${ep['Опис']||'Серія'}</button>`;
-      } else {
-        return '';
-      }
-    }).join('');
+container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+  const first = episodes[0];
+  const isPro = localStorage.getItem('isProUser') === 'true';
+  const isProFilm = first['Доступ'] === 'PRO';
+  const imgSrc = (isProFilm && !isPro) ? placeholderImage : first['Фото'];
+  const imdb = first['IMDb'] || "—";
+  const desc = first['Опис'] || '';
+  const likes = Number(first['Лайки']) || 0;
+  const dislikes = Number(first['Дизлайки']) || 0;
+  const safe = safeId(title);
 
-    document.getElementById('genre-results').innerHTML = `
-      <div class="film-card">
-        <img src="${poster}" class="film-img" alt="${seriesTitle}">
-        <h3>${seriesTitle}</h3>
-        ${renderControls(seriesTitle, desc)}
-        <p class="film-imdb">IMDb: ${imdb}</p>
-        <p class="film-desc">${desc}</p>
-        <div class="film-actions">
-          ${epsHtml}
-        </div>
-      </div>
-    `;
-    document.getElementById('genre-results')
-            .scrollIntoView({ behavior: 'smooth' });
+return `
+  <div class="film-card">
+    <img src="${imgSrc}" alt="${title}">
+    <h3>${title}</h3>
+    <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
+    <p class="film-desc">${desc}</p>
+
+    ${renderControls(title, desc)}
+
+    <div class="film-actions">
+      ${isProFilm && !isPro 
+        ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+        : episodes.map((ep, i) => {
+            return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+          }).join('')}
+    </div>
+  </div>
+`;
+
+}).join('');
+
+
+    container.scrollIntoView({ behavior: 'smooth' });
   }, 300);
 }
-
-
 
 document.getElementById('getProBtn').addEventListener('click', () => {
     const tg = window.Telegram.WebApp;
@@ -2213,7 +2263,7 @@ function updateUIAfterPro(expireDate) {
   notice.style.color = "#00f7ff";
   document.getElementById("getProBtn").after(notice);
 }
-
+// Додай цю функцію в кінець свого основного <script> блоку (або туди, де інші функції)
 async function checkProPendingStatus() {
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
@@ -2331,7 +2381,9 @@ document.addEventListener("visibilitychange", function() {
     </div>
   </div>
 </div>
-
+<script>
+ 
+</script>
 <!-- Модальне вікно -->
 <div id="suggest-modal" style="
   display:none; position:fixed; top:0; left:0; width:100%; height:100%;
@@ -2347,7 +2399,7 @@ document.addEventListener("visibilitychange", function() {
 </div>
 
 
-
+<script>
 function showSuggestResult({ success, remaining_requests, is_pro }) {
   const modal = document.getElementById('suggest-modal');
   const content = document.getElementById('suggest-modal-content');
@@ -2418,7 +2470,7 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   }
 
 
-
+<script>
 // … ваш існуючий код вище …
 
 // ⬇️ Прогрів бекенду кожні 3 хвилини, щоб Render не "засинав"
@@ -2427,10 +2479,10 @@ setInterval(() => {
     .catch(() => {/* ігноруємо помилки */});
 }, 1000 * 60 * 3);
 
+</script>
 
 
-
-
+</div>
 
 <div id="request-loading" style="
   position: fixed;
@@ -2444,7 +2496,7 @@ setInterval(() => {
   font-size: 18px;
   color: #00f7ff;
   text-align: center;
->
+">
   <div style="
     position: absolute;
     top: 50%;
@@ -2453,7 +2505,7 @@ setInterval(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-  >
+  ">
     <div class="loader"></div>
     <div style="margin-top:12px;">Надсилаємо запит...</div>
   </div>
