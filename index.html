@@ -687,13 +687,13 @@ async function fetchAndUpdateFilms() {
 let pendingLink = "";
 
 async function openVideo(filmName) {
-  const tg = window.Telegram.WebApp;
-  if (!tg.initDataUnsafe?.user) {
+  const tg   = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+  if (!user) {
     return alert("⛔️ Не вдалося отримати ваш Telegram ID. Перезавантажте WebApp у Telegram.");
   }
-  const user = tg.initDataUnsafe.user;
 
-  // Перевірка PRO-доступу
+  // Якщо PRO-контент та нема доступу
   const film = films.find(f => f['Назва'] === filmName);
   if (film?.['Доступ'] === 'PRO' && localStorage.getItem('isProUser') !== 'true') {
     return showProModal();
@@ -704,7 +704,7 @@ async function openVideo(filmName) {
   loader.style.display = "flex";
 
   try {
-    const res = await fetch('https://relax-time2.onrender.com/search-in-bot', {
+    const res  = await fetch('https://relax-time2.onrender.com/search-in-bot', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ user_id: user.id, query: filmName })
@@ -713,12 +713,9 @@ async function openVideo(filmName) {
     console.log("🎬 Відповідь search-in-bot:", data);
 
     if (data.found && data.videoUrl) {
-      // Відкриваємо URL у WebApp (якщо доступно) або в новій вкладці
-      if (typeof tg.openLink === 'function') {
-        tg.openLink(data.videoUrl);
-      } else {
-        window.open(data.videoUrl, '_blank');
-      }
+      // Відкриваємо лінк прямо в WebApp
+      if (tg.openLink) tg.openLink(data.videoUrl);
+      else window.open(data.videoUrl, '_blank');
     } else {
       alert("Фільм не знайдено 😢");
     }
@@ -727,10 +724,10 @@ async function openVideo(filmName) {
     console.error('❗️ Помилка при пошуку відео:', err);
     alert("❗️ Сталася помилка при запиті відео.");
   } finally {
-    // Ховаємо лоадер
     loader.style.display = "none";
   }
 }
+
 
 
 function openVideoById(fileId) {
@@ -1073,26 +1070,29 @@ function renderControls(title, description) {
 function buildWatchButton(item, title) {
   const isPro = localStorage.getItem('isProUser') === 'true';
 
-  // Якщо контент PRO, а користувач не PRO
+  // PRO-контент
   if (item['Доступ'] === 'PRO' && !isPro) {
     return `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`;
   }
 
-  // Якщо є file_id — надсилаємо саме його
+  // Якщо це внутрішній файл — надсилаємо file_id
   if (item.file_id) {
     return `
-      <button class="search-button" onclick="openVideoById('${item.file_id}')">
+      <button class="search-button"
+              onclick="openVideoById('${item.file_id}')">
         ▶️ Дивитись
       </button>
     `;
   }
 
-  // В будь-якому іншому випадку відкриваємо пошук по назві через search-in-bot
+  // Інакше — шлємо запит на search-in-bot
   return `
-    <button class="search-button" onclick="openVideo('${title}')">
+    <button class="search-button"
+            onclick="openVideo('${title}')">
       ▶️ Дивитись
     </button>
   `;
+}
 }
 
 
