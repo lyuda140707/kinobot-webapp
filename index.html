@@ -694,14 +694,14 @@ async function openVideo(filmName) {
   }
   const user = tg.initDataUnsafe.user;
 
-  // Перевірка PRO-доступу
+  // PRO-перевірка
   const film = films.find(f => f['Назва'] === filmName);
   if (film?.['Доступ'] === 'PRO' && localStorage.getItem('isProUser') !== 'true') {
     showProModal();
     return;
   }
 
-  // Показуємо лоадер
+  // Показати лоадер
   const loader = document.getElementById("loading-indicator");
   loader.style.display = "flex";
 
@@ -714,7 +714,7 @@ async function openVideo(filmName) {
     const data = await res.json();
 
     if (data.found && data.videoUrl) {
-      // Відкриваємо URL у WebApp або в новій вкладці
+      // Відкрити через WebApp або в новій вкладці
       if (typeof tg.openLink === 'function') {
         tg.openLink(data.videoUrl);
       } else {
@@ -1063,12 +1063,12 @@ function renderControls(title, description) {
 function buildWatchButton(item, title) {
   const isPro = localStorage.getItem('isProUser') === 'true';
 
-  // Якщо контент PRO, а користувач не PRO — показуємо 🔒 PRO
+  // 1) Для PRO-контенту
   if (item['Доступ'] === 'PRO' && !isPro) {
     return `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`;
   }
 
-  // Якщо є file_id — надсилаємо саме його
+  // 2) Якщо є file_id — надсилаємо саме його
   if (item.file_id) {
     return `
       <button class="search-button" onclick="openVideoById('${item.file_id}')">
@@ -1077,7 +1077,7 @@ function buildWatchButton(item, title) {
     `;
   }
 
-  // В будь-якому іншому випадку відкриваємо пошук по назві через search-in-bot
+  // 3) Інакше — шукаємо по назві через search-in-bot
   return `
     <button class="search-button" onclick="openVideo('${title}')">
       ▶️ Дивитись
