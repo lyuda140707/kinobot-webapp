@@ -1550,7 +1550,7 @@ if (proData.isPro) {
 
 } catch (error) {
   console.error('Помилка перевірки підписки', error);
-  alert("❗ Помилка перевірки підписки");
+  showRetryOverlay();
   return;
 }
 
@@ -2299,6 +2299,14 @@ document.addEventListener("visibilitychange", function() {
   }
 });
 
+function showRetryOverlay() {
+  const overlay = document.getElementById('error-overlay');
+  overlay.style.display = 'block';
+  // коли користувач натисне «Перезавантажити» — оновити сторінку
+  document.getElementById('reload-btn').onclick = () => {
+    window.location.reload();
+  };
+}
     
 </script>
 
@@ -2486,6 +2494,33 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
     <div class="loader"></div>
     <div style="margin-top:12px;">Надсилаємо запит...</div>
   </div>
+</div>
+<!-- Overlay для помилки перевірки підписки -->
+<div id="error-overlay" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  font-family: sans-serif;
+  text-align: center;
+  padding-top: 40vh;
+  z-index: 10000;
+">
+  <p style="font-size: 20px; margin-bottom: 20px;">❌ Помилка перевірки підписки</p>
+  <button id="reload-btn" style="
+    padding: 12px 24px;
+    font-size: 18px;
+    background: #00f7ff;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00f7ff;
+  ">
+    🔄 Перезавантажити
+  </button>
 </div>
 
   
