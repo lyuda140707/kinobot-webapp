@@ -697,10 +697,11 @@ let pendingLink = "";
 async function openVideo(filmName) {
   const tg = window.Telegram.WebApp;
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
-    window.location.reload();
+    alert("⛔️ Не вдалося отримати ваш Telegram ID.\n🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");
+    // alert("🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");  // більше не перезавантажуєм
     return;
   }
+  
 
  
 
@@ -748,8 +749,8 @@ async function openVideo(filmName) {
 function openVideoById(fileId) {
   const tg = window.Telegram.WebApp;
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
-    window.location.reload();
+    alert("⛔️ Не вдалося отримати ваш Telegram ID.\n🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");
+    // window.location.reload();  // більше не перезавантажуємо
     return;
   }
   const user = tg.initDataUnsafe.user;
@@ -1301,8 +1302,8 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
 
   const tg = window.Telegram.WebApp;
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
-    window.location.reload();
+    alert("⛔️ Не вдалося отримати ваш Telegram ID.\n🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");
+    // window.location.reload();  // більше не перезавантажуємо
     return;
   }
   const user = tg.initDataUnsafe.user;
@@ -1430,7 +1431,10 @@ function showSkeletonCollections() {
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
         <h2 style="color:#00f7ff;">⛔ Втрата з'єднання з Telegram</h2>
         <p>Оновіть застосунок для продовження</p>
-        <button style="padding:12px 30px;border-radius:12px;background:#00f7ff;color:#000;font-weight:bold;font-size:18px;margin-top:15px;" onclick="window.location.reload()">🔄 Оновити</button>
+        <button style="…"
+            onclick="alert('🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram')">
+          🔄 Оновити
+        </button>
       </div>
     `;
     }
@@ -1878,8 +1882,8 @@ async function suggestFilm() {
 
   const tg = window.Telegram.WebApp;
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
-    window.location.reload();
+    alert("⛔️ Не вдалося отримати ваш Telegram ID.\n🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");
+    // window.location.reload();  // більше не перезавантажуємо
     return;
   }
   const user = tg.initDataUnsafe.user;
@@ -2301,9 +2305,11 @@ async function checkProPendingStatus() {
 // Якщо користувач повернувся у WebApp, але даних нема — оновити сторінку
 document.addEventListener("visibilitychange", function() {
   if (!document.hidden && !window.Telegram.WebApp.initDataUnsafe?.user) {
-    window.location.reload();
+    alert("🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");
+    // alert("🔄 Будь ласка, закрийте та знову відкрийте WebApp у Telegram");  // більше не перезавантажуємо
   }
 });
+
 
     
 </script>
