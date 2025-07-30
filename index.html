@@ -2270,7 +2270,7 @@ function updateUIAfterPro(expireDate) {
   notice.style.color = "#00f7ff";
   document.getElementById("getProBtn").after(notice);
 }
-// Додай цю функцію в кінець свого основного <script> блоку (або туди, де інші функції)
+
 async function checkProPendingStatus() {
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
@@ -2477,7 +2477,7 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   }
 
 
-<script>
+
 // … ваш існуючий код вище …
 
 // ⬇️ Прогрів бекенду кожні 3 хвилини, щоб Render не "засинав"
