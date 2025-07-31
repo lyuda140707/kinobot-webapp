@@ -683,7 +683,7 @@ async function fetchAndUpdateFilms() {
 
     const cached = localStorage.getItem('films');
     if (!cached || JSON.parse(cached).length === 0) {
-      alert("⚠️ Виникла проблема з підключенням. Спробуй перезапустити застосунок.");
+      showServiceErrorModal("⚠️ Виникла проблема з підключенням. Спробуй перезапустити застосунок.");
       localStorage.removeItem('films');
       localStorage.removeItem('filmsTimestamp');
     }
@@ -745,11 +745,11 @@ async function openVideo(filmName) {
       if (data.success) {
         showRedirectButton();
       } else {
-        alert(`❗️ Помилка: ${data.error || 'Невідома помилка'}`);
+        showServiceErrorModal(`❗️ ${data.error || 'Невідома помилка'}`);
       }
     } catch (error) {
       console.error('❗️ Помилка при запиті:', error);
-      alert("❗️ Сталася помилка при надсиланні фільму");
+      showServiceErrorModal();
     } finally {
       document.getElementById("loading-indicator").style.display = "none";
     }
@@ -783,7 +783,7 @@ function openVideoById(fileId) {
       if (data.success) {
         showRedirectButton();
       } else {
-        alert(`❗️ Помилка: ${data.error || 'Невідома помилка'}`);
+        showServiceErrorModal(`❗️ ${data.error || 'Невідома помилка'}`);
       }
     } catch (error) {
       console.error(error);
@@ -1342,7 +1342,7 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
       }
       window.location.href = d.videoUrl;
     } else {
-      alert("Фільм не знайдено 😢");
+      showServiceErrorModal("Фільм не знайдено 😢");
     }
   }).catch(console.error).finally(() => {
     document.getElementById("loading-indicator").style.display = "none";
@@ -1778,7 +1778,7 @@ container.innerHTML = uniqueResults.map(f => {
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
   
   if (favs.find(f => f.title === title)) {
-    alert('Вже в улюбленому 💛');
+    showServiceErrorModal('Вже в улюбленому 💛');
     return;
   }
 
@@ -2213,7 +2213,7 @@ function sendFilm(film_id) {
     })
     .catch(err => {
         console.error(err);
-        alert("⚠️ Помилка мережі, спробуйте пізніше.");
+        showServiceErrorModal("⚠️ Помилка мережі, спробуйте ще раз через хвилину.");
     });
 }
 
@@ -2513,6 +2513,20 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
       });
     }
   }
+
+  function showServiceErrorModal(msg) {
+  const modal = document.getElementById('service-error-modal');
+  document.getElementById('service-error-message').innerHTML = msg || 'Сервіс тимчасово недоступний,<br>спробуйте ще раз через хвилину.';
+  modal.style.display = 'flex';
+  setTimeout(() => modal.style.opacity = '1', 10);
+}
+
+function closeServiceErrorModal() {
+  const modal = document.getElementById('service-error-modal');
+  modal.style.opacity = '0';
+  setTimeout(() => modal.style.display = 'none', 300);
+}
+
 </script>
 
 
@@ -2570,6 +2584,37 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   ">
     🔄 Перезавантажити
   </button>
+</div>
+<!-- Модальне вікно помилки сервісу -->
+<div id="service-error-modal" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.85);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+">
+  <div style="
+    background: #1a1a1a;
+    padding: 28px 22px;
+    border-radius: 14px;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 0 24px #00f7ff;
+  ">
+    <div style="font-size:32px; margin-bottom:15px;">😢</div>
+    <div id="service-error-message" style="color:#00f7ff; font-size:17px; margin-bottom:22px;">
+      Сервіс тимчасово недоступний,<br>спробуйте ще раз через хвилину.
+    </div>
+    <button onclick="closeServiceErrorModal()" style="
+      padding: 8px 20px; background: #00f7ff; color: #000;
+      border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+      font-size: 16px;
+    ">OK</button>
+  </div>
 </div>
 
 
