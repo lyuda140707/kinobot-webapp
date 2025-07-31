@@ -2313,7 +2313,50 @@ function showRetryOverlay() {
     window.location.reload();
   };
 }
-    
+
+document.getElementById('contact-admin-btn').onclick = function() {
+  document.getElementById('admin-message-modal').style.display = 'block';
+};
+
+document.getElementById('close-admin-modal-btn').onclick = function() {
+  document.getElementById('admin-message-modal').style.display = 'none';
+};
+
+document.getElementById('send-admin-message-btn').onclick = async function() {
+  const text = document.getElementById('admin-message-text').value.trim();
+  if (!text) {
+    alert("Напишіть повідомлення!");
+    return;
+  }
+
+  const tg = window.Telegram?.WebApp;
+  const user_id = tg?.initDataUnsafe?.user?.id;
+
+  if (!user_id) {
+    alert("Не вдалося отримати ID користувача.");
+    return;
+  }
+
+  // Відправляємо на бекенд
+  try {
+    const resp = await fetch('https://relax-time2.onrender.com/contact-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id, text })
+    });
+    const res = await resp.json();
+    if (res.ok) {
+      alert('Повідомлення надіслано адміну!');
+      document.getElementById('admin-message-modal').style.display = 'none';
+      document.getElementById('admin-message-text').value = '';
+    } else {
+      alert('Сталася помилка. Спробуйте ще раз.');
+    }
+  } catch(e) {
+    alert('Помилка мережі. Спробуйте ще раз.');
+  }
+};
+
 </script>
 
 <button id="scrollTopBtn" class="scroll-top-btn">🔝</button>
@@ -2528,48 +2571,7 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
     🔄 Перезавантажити
   </button>
 </div>
-document.getElementById('contact-admin-btn').onclick = function() {
-  document.getElementById('admin-message-modal').style.display = 'block';
-};
 
-document.getElementById('close-admin-modal-btn').onclick = function() {
-  document.getElementById('admin-message-modal').style.display = 'none';
-};
-
-document.getElementById('send-admin-message-btn').onclick = async function() {
-  const text = document.getElementById('admin-message-text').value.trim();
-  if (!text) {
-    alert("Напишіть повідомлення!");
-    return;
-  }
-
-  const tg = window.Telegram?.WebApp;
-  const user_id = tg?.initDataUnsafe?.user?.id;
-
-  if (!user_id) {
-    alert("Не вдалося отримати ID користувача.");
-    return;
-  }
-
-  // Відправляємо на бекенд
-  try {
-    const resp = await fetch('https://relax-time2.onrender.com/contact-admin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id, text })
-    });
-    const res = await resp.json();
-    if (res.ok) {
-      alert('Повідомлення надіслано адміну!');
-      document.getElementById('admin-message-modal').style.display = 'none';
-      document.getElementById('admin-message-text').value = '';
-    } else {
-      alert('Сталася помилка. Спробуйте ще раз.');
-    }
-  } catch(e) {
-    alert('Помилка мережі. Спробуйте ще раз.');
-  }
-};
 
   
 </body>
