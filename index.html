@@ -1006,14 +1006,19 @@ function showSeries(type = 'Серіал') {
     return;
   }
 
-  // Групуємо за назвою
-  const grouped = seriesFilms.reduce((acc, ep) => {
-    const title = ep['Назва'];
-    if (!acc[title]) acc[title] = [];
+// Групуємо за назвою, але унікальні по опису
+const grouped = seriesFilms.reduce((acc, ep) => {
+  const title = ep['Назва'];
+  if (!acc[title]) acc[title] = [];
+  const uniqueKey = (ep['Опис'] || '').toLowerCase();
+  if (!acc[title].some(e => (e['Опис'] || '').toLowerCase() === uniqueKey)) {
     acc[title].push(ep);
-    return acc;
-  }, {});
+  }
+  return acc;
+}, {});
 
+
+  
   // Генеруємо картки
   const html = Object.entries(grouped).map(([title, episodes]) => {
     const safe = safeId(title);
@@ -1107,9 +1112,13 @@ function filterByGenre(genre) {
     const grouped = filtered.reduce((acc, ep) => {
       const title = ep['Назва'];
       if (!acc[title]) acc[title] = [];
-      acc[title].push(ep);
+      const uniqueKey = (ep['Опис'] || '').toLowerCase();
+      if (!acc[title].some(e => (e['Опис'] || '').toLowerCase() === uniqueKey)) {
+        acc[title].push(ep);
+      }
       return acc;
     }, {});
+    
     // генеруємо HTML точно так само, як у showSeries
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       const safe = safeId(title);
@@ -1687,10 +1696,13 @@ const uniqueResults = results.filter((film, i, arr) =>
     const grouped = seriesResults.reduce((acc, ep) => {
       const title = ep['Назва'];
       if (!acc[title]) acc[title] = [];
-      acc[title].push(ep);
+      const uniqueKey = (ep['Опис'] || '').toLowerCase();
+      if (!acc[title].some(e => (e['Опис'] || '').toLowerCase() === uniqueKey)) {
+        acc[title].push(ep);
+      }
       return acc;
     }, {});
-    
+   
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       const safe = safeId(title);
       const count = episodes.length;
