@@ -1557,16 +1557,19 @@ if (proData.isPro) {
 
 
 
-  const getProBtn = document.getElementById('getProBtn');
-  if (proData.isPro && getProBtn) {
-    getProBtn.style.display = 'none';
+const getProBtn = document.getElementById('getProBtn');
+if (proData.isPro && proData.expire_date && getProBtn) {
+  // ховаємо кнопку
+  getProBtn.style.display = 'none';
 
-    const proNotice = document.createElement('p');
-    proNotice.textContent = `✅ Ваш PRO активний до ${proData.expire_date || "кінця періоду"}`;
-    proNotice.style.color = "#00f7ff";
-    proNotice.style.marginTop = "15px";
-    getProBtn.parentNode.insertBefore(proNotice, getProBtn.nextSibling);
-  }
+  // показуємо повідомлення з реальною датою
+  const proNotice = document.createElement('p');
+  proNotice.textContent = `✅ Ваш PRO активний до ${proData.expire_date}`;
+  proNotice.style.color = "#00f7ff";
+  proNotice.style.marginTop = "15px";
+  getProBtn.parentNode.insertBefore(proNotice, getProBtn.nextSibling);
+}
+
 
   fetch('https://relax-time2.onrender.com/reactivate-user', {
     method: 'POST',
