@@ -320,6 +320,38 @@
  
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  
+    <!-- Після <script src="https://telegram.org/js/telegram-web-app.js"></script> -->
+  <script>
+    // 1) Перевіряємо, що працюємо всередині Telegram WebApp
+    if (!window.Telegram || !window.Telegram.WebApp) {
+      document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;background:#111;">
+          <h2>Цей додаток запускається лише в Telegram</h2>
+        </div>`;
+      throw new Error('Не веб-App Telegram');
+    }
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+
+    // 2) Перевіряємо, що отримали валідні дані користувача
+    const user = tg.initDataUnsafe?.user;
+    if (!user || typeof user.id !== 'number' || user.id === 0) {
+      document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#00f7ff;background:#111;padding:1em;text-align:center;">
+          <h2>⛔️ Не вдалося авторизуватися в Telegram</h2>
+          <p>Можливо, проблеми з інтернетом. Будь ласка, оновіть застосунок.</p>
+          <button onclick="location.reload()" 
+                  style="margin-top:20px;padding:12px 24px;border:none;border-radius:8px;background:#00f7ff;color:#000;font-weight:bold;cursor:pointer;">
+            🔄 Спробувати знову
+          </button>
+        </div>`;
+      throw new Error('Немає user.id');
+    }
+    // якщо всі перевірки пройшли — далі ваш існуючий код...
+  </script>
+
 </head>
 <body>
   <div id="home" class="section active">
