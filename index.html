@@ -971,16 +971,26 @@ function showFilmOfTheDay() {
 }
 
 
-
+function showAllFilms() {
+  // перемикаємо на вкладку «Категорії»
+  switchTab('categories', document.querySelector('[data-tab=categories]'));
+  // відображаємо всі фільми
+  const container = document.getElementById('genre-results');
+  currentFilms = films;
+  offset = 0;
+  container.innerHTML = '';
+  renderBatch();
+  container.style.display = 'grid';
+}
 
 function showGenres() {
-  const genres = ['Новинки', 'Комедії', 'Драми', 'Серіали', 'Мультфільми'];
+  // тепер тільки Фільми, Серіали, Мультфільми
+  const genres = ['Фільми', 'Серіали', 'Мультфільми'];
   document.getElementById('genres').innerHTML = genres.map(g => {
-    if (g === 'Мультфільми') {
-      return `<button class="genre-btn" onclick="goToCartoons()">👧 ${g}</button>`;
+    if (g === 'Фільми') {
+      return `<button class="genre-btn" onclick="showAllFilms()">🎞️ ${g}</button>`;
     }
     if (g === 'Серіали') {
-      // Перехід у вкладку «Категорії» → група «Серіали» → відразу показуємо списки
       return `
         <button class="genre-btn"
                 onclick="
@@ -991,11 +1001,13 @@ function showGenres() {
           📺 ${g}
         </button>`;
     }
-    // решта жанрів
-    return `<button class="genre-btn" onclick="filterByGenre('${g}')">${g}</button>`;
+    // Мультфільми
+    return `<button class="genre-btn" onclick="goToCartoons()">👧 ${g}</button>`;
   }).join('');
   document.getElementById('genres').style.display = 'flex';
 }
+
+
 
     
     function showCountryFilters() {
