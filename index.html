@@ -315,6 +315,38 @@
   padding: 10px;
 }
 
+/* Центруємо кнопки в контейнері #genres */
+#genres {
+  display: flex;               /* флекс-контейнер */
+  justify-content: center;     /* горизонтальне вирівнювання по центру */
+  flex-wrap: wrap;             /* якщо не влазять — перехід на новий рядок */
+  gap: 12px;                   /* відстань між кнопками */
+  margin: 16px auto;           /* трохи відступу зверху/знизу і автополя ліво/право */
+}
+
+/* Стиль самих кнопок */
+.genre-btn {
+  background-color: #222;                    /* темне тло */
+  border: 1px solid #444;                    /* обведення */
+  padding: 8px 16px;                         /* внутрішні відступи */
+  border-radius: 20px;                       /* округлі краї */
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;                                  /* відстань між іконкою і текстом */
+  box-shadow: 0 0 6px rgba(0,255,255,0.3);    /* легка неонова тінь */
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+/* Ефект підсвітки і невеликого збільшення при наведенні */
+.genre-btn:hover {
+  box-shadow:
+    0 0 8px #00f7ff,
+    0 0 16px rgba(0,255,255,0.4),
+    0 0 24px rgba(0,255,255,0.2);
+  transform: scale(1.05);
+}
+
 
   </style>
  
@@ -374,7 +406,7 @@
   </div>
 
     
-    <h3>Жанри</h3>
+    <h3>Розділи</h3>
     <div id="genres" style="display:none; flex-wrap:wrap; gap:10px;"></div>
     
 
@@ -972,16 +1004,12 @@ function showFilmOfTheDay() {
 
 
 function showAllFilms() {
-  // перемикаємо на вкладку «Категорії»
+  // перемикаємося у вкладку “Категорії”
   switchTab('categories', document.querySelector('[data-tab=categories]'));
-  // відображаємо всі фільми
-  const container = document.getElementById('genre-results');
-  currentFilms = films;
-  offset = 0;
-  container.innerHTML = '';
-  renderBatch();
-  container.style.display = 'grid';
+  // показуємо підгрупу “Фільми за жанром”
+  openGenreGroup('films');
 }
+
 
 function showGenres() {
   // тепер тільки Фільми, Серіали, Мультфільми
