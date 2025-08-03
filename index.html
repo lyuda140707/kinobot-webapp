@@ -377,27 +377,27 @@
 #genres .genre-btn {
   background-color: #222;
   border: 1px solid #444;
-  padding: 12px 24px;
-  border-radius: 24px;
-  font-size: 18px;
+  padding: 8px 16px;                 /* зменшили відступи */
+  border-radius: 20px;               /* трохи менші закруглення */
+  font-size: 16px;                   /* зменшили розмір шрифту */
   font-weight: 500;
-  color: #00f7ff;                       /* яскравий текст */
-  text-shadow: 0 0 6px #00f7ff;         /* неоновий ореол */
+  color: #00f7ff;
+  text-shadow: 0 0 5px #00f7ff;      /* легший ореол */
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;                          /* зменшили відстань між іконкою і текстом */
   box-shadow:
-    0 0 8px  #00f7ff,
-    0 0 16px rgba(0,255,255,0.4),
-    0 0 24px rgba(0,255,255,0.2);       /* НЕОН */
+    0 0 6px  #00f7ff,
+    0 0 12px rgba(0,255,255,0.4),
+    0 0 18px rgba(0,255,255,0.2);
   transition: all 0.2s ease-in-out;
 }
 
 /* підсвітка при наведенні і у “активного” стану */
 #genres .genre-btn:hover {
-  color: #ccc;          /* повертаємо колір тексту в сірий */
-  text-shadow: none;    /* зникає ореол */
-  box-shadow: none;     /* зникає неон */
+  color: #ccc;
+  text-shadow: none;
+  box-shadow: none;
 }
 
 
