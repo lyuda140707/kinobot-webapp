@@ -709,27 +709,22 @@ function renderBatch() {
                       : (film['Фото'] || placeholderImage);
     const id        = safeId(film['Назва']);
 
+   let btn = '';
+   if (isProFilm && !isPro) {
+     btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+    } else if (film['message_id']) {
+     btn = `<button class="search-button" onclick="requestFilmByName(${film['message_id']})">▶️ Дивитись</button>`;
+    }
+
     return `
       <div class="film-card" id="film-${id}">
-        <!-- Постер -->
         <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
-
-        <!-- Назва -->
         <h3>${film['Назва']}</h3>
-
-        <!-- IMDb та опис -->
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
         <p>${film['Опис'] || ''}</p>
-
-        <!-- Дивитись / PRO та Улюблене -->
         <div class="film-actions">
           ${renderControls(film['Назва'], film['Опис'])}
-          ${isProFilm && !isPro
-            ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-            : (film['message_id']
-                ? `<button class="search-button" onclick="openVideoById('${film['message_id']}')">▶️ Дивитись</button>`
-                : ``)
-          }
+          ${btn}
         </div>
       </div>
     `;
@@ -737,6 +732,8 @@ function renderBatch() {
 
   container.insertAdjacentHTML('beforeend', html);
   offset += batch.length;
+}
+
 }
 
 async function loadFilms() {
@@ -1310,28 +1307,21 @@ function filterByGenre(genre) {
 
     
 function filterByCountry(country) {
-  // 1) Перехід на вкладку «Категорії»
   switchTab('categories');
-
-  // 2) Підготувати контейнер
   const container = document.getElementById('genre-results');
   container.style.display = 'grid';
   container.innerHTML = '';
 
-  // 3) Фільтруємо по країні та передаємо для пагінації
   currentFilms = films.filter(f => f['Країна'] === country);
-  if (currentFilms.length === 0) {
+  if (!currentFilms.length) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
   offset = 0;
-
-  // 4) Відмалювати перший батч через renderBatch
   renderBatch();
-
-  // 5) Прокрутити до контейнера
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
   
 
