@@ -1321,8 +1321,8 @@ function filterByCountry(country) {
     let buttons = '';
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['Посилання']) {
-      buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+    } else if (film['file_id']) {
+      `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`
     }
 
     // === Додаємо renderControls у film-actions ===
@@ -1367,8 +1367,8 @@ function filterByYear(year) {
     let buttons = '';
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
-    } else if (film['Посилання']) {
-      buttons = `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`;
+    } else if (film['file_id']) {
+      `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`
     }
 
     // === Додаємо renderControls у film-actions ===
