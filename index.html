@@ -1328,21 +1328,42 @@ function filterByCountry(country) {
 function filterByYear(year) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
+  const isPro = localStorage.getItem('isProUser') === 'true';
+  const filtered = films.filter(f => String(f['Рік']) === String(year));
 
-  // 1. Відфільтрувати фільми за роком
-  currentFilms = films.filter(f => String(f['Рік']) === String(year));
-  offset = 0;                    // починаємо з першого батчу
-  container.innerHTML = '';      // очищаємо попередні результати
-  container.style.display = 'grid'; // показуємо грід
-
-  // 2. Якщо нічого не знайдено — одразу виводимо повідомлення
-  if (currentFilms.length === 0) {
+  if (!filtered.length) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  // 3. Інакше — рендеримо перший батч
-  renderBatch();
+  container.innerHTML = filtered.map(film => {
+    const id = safeId(film['Назва']);           // ← Оголошуємо id!
+    const isProFilm = film['Доступ'] === 'PRO';
+    const imgSrc = (isProFilm && !isPro)
+      ? placeholderImage
+      : (film['Фото'] || placeholderImage);
+
+    let buttons = '';
+    if (isProFilm && !isPro) {
+      buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
+    } else if (film['message_id']) {
+      buttons = `<button class="search-button" onclick="openVideoById('${film['message_id']}')">▶️ Дивитись</button>`;
+    }
+
+    return `
+      <div class="film-card" id="film-${id}">
+        <img src="${imgSrc}" alt="${film['Назва']}">
+        <h3>${film['Назва']}</h3>
+        <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
+        <p>${film['Опис']||''}</p>
+        <div class="film-actions">
+          ${renderControls(film['Назва'], film['Опис'])}
+          ${buttons}
+        </div>
+      </div>
+    `;
+  }).join('');
+
   container.scrollIntoView({ behavior: 'smooth' });
 }
 
