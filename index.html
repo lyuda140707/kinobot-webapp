@@ -1806,10 +1806,9 @@ document.getElementById('searchInput').addEventListener('input', () => {
 
   const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
   // 1. Залишаємо тільки по одному фільму з кожною назвою
-const uniqueResults = results.filter((film, i, arr) =>
-  arr.findIndex(f => f['Назва'] === film['Назва']) === i
-);
-
+  const uniqueResults = results.filter((film, i, arr) =>
+    arr.findIndex(f => f['Назва'] === film['Назва']) === i
+  );
 
   // Якщо серед результатів є серіали — групуємо їх
   const seriesResults = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
@@ -1823,15 +1822,16 @@ const uniqueResults = results.filter((film, i, arr) =>
       }
       return acc;
     }, {});
-   
+
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       const safe = safeId(title);
       const count = episodes.length;
       const isPro = localStorage.getItem('isProUser') === 'true';
       const isProSeries = episodes[0]['Доступ'] === 'PRO';
       const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
+
       return `
-        <div class="film-card" id="film-${id}">
+        <div class="film-card" id="film-${safe}">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
           <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
@@ -1839,18 +1839,17 @@ const uniqueResults = results.filter((film, i, arr) =>
             📺 Показати серії (${count})
           </button>
           <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-            ${episodes.map((ep,i) => {
+            ${episodes.map((ep, i) => {
               const label = ep['Опис'] || `Серія ${i+1}`;
+              // для серій залишаємо requestFilmByName, бо вони передають file_id
               return ep.file_id
                 ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
-                : `<button class="search-button" onclick="requestFilmByName('${title}')">${label}</button>`;
+                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
             }).join('')}
           </div>
         </div>
       `;
     }).join('');
-
-  
     return;
   }
 
@@ -1864,31 +1863,29 @@ const uniqueResults = results.filter((film, i, arr) =>
   }
 
   // Інакше — звичайний рендер фільмів
-// новий код — рендеруємо вже унікальні результати
-container.innerHTML = uniqueResults.map(f => {
-  const id = safeId(f['Назва']);
-  const isPro = localStorage.getItem('isProUser') === 'true';
-  const locked = f['Доступ']==='PRO' && !isPro;
-  const img = locked ? placeholderImage : (f['Фото']||placeholderImage);
-  const watchBtn = locked
-    ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-    : (f.message_id
-       ? `<button class="search-button" onclick="requestFilmByName('${f.message_id}')">▶️ Дивитись</button>`
-       : '');
-  return `
-    <div class="film-card" id="film-${id}">
-      <img src="${img}" alt="${f['Назва']}" class="film-img">
-      <h3>${f['Назва']}</h3>
-      <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
-      <p>${f['Опис']||''}</p>
-      <div class="film-actions">
-        ${renderControls(f['Назва'], f['Опис'])}
-        ${watchBtn}
-      </div>
-    </div>
-  `;
-}).join('');
+  container.innerHTML = uniqueResults.map(f => {
+    const id = safeId(f['Назва']);
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const locked = f['Доступ'] === 'PRO' && !isPro;
+    const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
 
+    const watchBtn = locked
+      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+      : `<button class="search-button" onclick="openVideoById('${f['Назва']}')">▶️ Дивитись</button>`;
+
+    return `
+      <div class="film-card" id="film-${id}">
+        <img src="${img}" alt="${f['Назва']}" class="film-img">
+        <h3>${f['Назва']}</h3>
+        <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
+        <p>${f['Опис'] || ''}</p>
+        <div class="film-actions">
+          ${renderControls(f['Назва'], f['Опис'])}
+          ${watchBtn}
+        </div>
+      </div>
+    `;
+  }).join('');
 });
 
 
