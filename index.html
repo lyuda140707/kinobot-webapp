@@ -698,6 +698,7 @@
 
 function renderBatch() {
   const container = document.getElementById('genre-results');
+  container.style.display = 'grid';
   const isPro = localStorage.getItem('isProUser') === 'true';
   const batch = currentFilms.slice(offset, offset + BATCH_SIZE);
 
@@ -709,7 +710,7 @@ function renderBatch() {
     const id        = safeId(film['Назва']);
 
     return `
-      <div class="film-card">
+      <div class="film-card" id="film-${id}">
         <!-- Постер -->
         <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
 
@@ -721,16 +722,15 @@ function renderBatch() {
         <p>${film['Опис'] || ''}</p>
 
         <!-- Дивитись / PRO та Улюблене -->
-       <div class="film-actions">
-  ${renderControls(film['Назва'], film['Опис'])}
-  ${isProFilm && !isPro
-    ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-    : (film['file_id']
-        ? `<button … onclick="requestFilmByName('${film.file_id}')">▶️ Дивитись</button>`
-        : ``)
-  }
-</div>
-
+        <div class="film-actions">
+          ${renderControls(film['Назва'], film['Опис'])}
+          ${isProFilm && !isPro
+            ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+            : (film['file_id']
+                ? `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`
+                : ``)
+          }
+        </div>
       </div>
     `;
   }).join('');
@@ -1173,7 +1173,7 @@ const grouped = seriesFilms.reduce((acc, ep) => {
 
     // === Додаємо renderControls після назви ===
     return `
-      <div class="film-card">
+      <div class="film-card" id="film-${id}">
         <img src="${poster}" class="film-img" alt="${title}">
         <h3>${title}</h3>
         ${renderControls(title, episodes[0]['Опис'])}
@@ -1190,8 +1190,8 @@ const grouped = seriesFilms.reduce((acc, ep) => {
           ${episodes.map((ep, i) => {
             const label = ep['Опис'] || `Серія ${i+1}`;
             return ep.file_id
-              ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+              ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
+              : `<button class="search-button" onclick="requestFilmByName('${title}')">${label}</button>`;
           }).join('')}
         </div>
       </div>
@@ -1276,11 +1276,11 @@ function filterByGenre(genre) {
       const epsHtml = episodes.map((ep, i) => {
         const label = ep['Опис'] || `Серія ${i+1}`;
         return ep.file_id
-          ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-          : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+          ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
+          : `<button class="search-button" onclick="requestFilmByName('${title}')">${label}</button>`;
       }).join('');
       return `
-        <div class="film-card">
+        <div class="film-card" id="film-${id}">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
           <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
@@ -1310,44 +1310,32 @@ function filterByGenre(genre) {
 
     
 function filterByCountry(country) {
+  // 1) Перехід на вкладку «Категорії»
   switchTab('categories');
-  const container = document.getElementById('genre-results');
-  const filtered = films.filter(f => f['Країна'] === country);
 
+  // 2) Підготувати контейнер
+  const container = document.getElementById('genre-results');
+  container.style.display = 'grid';    // показуємо грід
+  container.innerHTML = '';            // очищуємо старі картки
+
+  // 3) Відфільтрувати
+  const filtered = films.filter(f => f['Країна'] === country);
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  container.innerHTML = filtered.map(film => {
-    const isProFilm = film['Доступ'] === 'PRO';
-    const isPro     = localStorage.getItem('isProUser') === 'true';
-    const imgSrc    = (isProFilm && !isPro)
-                      ? placeholderImage
-                      : (film['Фото'] || placeholderImage);
+  // 4) Підготувати для пагінації
+  currentFilms = filtered;
+  offset = 0;
 
-    let buttons = '';
-    if (isProFilm && !isPro) {
-      buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['file_id']) {
-      buttons = `<button class="search-button" onclick="requestFilmByName('${film['file_id']}')">▶️ Дивитись</button>`;
-    }
+  // 5) Відмалювати перший батч
+  renderBatch();
 
-    return `
-      <div class="film-card">
-        <img src="${imgSrc}" alt="${film['Назва']}">
-        <h3>${film['Назва']}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
-        <p>${film['Опис']||''}</p>
-        <div class="film-actions">
-          ${renderControls(film['Назва'], film['Опис'])}
-          ${buttons}
-        </div>
-      </div>
-    `;
-  }).join('');
-
+  // 6) Прокрутити до контейнера
   container.scrollIntoView({ behavior: 'smooth' });
+}
+
 }
 
 
@@ -1375,11 +1363,11 @@ function filterByYear(year) {
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
     } else if (film['file_id']) {
-      buttons = `<button class="search-button" onclick="requestFilmByName('${film['file_id']}')">▶️ Дивитись</button>`;
+      buttons = `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`;
     }
 
     return `
-      <div class="film-card">
+      <div class="film-card" id="film-${id}">
         <img src="${imgSrc}" alt="${film['Назва']}">
         <h3>${film['Назва']}</h3>
         <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
@@ -1409,7 +1397,7 @@ function filterByYear(year) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
     container.innerHTML = favs.map(f => `
-      <div class="film-card">
+      <div class="film-card" id="film-${id}">
         <h3>${f.title}</h3>
         <p>${f.description}</p>
         <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
@@ -1858,7 +1846,7 @@ const uniqueResults = results.filter((film, i, arr) =>
       const isProSeries = episodes[0]['Доступ'] === 'PRO';
       const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
       return `
-        <div class="film-card">
+        <div class="film-card" id="film-${id}">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
           <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
@@ -1869,8 +1857,8 @@ const uniqueResults = results.filter((film, i, arr) =>
             ${episodes.map((ep,i) => {
               const label = ep['Опис'] || `Серія ${i+1}`;
               return ep.file_id
-                ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+                ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
+                : `<button class="search-button" onclick="requestFilmByName('${title}')">${label}</button>`;
             }).join('')}
           </div>
         </div>
@@ -1902,7 +1890,7 @@ container.innerHTML = uniqueResults.map(f => {
         ? `<button class="search-button" onclick="requestFilmByName('${f['Назва']}')">▶️ Дивитись</button>`
         : '');
   return `
-    <div class="film-card">
+    <div class="film-card" id="film-${id}">
       <img src="${img}" alt="${f['Назва']}" class="film-img">
       <h3>${f['Назва']}</h3>
       <p class="film-imdb">IMDb: ${f['IMDb']||'—'}</p>
@@ -2188,7 +2176,7 @@ container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
   const safe = safeId(title);
 
 return `
-  <div class="film-card">
+  <div class="film-card" id="film-${id}">
     <img src="${imgSrc}" alt="${title}">
     <h3>${title}</h3>
     <p class="film-imdb">IMDb: ${first['IMDb'] || '—'}</p>
