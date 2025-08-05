@@ -1328,47 +1328,21 @@ function filterByCountry(country) {
 function filterByYear(year) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
-  const isPro = localStorage.getItem('isProUser') === 'true';
-  const filtered = films.filter(f => String(f['Рік']) === String(year));
 
-  if (filtered.length === 0) {
+  // 1. Відфільтрувати фільми за роком
+  currentFilms = films.filter(f => String(f['Рік']) === String(year));
+  offset = 0;                    // починаємо з першого батчу
+  container.innerHTML = '';      // очищаємо попередні результати
+  container.style.display = 'grid'; // показуємо грід
+
+  // 2. Якщо нічого не знайдено — одразу виводимо повідомлення
+  if (currentFilms.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
 
-  container.innerHTML = filtered.map(film => {
-    // 1. Генеруємо унікальний id
-    const id = safeId(film['Назва']);
-
-    // 2. Визначаємо картинку
-    const isProFilm = film['Доступ'] === 'PRO';
-    const imgSrc = (isProFilm && !isPro)
-      ? placeholderImage
-      : (film['Фото'] || placeholderImage);
-
-    // 3. Формуємо кнопку
-    let buttons = '';
-    if (isProFilm && !isPro) {
-      buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
-    } else if (film['message_id']) {
-      buttons = `<button class="search-button" onclick="requestFilmByName(${film['message_id']})">▶️ Дивитись</button>`;
-    }
-
-    // 4. Повертаємо HTML
-    return `
-      <div class="film-card" id="film-${id}">
-        <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
-        <h3>${film['Назва']}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
-        <p>${film['Опис'] || ''}</p>
-        <div class="film-actions">
-          ${renderControls(film['Назва'], film['Опис'])}
-          ${buttons}
-        </div>
-      </div>
-    `;
-  }).join('');
-
+  // 3. Інакше — рендеримо перший батч
+  renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
 }
 
