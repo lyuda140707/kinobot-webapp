@@ -721,15 +721,16 @@ function renderBatch() {
         <p>${film['Опис'] || ''}</p>
 
         <!-- Дивитись / PRO та Улюблене -->
-        <div class="film-actions">
+       <div class="film-actions">
   ${renderControls(film['Назва'], film['Опис'])}
   ${isProFilm && !isPro
     ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
-    : (film['Посилання']
-        ? `<button class="search-button" onclick="openVideo('${film['Назва']}')">▶️ Дивитись</button>`
+    : (film['file_id']
+        ? `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`
         : ``)
   }
 </div>
+
       </div>
     `;
   }).join('');
@@ -824,7 +825,7 @@ async function fetchAndUpdateFilms() {
 
 let pendingLink = "";
 
-async function openVideo(filmName) {
+async function openVideoById(filmName) {
   const tg = window.Telegram.WebApp;
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
     alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
@@ -882,7 +883,7 @@ async function openVideo(filmName) {
   }, 2000);
 }
 
-function openVideoById(fileId) {
+async function requestFilmByName(fileId) {
   const tg = window.Telegram.WebApp;
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
     alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
@@ -891,21 +892,25 @@ function openVideoById(fileId) {
   }
   const user = tg.initDataUnsafe.user;
 
+  // Показуємо індикатор завантаження
   document.getElementById("loading-indicator").style.display = "block";
 
+  // Додаємо невелику затримку перед запитом
   setTimeout(async () => {
     try {
-      const response = await fetch('https://relax-time2.onrender.com/send-film-id', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user.id,
-          file_id: fileId
-        })
-      });
+      const response = await fetch(
+        'https://relax-time2.onrender.com/send-film-id',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: user.id,
+            file_id: fileId
+          })
+        }
+      );
 
       const data = await response.json();
-
       if (data.success) {
         showRedirectButton();
       } else {
@@ -915,10 +920,12 @@ function openVideoById(fileId) {
       console.error(error);
       alert("❗️ Сталася помилка при надсиланні фільму");
     } finally {
+      // Ховаємо індикатор завантаження
       document.getElementById("loading-indicator").style.display = "none";
     }
   }, 2000);
 }
+
     
 
     
@@ -1041,8 +1048,8 @@ function showFilmOfTheDay() {
   document.getElementById('film-day-img').src = film['Фото'];
 
   document.getElementById('film-day-button').onclick = () => {
-    const videoUrl = film['Посилання']; // ⬅️ тут тепер 'Посилання'
-    openVideo(film['Назва']); // ⬅️ відкриваємо
+    const videoUrl = film['file_id']; // ⬅️ тут тепер 'Посилання'
+    openVideoById(film['Назва']); // ⬅️ відкриваємо
   };
 
   document.getElementById('film-title').textContent = film['Назва'];
@@ -1184,7 +1191,7 @@ const grouped = seriesFilms.reduce((acc, ep) => {
             const label = ep['Опис'] || `Серія ${i+1}`;
             return ep.file_id
               ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-              : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
           }).join('')}
         </div>
       </div>
@@ -1270,7 +1277,7 @@ function filterByGenre(genre) {
         const label = ep['Опис'] || `Серія ${i+1}`;
         return ep.file_id
           ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-          : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+          : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
       }).join('');
       return `
         <div class="film-card">
@@ -1306,6 +1313,7 @@ function filterByCountry(country) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
   const filtered = films.filter(f => f['Країна'] === country);
+
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
@@ -1322,16 +1330,15 @@ function filterByCountry(country) {
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['file_id']) {
-      `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`
+      buttons = `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`;
     }
 
-    // === Додаємо renderControls у film-actions ===
     return `
       <div class="film-card">
         <img src="${imgSrc}" alt="${film['Назва']}">
         <h3>${film['Назва']}</h3>
         <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
-        <p>${film['Опис']}</p>
+        <p>${film['Опис']||''}</p>
         <div class="film-actions">
           ${renderControls(film['Назва'], film['Опис'])}
           ${buttons}
@@ -1344,14 +1351,14 @@ function filterByCountry(country) {
 }
 
 
+
   
 
 function filterByYear(year) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
   const isPro = localStorage.getItem('isProUser') === 'true';
-
-  const filtered = films.filter(f => f['Рік']?.toString() === year.toString());
+  const filtered = films.filter(f => String(f['Рік']) === String(year));
 
   if (filtered.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
@@ -1368,16 +1375,15 @@ function filterByYear(year) {
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
     } else if (film['file_id']) {
-      `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`
+      buttons = `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`;
     }
 
-    // === Додаємо renderControls у film-actions ===
     return `
       <div class="film-card">
         <img src="${imgSrc}" alt="${film['Назва']}">
         <h3>${film['Назва']}</h3>
         <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
-        <p>${film['Опис']}</p>
+        <p>${film['Опис']||''}</p>
         <div class="film-actions">
           ${renderControls(film['Назва'], film['Опис'])}
           ${buttons}
@@ -1408,7 +1414,7 @@ function filterByYear(year) {
         <p>${f.description}</p>
         <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
         <!-- Додаємо кнопку для перегляду відео -->
-        <button class="search-button" onclick="event.stopPropagation(); openVideo('${f.title}')">▶️ Дивитись</button>
+        <button class="search-button" onclick="event.stopPropagation(); openVideoById('${f.title}')">▶️ Дивитись</button>
       </div>
     `).join('');
   }
@@ -1864,7 +1870,7 @@ const uniqueResults = results.filter((film, i, arr) =>
               const label = ep['Опис'] || `Серія ${i+1}`;
               return ep.file_id
                 ? `<button class="search-button" onclick="openVideoById('${ep.file_id}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideo('${title}')">${label}</button>`;
+                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
             }).join('')}
           </div>
         </div>
@@ -1893,7 +1899,7 @@ container.innerHTML = uniqueResults.map(f => {
   const watchBtn = locked
     ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
     : (f['Посилання']
-        ? `<button class="search-button" onclick="openVideo('${f['Назва']}')">▶️ Дивитись</button>`
+        ? `<button class="search-button" onclick="openVideoById('${f['Назва']}')">▶️ Дивитись</button>`
         : '');
   return `
     <div class="film-card">
