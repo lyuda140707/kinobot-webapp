@@ -447,7 +447,7 @@
     <div class="film-title-overlay" id="film-title">Назва фільму</div>
   </div>
   <div class="btn-container">
-    <button id="film-day-button" class="watch-btn">👀 Поглянути</button>
+    <button id="openVideoById" class="watch-btn">👀 Поглянути</button>
   </div>
 </div>
 
@@ -726,7 +726,7 @@ function renderBatch() {
   ${isProFilm && !isPro
     ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
     : (film['file_id']
-        ? `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`
+        ? `<button … onclick="requestFilmByName('${film.file_id}')">▶️ Дивитись</button>`
         : ``)
   }
 </div>
@@ -1047,7 +1047,7 @@ function showFilmOfTheDay() {
   const film = films[Math.floor(Math.random() * films.length)];
   document.getElementById('film-day-img').src = film['Фото'];
 
-  document.getElementById('film-day-button').onclick = () => {
+  document.getElementById('openVideoById').onclick = () => {
     const videoUrl = film['file_id']; // ⬅️ тут тепер 'Посилання'
     openVideoById(film['Назва']); // ⬅️ відкриваємо
   };
@@ -1330,7 +1330,7 @@ function filterByCountry(country) {
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['file_id']) {
-      buttons = `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`;
+      buttons = `<button class="search-button" onclick="requestFilmByName('${film['file_id']}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1375,7 +1375,7 @@ function filterByYear(year) {
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
     } else if (film['file_id']) {
-      buttons = `<button class="search-button" onclick="openVideoById('${film['file_id']}')">▶️ Дивитись</button>`;
+      buttons = `<button class="search-button" onclick="requestFilmByName('${film['file_id']}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1414,7 +1414,7 @@ function filterByYear(year) {
         <p>${f.description}</p>
         <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
         <!-- Додаємо кнопку для перегляду відео -->
-        <button class="search-button" onclick="event.stopPropagation(); openVideoById('${f.title}')">▶️ Дивитись</button>
+        <button class="search-button" onclick="event.stopPropagation(); requestFilmByName('${f.title}')">▶️ Дивитись</button>
       </div>
     `).join('');
   }
@@ -1899,7 +1899,7 @@ container.innerHTML = uniqueResults.map(f => {
   const watchBtn = locked
     ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
     : (f['Посилання']
-        ? `<button class="search-button" onclick="openVideoById('${f['Назва']}')">▶️ Дивитись</button>`
+        ? `<button class="search-button" onclick="requestFilmByName('${f['Назва']}')">▶️ Дивитись</button>`
         : '');
   return `
     <div class="film-card">
