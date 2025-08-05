@@ -1318,52 +1318,20 @@ function filterByCountry(country) {
   container.style.display = 'grid';
   container.innerHTML = '';
 
-  // 3) Фільтруємо по країні
-  const filtered = films.filter(f => f['Країна'] === country);
-  if (filtered.length === 0) {
+  // 3) Фільтруємо по країні та передаємо для пагінації
+  currentFilms = films.filter(f => f['Країна'] === country);
+  if (currentFilms.length === 0) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
   }
-
-  // 4) Оновлюємо дані для пагінації
-  currentFilms = filtered;
   offset = 0;
 
-  // 5) Відмалювати перший батч вручну з підтримкою message_id
-  const isProUser = localStorage.getItem('isProUser') === 'true';
-  container.innerHTML = filtered.map(film => {
-    const id         = safeId(film['Назва']);
-    const isProFilm  = film['Доступ'] === 'PRO';
-    const imgSrc     = (isProFilm && !isProUser)
-                       ? placeholderImage
-                       : (film['Фото'] || placeholderImage);
+  // 4) Відмалювати перший батч через renderBatch
+  renderBatch();
 
-    let btn = '';
-    if (isProFilm && !isProUser) {
-      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['message_id']) {
-      btn = `<button class="search-button" onclick="requestFilmByName('${film['message_id']}')">▶️ Дивитись</button>`;
-    }
-
-    return `
-      <div class="film-card" id="film-${id}">
-        <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
-        <h3>${film['Назва']}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
-        <p>${film['Опис'] || ''}</p>
-        <div class="film-actions">
-          ${renderControls(film['Назва'], film['Опис'])}
-          ${btn}
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  // 6) Прокрутити до контейнера
+  // 5) Прокрутити до контейнера
   container.scrollIntoView({ behavior: 'smooth' });
 }
-
-
 
   
 
