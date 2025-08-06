@@ -902,7 +902,7 @@ async function requestFilmByName(fileId) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             user_id: user.id,
-            file_id: fileId
+             message_id: fileId
           })
         }
       );
@@ -2342,7 +2342,7 @@ function sendFilm(film_id) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id,
-            file_id: film_id
+             message_id: film_id
         })
     })
     .then(r => r.json())
