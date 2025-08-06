@@ -1137,26 +1137,24 @@ function showSeries(type = 'Серіал') {
 
   // Фільтруємо епізоди потрібного типу
   const seriesFilms = films.filter(f =>
-    (f['Тип']||'').trim().toLowerCase() === type.trim().toLowerCase()
+    (f['Тип'] || '').trim().toLowerCase() === type.trim().toLowerCase()
   );
   if (!seriesFilms.length) {
     container.innerHTML = '<p>Немає серіалів 😢</p>';
     return;
   }
 
-// Групуємо за назвою, але унікальні по опису
-const grouped = seriesFilms.reduce((acc, ep) => {
-  const title = ep['Назва'];
-  if (!acc[title]) acc[title] = [];
-  const uniqueKey = (ep['Опис'] || '').toLowerCase();
-  if (!acc[title].some(e => (e['Опис'] || '').toLowerCase() === uniqueKey)) {
-    acc[title].push(ep);
-  }
-  return acc;
-}, {});
+  // Групуємо за назвою, унікальні по опису
+  const grouped = seriesFilms.reduce((acc, ep) => {
+    const title = ep['Назва'];
+    if (!acc[title]) acc[title] = [];
+    const uniqueKey = (ep['Опис'] || '').toLowerCase();
+    if (!acc[title].some(e => (e['Опис'] || '').toLowerCase() === uniqueKey)) {
+      acc[title].push(ep);
+    }
+    return acc;
+  }, {});
 
-
-  
   // Генеруємо картки
   const html = Object.entries(grouped).map(([title, episodes]) => {
     const safe = safeId(title);
@@ -1168,9 +1166,8 @@ const grouped = seriesFilms.reduce((acc, ep) => {
     const count     = episodes.length;
     const imdb      = episodes[0]['IMDb'] || '—';
 
-    // === Додаємо renderControls після назви ===
     return `
-      <div class="film-card" id="film-${id}">
+      <div class="film-card" id="film-${safe}">
         <img src="${poster}" class="film-img" alt="${title}">
         <h3>${title}</h3>
         ${renderControls(title, episodes[0]['Опис'])}
@@ -1188,7 +1185,7 @@ const grouped = seriesFilms.reduce((acc, ep) => {
             const label = ep['Опис'] || `Серія ${i+1}`;
             return ep.file_id
               ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
-              : `<button class="search-button" onclick="requestFilmByName('${title}')">${label}</button>`;
+              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
           }).join('')}
         </div>
       </div>
@@ -1230,9 +1227,9 @@ function filterByGenre(genre) {
   switchTab('categories');
   const normalized = genre.toLowerCase();
 
-  // спочатку відфільтруємо всі фільми за жанром / добіркою
+  // відфільтруємо всі фільми за жанром / добіркою
   const filtered = films.filter(f => {
-    const g1 = (f['Жанр']    || '').toLowerCase();
+    const g1 = (f['Жанр'] || '').toLowerCase();
     const g2 = (f['Добірка'] || '').toLowerCase();
     return g1 === normalized || g2 === normalized;
   });
@@ -1244,9 +1241,8 @@ function filterByGenre(genre) {
     return;
   }
 
-  // === Якщо це серіали — зробимо групування ===
+  // Якщо це серіали — зробимо групування
   if (filtered[0]['Тип']?.trim().toLowerCase() === 'серіал') {
-    // групуємо по Назві
     const grouped = filtered.reduce((acc, ep) => {
       const title = ep['Назва'];
       if (!acc[title]) acc[title] = [];
@@ -1256,8 +1252,7 @@ function filterByGenre(genre) {
       }
       return acc;
     }, {});
-    
-    // генеруємо HTML точно так само, як у showSeries
+
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
       const safe = safeId(title);
       const isPro     = localStorage.getItem('isProUser') === 'true';
@@ -1266,18 +1261,22 @@ function filterByGenre(genre) {
         ? placeholderImage
         : (episodes[0]['Фото'] || placeholderImage);
       const count     = episodes.length;
+
       const btn = `<button class="search-button"
-                    onclick="toggleEpisodes('${safe}', this)"
-                    data-count="${count}"
-                  >📺 Показати серії (${count})</button>`;
+                          onclick="toggleEpisodes('${safe}', this)"
+                          data-count="${count}">
+                     📺 Показати серії (${count})
+                   </button>`;
+
       const epsHtml = episodes.map((ep, i) => {
         const label = ep['Опис'] || `Серія ${i+1}`;
         return ep.file_id
           ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
-          : `<button class="search-button" onclick="requestFilmByName('${title}')">${label}</button>`;
+          : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
       }).join('');
+
       return `
-        <div class="film-card" id="film-${id}">
+        <div class="film-card" id="film-${safe}">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
           <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
@@ -1292,17 +1291,19 @@ function filterByGenre(genre) {
         </div>
       `;
     }).join('');
+
     container.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
-  // === Інакше — це не серіали, малюємо як фільми ===
+  // Інакше — малюємо як фільми
   currentFilms = filtered;
   container.innerHTML = '';
   offset = 0;
   renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
     
