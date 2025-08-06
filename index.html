@@ -2182,7 +2182,7 @@ return `
       ${isProFilm && !isPro 
         ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
         : episodes.map((ep, i) => {
-            return `<button class="search-button" onclick="sendFilm('${ep['file_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
+            return `<button class="search-button" onclick="sendFilm('${ep['message_id']}')">${ep['Опис'] || 'Серія ' + (i + 1)}</button>`;
           }).join('')}
     </div>
   </div>
@@ -2331,7 +2331,7 @@ function sendFilm(film_id) {
         return;
     }
 
-    const film = films.find(f => f.file_id === film_id);
+    const film = films.find(f => f.message_id === film_id);
     if (!film) {
         alert("❌ Фільм не знайдено, спробуйте пізніше.");
         return;
