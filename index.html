@@ -1818,9 +1818,49 @@ document.getElementById('searchInput').addEventListener('input', () => {
   // 1. Знайшли всі збіги
   const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
   // 2. Лівому лишаємо тільки одну копію кожної назви
-  const uniqueResults = results.filter((film, i, arr) =>
-    arr.findIndex(f => f['Назва'] === film['Назва']) === i
-  );
+  const matchedSeries = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
+if (matchedSeries.length) {
+  const grouped = matchedSeries.reduce((acc, ep) => {
+    const title = ep['Назва'];
+    if (!acc[title]) acc[title] = [];
+    const key = (ep['Опис']||'').trim().toLowerCase();
+    if (!acc[title].some(e => (e['Опис']||'').trim().toLowerCase() === key)) {
+      acc[title].push(ep);
+    }
+    return acc;
+  }, {});
+
+  container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+    const safe = safeId(title);
+    const count = episodes.length;
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const isProSeries = episodes[0]['Доступ'] === 'PRO';
+    const poster = (isProSeries && !isPro)
+      ? placeholderImage
+      : (episodes[0]['Фото'] || placeholderImage);
+
+    return `
+      <div class="film-card" id="film-${safe}">
+        <img src="${poster}" class="film-img" alt="${title}">
+        <h3>${title}</h3>
+        <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+          📺 Показати серії (${count})
+        </button>
+        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+          ${episodes.map((ep, i) => {
+            const label = ep['Опис'] || `Серія ${i+1}`;
+            return ep.message_id
+              ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
+              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  return;
+}
+
 
   // === Якщо серед унікальних результатів є серіали — групуємо їх ===
   const seriesResults = uniqueResults.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
