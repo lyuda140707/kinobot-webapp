@@ -1815,17 +1815,61 @@ document.getElementById('searchInput').addEventListener('input', () => {
   container.innerHTML = '';
   if (!val) return;
 
-  // Знайшли всі збіги
+  // 1. Знайшли всі збіги
   const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
-  
-  // Якщо є серіали серед результатів — показуємо їх ГРУПОВАНО!
-  const matchedSeries = results.filter(f => (f['Тип'] || '').trim().toLowerCase() === 'серіал');
-  if (matchedSeries.length) {
-    const grouped = matchedSeries.reduce((acc, ep) => {
+  // 2. Лівому лишаємо тільки одну копію кожної назви
+  const matchedSeries = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
+if (matchedSeries.length) {
+  const grouped = matchedSeries.reduce((acc, ep) => {
+    const title = ep['Назва'];
+    if (!acc[title]) acc[title] = [];
+    const key = (ep['Опис']||'').trim().toLowerCase();
+    if (!acc[title].some(e => (e['Опис']||'').trim().toLowerCase() === key)) {
+      acc[title].push(ep);
+    }
+    return acc;
+  }, {});
+
+  container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
+    const safe = safeId(title);
+    const count = episodes.length;
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const isProSeries = episodes[0]['Доступ'] === 'PRO';
+    const poster = (isProSeries && !isPro)
+      ? placeholderImage
+      : (episodes[0]['Фото'] || placeholderImage);
+
+    return `
+      <div class="film-card" id="film-${safe}">
+        <img src="${poster}" class="film-img" alt="${title}">
+        <h3>${title}</h3>
+        <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+          📺 Показати серії (${count})
+        </button>
+        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+          ${episodes.map((ep, i) => {
+            const label = ep['Опис'] || `Серія ${i+1}`;
+            return ep.message_id
+              ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
+              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  return;
+}
+
+
+  // === Якщо серед унікальних результатів є серіали — групуємо їх ===
+  const seriesResults = uniqueResults.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
+  if (seriesResults.length) {
+    const grouped = seriesResults.reduce((acc, ep) => {
       const title = ep['Назва'];
       if (!acc[title]) acc[title] = [];
-      const key = (ep['Опис']||'').trim().toLowerCase();
-      if (!acc[title].some(e => (e['Опис']||'').trim().toLowerCase() === key)) {
+      const uniqueKey = (ep['Опис'] || '').toLowerCase();
+      if (!acc[title].some(e => (e['Опис'] || '').toLowerCase() === uniqueKey)) {
         acc[title].push(ep);
       }
       return acc;
@@ -1862,8 +1906,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
     return;
   }
 
-  // Якщо це не серіали — стандартний список (фільми/мультфільми)
-  if (results.length === 0) {
+  // === Якщо нічого не знайдено ===
+  if (uniqueResults.length === 0) {
     container.innerHTML = `
       <p>Фільм не знайдено 😢</p>
       <button class="suggest-button" onclick="suggestFilm()">➕ Замовити цей фільм</button>
@@ -1871,7 +1915,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
     return;
   }
 
-  container.innerHTML = results.map(f => {
+  // === Інакше — звичайний рендер унікальних фільмів ===
+  container.innerHTML = uniqueResults.map(f => {
     const id = safeId(f['Назва']);
     const isPro = localStorage.getItem('isProUser') === 'true';
     const locked = f['Доступ'] === 'PRO' && !isPro;
@@ -1895,6 +1940,19 @@ document.getElementById('searchInput').addEventListener('input', () => {
   }).join('');
 });
 
+
+
+
+
+  // Клік по картці
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.film-card');
+    if (card && !e.target.closest('button')) {
+      card.classList.toggle('expanded');
+    }
+  });
+
+});
 
 
 
