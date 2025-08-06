@@ -1227,11 +1227,11 @@ function filterByGenre(genre) {
   switchTab('categories');
   const normalized = genre.toLowerCase();
 
-  // відфільтруємо всі фільми за жанром / добіркою
+  // фільтруємо всі фільми за жанром / добіркою
   const filtered = films.filter(f => {
-    const g1 = (f['Жанр'] || '').toLowerCase();
+    const g1 = (f['Жанр']    || '').toLowerCase();
     const g2 = (f['Добірка'] || '').toLowerCase();
-    return g1 === normalized || g2 === normalized;
+    return g1.includes(normalized) || g2.includes(normalized);
   });
 
   const container = document.getElementById('genre-results');
@@ -1241,7 +1241,7 @@ function filterByGenre(genre) {
     return;
   }
 
-  // Якщо це серіали — зробимо групування
+  // якщо це серіали — робимо групування
   if (filtered[0]['Тип']?.trim().toLowerCase() === 'серіал') {
     const grouped = filtered.reduce((acc, ep) => {
       const title = ep['Назва'];
@@ -1254,19 +1254,20 @@ function filterByGenre(genre) {
     }, {});
 
     container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-      const safe = safeId(title);
-      const isPro     = localStorage.getItem('isProUser') === 'true';
+      const safe  = safeId(title);
+      const isPro = localStorage.getItem('isProUser') === 'true';
       const isProFilm = episodes[0]['Доступ'] === 'PRO';
       const poster    = (isProFilm && !isPro)
         ? placeholderImage
         : (episodes[0]['Фото'] || placeholderImage);
       const count     = episodes.length;
 
-      const btn = `<button class="search-button"
-                          onclick="toggleEpisodes('${safe}', this)"
-                          data-count="${count}">
-                     📺 Показати серії (${count})
-                   </button>`;
+      const btn = `
+        <button class="search-button"
+                onclick="toggleEpisodes('${safe}', this)"
+                data-count="${count}">
+          📺 Показати серії (${count})
+        </button>`;
 
       const epsHtml = episodes.map((ep, i) => {
         const label = ep['Опис'] || `Серія ${i+1}`;
@@ -1279,7 +1280,7 @@ function filterByGenre(genre) {
         <div class="film-card" id="film-${safe}">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${title}</h3>
-          <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+          <p class="film-imdb">IMDb: ${episodes[0]['IMDb']||'—'}</p>
           ${renderControls(title, episodes[0]['Опис'])}
           ${btn}
           <div id="episodes-${safe}"
@@ -1296,14 +1297,13 @@ function filterByGenre(genre) {
     return;
   }
 
-  // Інакше — малюємо як фільми
+  // інакше — рендеримо як фільми
   currentFilms = filtered;
   container.innerHTML = '';
   offset = 0;
   renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
 }
-
 
 
     
