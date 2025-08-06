@@ -1817,6 +1817,18 @@ document.getElementById('searchInput').addEventListener('input', () => {
 
   // 1. Знайшли всі збіги
   const results = films.filter(f => (f['Назва'] || '').toLowerCase().includes(val));
+
+  // ...після const results = films.filter(...)
+
+const uniqueResults = [];
+const seenTitles = new Set();
+for (const f of results) {
+  if (!seenTitles.has(f['Назва'])) {
+    uniqueResults.push(f);
+    seenTitles.add(f['Назва']);
+  }
+}
+
   // 2. Лівому лишаємо тільки одну копію кожної назви
   const matchedSeries = results.filter(f => f['Тип']?.trim().toLowerCase() === 'серіал');
 if (matchedSeries.length) {
