@@ -713,7 +713,7 @@ function renderBatch() {
    if (isProFilm && !isPro) {
      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['message_id']) {
-     btn = `<button class="search-button" onclick="requestFilmByName('${film['message_id']}')">▶️ Дивитись</button>`;
+     btn = `<button class="search-button" onclick="requestFilmByName(${film['message_id']})">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1183,8 +1183,8 @@ function showSeries(type = 'Серіал') {
              data-count="${count}">
           ${episodes.map((ep, i) => {
             const label = ep['Опис'] || `Серія ${i+1}`;
-            return ep.message_id
-              ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
+            return ep.file_id
+              ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
               : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
           }).join('')}
         </div>
@@ -1236,7 +1236,8 @@ function filterByGenre(genre) {
     return (g1.includes(normalized) || g2.includes(normalized));
   });
 
-  // 2) Якщо користувач натиснув підкатегорію серіалів — лишити тільки Серіали
+  // 2) Якщо користувач натиснув підкатегорію серіалів, то лишити тільки Серіали
+  //    (припускаємо, що кнопки серіалів знаходяться у блокові #group-series)
   if (document.getElementById('group-series').style.display === 'flex') {
     filtered = filtered.filter(f =>
       (f['Тип'] || '').trim().toLowerCase() === 'серіал'
@@ -1271,7 +1272,6 @@ function filterByGenre(genre) {
                         : (eps[0]['Фото'] || placeholderImage);
       const count     = eps.length;
 
-      // Генеруємо HTML картки серіалу
       return `
         <div class="film-card" id="film-${safe}">
           <img src="${poster}" class="film-img" alt="${title}">
@@ -1283,21 +1283,12 @@ function filterByGenre(genre) {
                   data-count="${count}">
             📺 Показати серії (${count})
           </button>
-          <div id="episodes-${safe}"
-               class="series-episodes-grid"
-               style="display:none;"
-               data-count="${count}">
-            ${eps.map((ep, i) => {
+          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+            ${eps.map((ep,i) => {
               const label = ep['Опис'] || `Серія ${i+1}`;
-              if (ep.message_id) {
-                return `<button class="search-button"
-                                 onclick="requestFilmByName('${ep.message_id}')"
-                        >${label}</button>`;
-              } else {
-                return `<button class="search-button"
-                                 onclick="openVideoById('${title}')"
-                        >${label}</button>`;
-              }
+              return ep.file_id
+                ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
+                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
             }).join('')}
           </div>
         </div>
@@ -1855,8 +1846,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
           <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
             ${episodes.map((ep, i) => {
               const label = ep['Опис'] || `Серія ${i+1}`;
-              return ep.message_id
-                ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
+              return ep.file_id
+                ? `<button class="search-button" onclick="requestFilmByName('${ep.file_id}')">${label}</button>`
                 : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
             }).join('')}
           </div>
