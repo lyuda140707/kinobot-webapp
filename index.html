@@ -1403,14 +1403,26 @@ function filterByYear(year) {
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
-  container.innerHTML = favs.map(f => `
-  <div class="film-card" id="film-${safeId(f.title)}">
-    <h3>${maskWord(f.title)}</h3>
-    <p>${f.description}</p>
-    <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
-    ${f.message_id ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName('${f.message_id}')">▶️ Дивитись</button>` : '<div style="color:#999; margin:6px 0 2px;">Недоступно</div>'}
-  </div>
-`).join('');
+  container.innerHTML = favs.map(f => {
+    // Пошук фільму в масиві films по unmaskWord
+    const found = films.find(item =>
+      unmaskWord(item['Назва']) === unmaskWord(f.title)
+    );
+    const msgId = found?.message_id || f.message_id;
+    const watchBtn = msgId
+      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName('${msgId}')">▶️ Дивитись</button>`
+      : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
+    return `
+      <div class="film-card" id="film-${safeId(f.title)}">
+      <h3>${maskWord(f.title)}</h3>
+      <p>${f.description}</p>
+      <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
+      ${watchBtn}
+    </div>
+  `;
+  }).join('');
+
+
 
     
   }
