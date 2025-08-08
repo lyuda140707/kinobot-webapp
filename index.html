@@ -1403,14 +1403,15 @@ function filterByYear(year) {
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
-    container.innerHTML = favs.map(f => `
-      <div class="film-card" id="film-${safeId(f.title)}">
-        <h3>${maskWord(f.title)}</h3>
-        <p>${f.description}</p>
-        <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
-        <button class="search-button" onclick="event.stopPropagation(); requestFilmByName('${f.message_id}')">▶️ Дивитись</button>
-      </div>
-    `).join('');
+  container.innerHTML = favs.map(f => `
+  <div class="film-card" id="film-${safeId(f.title)}">
+    <h3>${maskWord(f.title)}</h3>
+    <p>${f.description}</p>
+    <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
+    ${f.message_id ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName('${f.message_id}')">▶️ Дивитись</button>` : '<div style="color:#999; margin:6px 0 2px;">Недоступно</div>'}
+  </div>
+`).join('');
+
     
   }
 
@@ -1983,16 +1984,21 @@ if (matchedSeries.length) {
 
 
 function addToFavorites(title, description, message_id) {
+  // Знайти реальний message_id у масиві films
+  const film = films.find(f => unmaskWord(f['Назва']) === unmaskWord(title));
+  const real_message_id = film?.message_id || message_id || '';
+
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
   if (favs.find(f => f.title === title)) {
     showServiceErrorModal('Вже в улюбленому 💛');
     return;
   }
-  favs.push({ title, description, message_id });
+  favs.push({ title, description, message_id: real_message_id });
   localStorage.setItem('favorites', JSON.stringify(favs));
   showFavorites();
   alert('Додано в улюблене!');
 }
+
 
 
 
