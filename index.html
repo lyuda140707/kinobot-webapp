@@ -626,6 +626,7 @@ function unmaskWord(word) {
     </button>
   </div>
 
+  
   <!-- Модальне вікно для введення повідомлення адміну -->
   <div id="admin-message-modal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6)">
     <div style="background:#222; color:#fff; border-radius:18px; padding:24px; width:96vw; max-width:420px; margin:10vh auto; display:flex; flex-direction:column;">
@@ -635,7 +636,14 @@ function unmaskWord(word) {
    </div>
   </div>
  
- 
+ <!-- 🔔 Підписка на апдейти -->
+<div id="updates-block" style="margin:18px 0;">
+  <button id="subscribe-btn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold;">
+    🔔 Отримувати апдейти
+  </button>
+  <div id="subscribe-hint" style="opacity:.85; font-size:12px; margin-top:6px;"></div>
+</div>
+
 
 
 <hr style="margin: 20px 0; border-color: #444;">
@@ -699,6 +707,9 @@ function unmaskWord(word) {
   <script>
 
     const placeholderImage = "https://i.postimg.cc/6q9Cd9sQ/d9d66124-1900-49be-a89c-007edc35bd13.png";
+    // 🔧 Бекенд
+    const API_BASE = "https://relax-time2.onrender.com";
+
     
     let films = [];
     let isDataLoaded = false;
@@ -1683,6 +1694,66 @@ function showSkeletonCollections() {
   `;
   return;
 }
+
+
+// === UPDATES: керування підпискою на апдейти ===
+try {
+  const subBtn  = document.getElementById("subscribe-btn");
+  const subHint = document.getElementById("subscribe-hint");
+  if (subBtn && subHint) {
+    let allowState = false;
+    let busy = false;
+
+    function setSubUI(allowed) {
+      allowState = !!allowed;
+      if (allowed) {
+        subBtn.textContent = "✅ Підписка увімкнена (натисніть, щоб вимкнути)";
+        subHint.textContent = "Ми зберегли ваш chat_id для коротких апдейтів.";
+      } else {
+        subBtn.textContent = "🔔 Отримувати апдейти";
+        subHint.textContent = "Натисніть, щоб погодитись на отримання оновлень.";
+      }
+    }
+
+    // 1) початковий стан
+    fetch(`${API_BASE}/updates/status?user_id=${user.id}`)
+      .then(r => r.json())
+      .then(d => setSubUI(!!d.allow))
+      .catch(() => setSubUI(false));
+
+    // 2) перемикач (on/off)
+    subBtn.addEventListener("click", async () => {
+      if (busy) return;
+      busy = true; subBtn.disabled = true;
+
+      try {
+        const nextAllow = !allowState;
+        const res = await fetch(`${API_BASE}/updates/consent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            username: user.username || null,
+            allow: nextAllow
+          })
+        }).then(r => r.json());
+
+        if (res && res.ok) {
+          setSubUI(nextAllow);
+        } else {
+          alert("Не вдалось зберегти підписку 😔");
+        }
+      } catch (e) {
+        alert("Помилка мережі. Спробуйте ще раз.");
+      } finally {
+        busy = false; subBtn.disabled = false;
+      }
+    });
+  }
+} catch (e) {
+  console.warn("UPDATES init error:", e);
+}
+
 
   // ✅ Тут вставляємо перевірку PRO
 const proRes = await fetch('https://relax-time2.onrender.com/check-pro', {
