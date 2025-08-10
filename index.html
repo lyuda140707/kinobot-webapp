@@ -626,7 +626,6 @@ function unmaskWord(word) {
     </button>
   </div>
 
-  
   <!-- Модальне вікно для введення повідомлення адміну -->
   <div id="admin-message-modal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6)">
     <div style="background:#222; color:#fff; border-radius:18px; padding:24px; width:96vw; max-width:420px; margin:10vh auto; display:flex; flex-direction:column;">
@@ -636,13 +635,7 @@ function unmaskWord(word) {
    </div>
   </div>
  
- <!-- 🔔 Підписка на апдейти (показуємо тільки в Telegram) -->
-<button id="subscribeBtn"
-        class="account-button"
-        style="display:none; background:#00f7ff; color:#000; font-weight:bold;">
-  🔔 Отримувати апдейти
-</button>
-
+ 
 
 
 <hr style="margin: 20px 0; border-color: #444;">
@@ -1377,7 +1370,7 @@ function filterByYear(year) {
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
     } else if (film['message_id']) {
-      buttons = `<button class="search-button" onclick="requestFilmByName('${film['message_id']}')">▶️ Дивитись</button>`;
+      buttons = `<button class="search-button" onclick="openVideoById('${film['message_id']}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1623,26 +1616,6 @@ function showSkeletonCollections() {
   Telegram.WebApp.ready();
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
-
-  // 🔔 Кнопка підписки з WebApp
-const subBtn = document.getElementById('subscribeBtn');
-if (user && subBtn) {
-  subBtn.style.display = 'inline-block';
-  subBtn.onclick = async () => {
-    try {
-      const res = await fetch('https://relax-time2.onrender.com/subscribe', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ user_id: user.id, allow_updates: true })
-      });
-      if (!res.ok) throw new Error('Bad status');
-      alert('✅ Підписано на апдейти. Якщо будемо переїжджати — напишемо тут.');
-    } catch (e) {
-      alert('⚠️ Не вдалося підписати. Можна також в боті командою /subscribe');
-    }
-  };
-}
-
 
   if (!user) {
     alert("Не вдалося отримати ваш Telegram ID");
