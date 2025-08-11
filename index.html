@@ -635,7 +635,15 @@ function unmaskWord(word) {
    </div>
   </div>
  
- 
+ <!-- 🚀 Launcher: перехід до лаунчер-бота -->
+<div id="launcher-section" style="margin: 12px 0;">
+  <button id="launcher-btn"
+          class="account-button"
+          style="background:#00f7ff; color:#000; font-weight:bold;">
+    🚀 Отримувати оновлення через Launcher
+  </button>
+</div>
+
 
 
 <hr style="margin: 20px 0; border-color: #444;">
@@ -2831,6 +2839,28 @@ function closeServiceErrorModal() {
   </div>
 </div>
 
+<script>
+  // Відкрити чат з лаунчер-ботом із payload'ом (хто натиснув)
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('launcher-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      const tg  = window.Telegram?.WebApp;
+      const uid = tg?.initDataUnsafe?.user?.id || '';
+      const url = `https://t.me/relax_time_launcher_bot?start=from_webapp_${uid}`;
+
+      try {
+        if (tg?.openTelegramLink) tg.openTelegramLink(url);
+        else if (tg?.openLink)    tg.openLink(url);
+        else                      window.open(url, '_blank');
+        tg?.HapticFeedback?.impactOccurred('medium');
+      } catch (_) {
+        window.open(url, '_blank');
+      }
+    });
+  });
+</script>
 
   
 </body>
