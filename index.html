@@ -809,15 +809,12 @@ function renderBatch() {
 
 async function loadFilms() {
   const cached = localStorage.getItem('films');
-  const ts = localStorage.getItem('filmsTimestamp');
-  const maxAge = 1000 * 60 * 60 * 48; // 48 годин
 
-  if (cached && ts && (Date.now() - Number(ts) < maxAge)) {
+  // 1) Якщо є кеш — миттєво рендеримо з нього
+  if (cached) {
     films = JSON.parse(cached);
     shuffleArray(films);
-    console.log('✅ Фільми з кешу');
 
-    // Оновлюємо UI
     showFilmOfTheDay();
     showCollections();
     showGenres();
@@ -825,27 +822,48 @@ async function loadFilms() {
     showYearFilters();
 
     isDataLoaded = true;
-
-    // Перший батч карток + оновлення їх рейтингів
     currentFilms = films;
     offset = 0;
+    document.getElementById('genre-results').innerHTML = '';
     renderBatch();
-   
-
-
-    return;
+  } else {
+    // Якщо кешу немає — можна показати спінер (якщо хочете)
+    const loader = document.getElementById('home-loading');
+    if (loader) loader.style.display = 'block';
   }
 
-  // Якщо в кеші немає — підтягуємо з мережі
-  await fetchAndUpdateFilms();
-  isDataLoaded = true;
+  // 2) Завжди пробуємо підтягнути свіже у фоні
+  try {
+    const res = await fetch(
+      `https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1?cb=${Date.now()}`
+    );
+    const fresh = await res.json();
 
-  // Перший батч карток + оновлення їх рейтингів
-  currentFilms = films;
-  offset = 0;
-  renderBatch();
-  
+    if (Array.isArray(fresh) && fresh.length) {
+      films = fresh;
+      shuffleArray(films);
+      localStorage.setItem('films', JSON.stringify(films));
+      localStorage.setItem('filmsTimestamp', Date.now().toString());
+
+      // легкий перерендер актуальними даними
+      document.getElementById('genre-results').innerHTML = '';
+      currentFilms = films;
+      offset = 0;
+      renderBatch();
+      showFilmOfTheDay();
+      showCollections();
+      showCountryFilters();
+      showYearFilters();
+    }
+  } catch (e) {
+    console.warn('Не вдалося оновити дані з мережі:', e);
+  } finally {
+    const loader = document.getElementById('home-loading');
+    if (loader) loader.style.display = 'none';
+    isDataLoaded = true;
+  }
 }
+
 
 
 
