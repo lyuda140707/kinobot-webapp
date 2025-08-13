@@ -1898,96 +1898,97 @@ document.querySelectorAll('.genre-btn[data-genre]').forEach(button => {
 
 // Обробник пошуку
 // Обробник пошуку
+// Обробник пошуку
 document.getElementById('searchInput').addEventListener('input', () => {
-  const val = document.getElementById('searchInput').value.trim().toLowerCase();
+  const val = unmaskWord(document.getElementById('searchInput').value).trim().toLowerCase();
   const container = document.getElementById('searchResults');
   container.innerHTML = '';
   if (!val) return;
 
-  // 1. Знайшли всі збіги
-  const results = films.filter(f =>
-    unmaskWord(f['Назва'] || '').toLowerCase().includes(unmaskWord(val))
+  // 1) Збіги по назві (з урахуванням mask/unmask)
+  const hits = films.filter(f =>
+    unmaskWord(f['Назва'] || '').toLowerCase().includes(val)
   );
 
-  // ...після const results = films.filter(...)
-
-const uniqueResults = [];
-const seenTitles = new Set();
-for (const f of results) {
-  if (!seenTitles.has(f['Назва'])) {
-    uniqueResults.push(f);
-    seenTitles.add(f['Назва']);
+  // 2) Нічого не знайдено
+  if (hits.length === 0) {
+    container.innerHTML = `
+      <p>Фільм не знайдено 😢</p>
+      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити цей фільм</button>
+    `;
+    return;
   }
-}
 
-  // 2. Лівому лишаємо тільки одну копію кожної назви
-  const matchedSeries = results.filter(f => isEpisodicType(f['Тип']));
-const grouped = groupSeriesEpisodes(matchedSeries);
+  // 3) Якщо серед результатів є серіали — показуємо їх згруповано і ВИХОДИМО
+  const seriesHits = hits.filter(f => isEpisodicType(f['Тип']));
+  if (seriesHits.length > 0) {
+    const groupedSeries = groupSeriesEpisodes(seriesHits);
+    container.innerHTML = Object.entries(groupedSeries).map(([title, episodes]) => {
+      const safe = safeId(title);
+      const count = episodes.length;
+      const isPro = localStorage.getItem('isProUser') === 'true';
+      const isProSeries = episodes[0]['Доступ'] === 'PRO';
+      const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
 
-container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-  const safe = safeId(title);
-  const count = episodes.length;
+      return `
+        <div class="film-card" id="film-${safe}">
+          <img src="${poster}" class="film-img" alt="${title}">
+          <h3>${maskWord(title)}</h3>
+          <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
+          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+            📺 Показати серії (${count})
+          </button>
+          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+            ${episodes.map((ep, i) => {
+              const label = episodeLabel(ep, i);
+              return ep.message_id
+                ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
+                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+    return;
+  }
+
+  // 4) Інакше — звичайні фільми, прибираємо дублікати за назвою
+  const unique = [];
+  const seen = new Set();
+  for (const f of hits) {
+    if (!seen.has(f['Назва'])) { seen.add(f['Назва']); unique.push(f); }
+  }
+
   const isPro = localStorage.getItem('isProUser') === 'true';
-  const isProSeries = episodes[0]['Доступ'] === 'PRO';
-  const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
-
-  return `
-    <div class="film-card" id="film-${safe}">
-      <img src="${poster}" class="film-img" alt="${title}">
-      <h3>${maskWord(title)}</h3>
-      <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
-      <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-        📺 Показати серії (${count})
-      </button>
-      <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-        ${episodes.map((ep, i) => {
-          const label = episodeLabel(ep, i);
-          return ep.message_id
-            ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
-            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-}).join('');
-return;
-
-
-  container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-    const safe = safeId(title);
-    const count = episodes.length;
-    const isPro = localStorage.getItem('isProUser') === 'true';
-    const isProSeries = episodes[0]['Доступ'] === 'PRO';
-    const poster = (isProSeries && !isPro)
-      ? placeholderImage
-      : (episodes[0]['Фото'] || placeholderImage);
+  container.innerHTML = unique.map(f => {
+    const id = safeId(f['Назва']);
+    const locked = f['Доступ'] === 'PRO' && !isPro;
+    const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
+    const watchBtn = locked
+      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+      : (f['message_id']
+          ? `<button class="search-button" onclick="requestFilmByName('${f['message_id']}')">▶️ Дивитись</button>`
+          : `<button class="search-button" onclick="openVideoById('${f['Назва']}')">▶️ Дивитись</button>`);
 
     return `
-      <div class="film-card" id="film-${safe}">
-        <img src="${poster}" class="film-img" alt="${title}">
-        <h3>${maskWord(title)}</h3>
-        <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
-        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-          📺 Показати серії (${count})
-        </button>
-        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-          ${episodes.map((ep, i) => {
-            const label = ep['Опис'] || `Серія ${i+1}`;
-            return ep.message_id
-              ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
-              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-          }).join('')}
+      <div class="film-card" id="film-${id}">
+        <img src="${img}" alt="${f['Назва']}" class="film-img">
+        <h3>${maskWord(f['Назва'])}</h3>
+        <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
+        <p>${f['Опис'] || ''}</p>
+        <div class="film-actions">
+          ${renderControls(f['Назва'], f['Опис'])}
+          ${watchBtn}
         </div>
       </div>
     `;
   }).join('');
-  return;
-}
+});
 
 
   // === Якщо серед унікальних результатів є серіали — групуємо їх ===
   const seriesResults = uniqueResults.filter(f => isEpisodicType(f['Тип']));
-const grouped = groupSeriesEpisodes(seriesResults);
+  const grouped = groupSeriesEpisodes(seriesResults);
 
 // Рендер той самий, що в пункті 5.1
 container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
