@@ -754,6 +754,22 @@ function episodeLabel(ep, i) {
   </div>
 </div>
 
+<div id="request-loading" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+">
+  <div style="text-align:center;">
+    <div class="loader"></div>
+    <div style="margin-top: 10px; color:#00f7ff;">Надсилаємо запит…</div>
+  </div>
+</div>
+
+
 
   <script>
 
@@ -2181,64 +2197,62 @@ function rateFilm(filmName, action) {
 
 
 async function suggestFilm() {
-  const val = document.getElementById('searchInput').value.trim();
+  const inputEl = document.getElementById('searchInput');
+  const val = (inputEl?.value || '').trim(); // якщо використовуєш maskWord — можеш тут робити unmaskWord(val)
   if (!val || isSending) return;
 
-  const tg = window.Telegram.WebApp;
-  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+  const tg = window.Telegram?.WebApp;
+  const userId = tg?.initDataUnsafe?.user?.id;
+  if (!userId) {
     alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
     window.location.reload();
     return;
   }
-  const user = tg.initDataUnsafe.user;
-  
 
   isSending = true;
 
+  // тимчасово блокуємо кнопку, щоб не спамити запитами
   const btn = document.querySelector(".suggest-button");
   if (btn) {
     btn.disabled = true;
-    setTimeout(() => btn.disabled = false, 7000);
+    setTimeout(() => (btn.disabled = false), 7000);
   }
 
-  document.getElementById('request-loading').style.display = 'flex'; // ⏳ Показати
+  // показати оверлей, якщо він існує в DOM
+  const overlay = document.getElementById('request-loading');
+  if (overlay) overlay.style.display = 'flex';
 
   try {
-    await fetch('https://relax-time2.onrender.com/ping');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // “розбудити” бекенд + невелика пауза
+    try { await fetch('https://relax-time2.onrender.com/ping'); } catch {}
+    await new Promise(r => setTimeout(r, 800));
 
+    // основний запит з ретраями
     const res = await requestWithRetry('https://relax-time2.onrender.com/request-film', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id, film_name: val })
+      body: JSON.stringify({ user_id: userId, film_name: val })
     });
 
-    const contentType = res.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      const data = await res.json();
+    // намагаємося зчитати JSON; якщо не JSON — вважаємо помилкою
+    let data = null;
+    try { data = await res.clone().json(); } catch {}
+
+    if (data) {
       showSuggestResult({
-        success: data.ok !== false,
-        remaining_requests: data.remaining_requests || '∞',
-        is_pro: data.is_pro
+        success: res.ok && data.ok !== false,
+        remaining_requests: data.remaining_requests ?? '∞',
+        is_pro: !!data.is_pro
       });
     } else {
-      showSuggestResult({
-        success: false,
-        is_pro: false,
-        remaining_requests: 0
-      });
+      showSuggestResult({ success: false, remaining_requests: 0, is_pro: false });
     }
-
   } catch (error) {
     console.error(error);
-    showSuggestResult({
-      success: false,
-      is_pro: false,
-      remaining_requests: 0
-    });
+    showSuggestResult({ success: false, remaining_requests: 0, is_pro: false });
   } finally {
     isSending = false;
-    document.getElementById('request-loading').style.display = 'none'; // ⛔ Сховати
+    if (overlay) overlay.style.display = 'none';
   }
 }
 
@@ -2538,6 +2552,17 @@ function toggleEpisodes(id, btn) {
   window.openConfirm      = openConfirm;
   window.confirmOpen      = confirmOpen;
   window.cancelOpen       = cancelOpen;
+  window.suggestFilm      = suggestFilm;
+
+
+  window.openVideoById       = openVideoById;
+  window.requestFilmByName   = requestFilmByName;
+  window.showProModal        = showProModal;
+  window.closeProModal       = closeProModal;
+  window.goToPro             = goToPro;
+  window.closeVideo          = closeVideo;
+  window.openGenreGroup      = openGenreGroup;
+  window.switchTab           = switchTab;
     
 // Запуск регулярної перевірки PRO-статусу
 function startProPolling() {
