@@ -766,6 +766,13 @@ function episodeLabel(ep, i) {
     const BATCH_SIZE = 50;
     let currentFilms = [];
     let offset = 0;
+    
+  function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
 function renderBatch() {
   const container = document.getElementById('genre-results');
@@ -2302,12 +2309,6 @@ setTimeout(() => {
   }
 }, 20000);
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
 
 function goToSeries(seriesTitle) {
   switchTab('categories', document.querySelector('[data-tab=categories]'));
