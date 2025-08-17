@@ -1155,8 +1155,9 @@ function confirmOpen() {
       window.open(pendingLink, '_blank');
     } finally {
       pendingLink = "";
+      modal.style.display = 'none';   // ⬅️ додано
     }
-  }, 200); // ← Ось ця кома і правильне закриття
+  }, 200);
 }
 
 
@@ -1174,8 +1175,11 @@ function openConfirm(link) {
   }
 
 
-
-
+  window.toggleEpisodes   = toggleEpisodes;
+  window.closeDonatePopup = closeDonatePopup;
+  window.openConfirm      = openConfirm;
+  window.confirmOpen      = confirmOpen;
+  window.cancelOpen       = cancelOpen;
 
 
 
@@ -2733,6 +2737,8 @@ document.getElementById('send-admin-message-btn').onclick = async function() {
     </div>
   </div>
 </div>
+
+
 <script>
  
 </script>
