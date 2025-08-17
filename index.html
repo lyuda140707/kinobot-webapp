@@ -1166,11 +1166,7 @@ function openConfirm(link) {
     setTimeout(() => { modal.style.display = 'none'; pendingLink = ""; }, 200);
   }
 
-function cancelOpen() {
-  const modal = document.getElementById('confirm-modal');
-  modal.classList.remove('show');
-  pendingLink = "";
-}
+
 
 
 
@@ -2669,6 +2665,7 @@ document.getElementById('send-admin-message-btn').onclick = async function() {
     alert('Помилка мережі. Спробуйте ще раз.');
   }
 };
+});
 
 </script>
 
