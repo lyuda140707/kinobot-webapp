@@ -2058,47 +2058,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
 
 
   // === Якщо серед унікальних результатів є серіали — групуємо їх ===
-  const seriesResults = uniqueResults.filter(f => isEpisodicType(f['Тип']));
-  const grouped = groupSeriesEpisodes(seriesResults);
 
-// Рендер той самий, що в пункті 5.1
-container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-  const safe = safeId(title);
-  const count = episodes.length;
-  const isPro = localStorage.getItem('isProUser') === 'true';
-  const isProSeries = episodes[0]['Доступ'] === 'PRO';
-  const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
-
-  return `
-    <div class="film-card" id="film-${safe}">
-      <img src="${poster}" class="film-img" alt="${title}">
-      <h3>${maskWord(title)}</h3>
-      <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
-      <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-        📺 Показати серії (${count})
-      </button>
-      <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-        ${episodes.map((ep, i) => {
-          const label = episodeLabel(ep, i);
-          return ep.message_id
-            ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
-            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-}).join('');
-return;
-
-
-  // === Якщо нічого не знайдено ===
-  if (uniqueResults.length === 0) {
-    container.innerHTML = `
-      <p>Фільм не знайдено 😢</p>
-      <button class="suggest-button" onclick="suggestFilm()">➕ Замовити цей фільм</button>
-    `;
-    return;
-  }
 
   // === Інакше — звичайний рендер унікальних фільмів ===
   container.innerHTML = uniqueResults.map(f => {
