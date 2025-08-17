@@ -401,6 +401,44 @@
   box-shadow: none;
 }
 
+/* 🌈 Яскраві дитячі кнопки лише для "Категорії → Мультики" */
+#group-cartoons .genre-btn {
+  border: 0;
+  color: #000;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 24px;
+  letter-spacing: .2px;
+  box-shadow:
+    0 6px 0 rgba(0,0,0,.25),
+    0 0 12px rgba(255, 231, 76, .5);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+/* 🎬 "Мультфільми" (1-а кнопка) — жовто-помаранчевий градієнт */
+#group-cartoons .genre-btn:nth-child(1) {
+  background: linear-gradient(135deg, #FFE082, #FF8F00);
+}
+
+/* 📺 "Мультсеріали" (2-а кнопка) — бірюзово-блакитний градієнт */
+#group-cartoons .genre-btn:nth-child(2) {
+  background: linear-gradient(135deg, #64FFDA, #40C4FF);
+}
+
+/* Ховери/клік – трохи «стрибок» і яскравіше світіння */
+#group-cartoons .genre-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow:
+    0 8px 0 rgba(0,0,0,.25),
+    0 0 16px rgba(255, 231, 76, .7);
+}
+#group-cartoons .genre-btn:active {
+  transform: translateY(0) scale(.98);
+  box-shadow:
+    0 4px 0 rgba(0,0,0,.25),
+    0 0 10px rgba(255, 231, 76, .55);
+}
 
   </style>
  
