@@ -805,7 +805,65 @@ function renderBatch() {
   offset += batch.length;
 }
 
+// ==== SUPABASE (підстав свої значення) ====
+const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co';   // Settings → API → Project URL
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplcmxxdmJtcXN6b21sb25kbHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzMzg3NzQsImV4cCI6MjA3MDkxNDc3NH0.8wUBYIeQRC6KVp6vdzv0oqofIf4PeZyzbV5GcD0vxTE';              // Settings → API → anon public
 
+// читаємо REST’ом і мапимо у старий формат з українськими ключами
+async function fetchFilmsFromSupabase() {
+  const pageSize = 1000;
+  const base = `${SUPABASE_URL}/rest/v1/films?select=title,type,genre,description,photo,message_id,collection,country,year,access,imdb,season,episode&order=id.asc`;
+
+  let rows = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const res = await fetch(`${base}&limit=${pageSize}&offset=${offset}`, {
+      headers: {
+        apikey: SUPABASE_ANON,
+        Authorization: `Bearer ${SUPABASE_ANON}`
+      }
+    });
+    if (!res.ok) throw new Error('Supabase fetch failed: ' + (await res.text()));
+    const batch = await res.json();
+    rows = rows.concat(batch);
+    if (batch.length < pageSize) break; // остання сторінка
+  }
+
+  // Мапінг у ваш старий формат з українськими ключами
+  return rows.map(r => ({
+    'Назва'      : r.title ?? '',
+    'Тип'        : r.type ?? '',
+    'Жанр'       : r.genre ?? '',
+    'Опис'       : r.description ?? '',
+    'Фото'       : r.photo ?? '',
+    'IMDb'       : r.imdb ?? '',
+    'Добірка'    : r.collection ?? '',
+    'Доступ'     : r.access ?? '',
+    'Країна'     : r.country ?? '',
+    'Рік'        : r.year ?? '',
+    'message_id' : r.message_id ?? '',
+    'Сезон'      : r.season ?? '',
+    'Серія'      : r.episode ?? ''
+  }));
+}
+
+    
+
+// (необов’язково) запасний варіант — твій старий Google Sheet
+async function fetchFilmsFromGoogle() {
+  const url = `https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1?cb=${Date.now()}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Google fetch failed: ' + res.status);
+  return await res.json();
+}
+
+// єдина точка: пробуємо Supabase → якщо впав, йдемо в Google
+async function fetchFilms() {
+  try { return await fetchFilmsFromSupabase(); }
+  catch (e) {
+    console.warn('Supabase недоступний, fallback до Google:', e);
+    return await fetchFilmsFromGoogle();
+  }
+}
 
 async function loadFilms() {
   const cached = localStorage.getItem('films');
@@ -834,10 +892,7 @@ async function loadFilms() {
 
   // 2) Завжди пробуємо підтягнути свіже у фоні
   try {
-    const res = await fetch(
-      `https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1?cb=${Date.now()}`
-    );
-    const fresh = await res.json();
+    const fresh = await fetchFilms();   // ← і все
 
     if (Array.isArray(fresh) && fresh.length) {
       films = fresh;
@@ -871,10 +926,8 @@ async function fetchAndUpdateFilms() {
   try {
     document.getElementById('home-loading').style.display = 'block';
 
-    const res = await fetch(
-      `https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1?cb=${Date.now()}`
-    );
-    const loadedFilms = await res.json();
+    const loadedFilms = await fetchFilms();   // ← і все
+
 
     if (!loadedFilms || loadedFilms.length === 0) {
       throw new Error('Отримано пустий список фільмів');
