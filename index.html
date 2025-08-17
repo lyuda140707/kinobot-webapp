@@ -1168,19 +1168,17 @@ function openConfirm(link) {
     requestAnimationFrame(() => modal.classList.add('show'));
   }
 
-  function cancelOpen() {
+function cancelOpen() {
     const modal = document.getElementById('confirm-modal');
     modal.classList.remove('show');
     setTimeout(() => { modal.style.display = 'none'; pendingLink = ""; }, 200);
   }
-
 
   window.toggleEpisodes   = toggleEpisodes;
   window.closeDonatePopup = closeDonatePopup;
   window.openConfirm      = openConfirm;
   window.confirmOpen      = confirmOpen;
   window.cancelOpen       = cancelOpen;
-
 
 
 function closeVideo() {
@@ -1193,11 +1191,6 @@ function closeVideo() {
     videoOverlay.style.display = 'none';
   }, 400);
 }
-
-
-
-
-
 
 function showFilmOfTheDay() {
   document.getElementById('film-day-img').classList.remove('skeleton');
