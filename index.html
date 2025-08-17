@@ -783,8 +783,9 @@ function renderBatch() {
    let btn = '';
    if (isProFilm && !isPro) {
      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['message_id']) {
-     btn = `<button class="search-button" onclick="requestFilmByName('${film['message_id']}')">▶️ Дивитись</button>`;
+    } else if (film['message_id'] || film['file_id']) {
+     const mid = film['message_id'] || film['file_id'];
+     btn = `<button class="search-button" onclick="requestFilmByName('${mid}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -806,21 +807,18 @@ function renderBatch() {
 }
 
 // ==== SUPABASE (підстав свої значення) ====
-const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co';   // Settings → API → Project URL
+const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co'; // перевір точний URL!
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplcmxxdmJtcXN6b21sb25kbHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzMzg3NzQsImV4cCI6MjA3MDkxNDc3NH0.8wUBYIeQRC6KVp6vdzv0oqofIf4PeZyzbV5GcD0vxTE';              // Settings → API → anon public
 
 // читаємо REST’ом і мапимо у старий формат з українськими ключами
 async function fetchFilmsFromSupabase() {
   const pageSize = 1000;
-  const base = `${SUPABASE_URL}/rest/v1/films?select=title,type,genre,description,photo,message_id,collection,country,year,access,imdb,season,episode&order=id.asc`;
+  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb&order=id.asc`;
 
   let rows = [];
-  for (let offset = 0; ; offset += pageSize) {
-    const res = await fetch(`${base}&limit=${pageSize}&offset=${offset}`, {
-      headers: {
-        apikey: SUPABASE_ANON,
-        Authorization: `Bearer ${SUPABASE_ANON}`
-      }
+  for (let pageOffset = 0; ; pageOffset += pageSize) {
+    const res = await fetch(`${base}&limit=${pageSize}&offset=${pageOffset}`, {
+      headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
     });
     if (!res.ok) throw new Error('Supabase fetch failed: ' + (await res.text()));
     const batch = await res.json();
@@ -841,8 +839,9 @@ async function fetchFilmsFromSupabase() {
     'Країна'     : r.country ?? '',
     'Рік'        : r.year ?? '',
     'message_id' : r.message_id ?? '',
-    'Сезон'      : r.season ?? '',
-    'Серія'      : r.episode ?? ''
+    'file_id'    : r.file_id ?? '',
+   
+    
   }));
 }
 
@@ -1153,6 +1152,20 @@ function confirmOpen() {
   }, 200); // ← Ось ця кома і правильне закриття
 }
 
+
+function openConfirm(link) {
+    pendingLink = link;
+    const modal = document.getElementById('confirm-modal');
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => modal.classList.add('show'));
+  }
+
+  function cancelOpen() {
+    const modal = document.getElementById('confirm-modal');
+    modal.classList.remove('show');
+    setTimeout(() => { modal.style.display = 'none'; pendingLink = ""; }, 200);
+  }
+
 function cancelOpen() {
   const modal = document.getElementById('confirm-modal');
   modal.classList.remove('show');
@@ -1358,9 +1371,10 @@ function showSeries(type = 'Серіал') {
         <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
           ${episodes.map((ep, i) => {
             const label = epLabel(ep, i);
-            return ep.message_id
-              ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
-              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+            const mid = ep.message_id || ep.file_id;
+            return mid
+            ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
+            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
           }).join('')}
         </div>
       </div>
@@ -1446,9 +1460,10 @@ function filterByGenre(genre) {
         <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
           ${eps.map((ep, i) => {
             const label = episodeLabel(ep, i);
-            return ep.message_id
-              ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
-              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+            const mid = ep.message_id || ep.file_id;
+            return mid
+            ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
+            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
           }).join('')}
         </div>
       </div>
@@ -1508,8 +1523,9 @@ function filterByYear(year) {
     let buttons = '';
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
-    } else if (film['message_id']) {
-      buttons = `<button class="search-button" onclick="openVideoById('${film['message_id']}')">▶️ Дивитись</button>`;
+   } else if (film['message_id'] || film['file_id']) {
+      const mid = film['message_id'] || film['file_id'];
+      buttons = `<button class="search-button" onclick="requestFilmByName('${mid}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -2012,8 +2028,9 @@ document.getElementById('searchInput').addEventListener('input', () => {
           <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
             ${episodes.map((ep, i) => {
               const label = episodeLabel(ep, i);
-              return ep.message_id
-                ? `<button class="search-button" onclick="requestFilmByName('${ep.message_id}')">${label}</button>`
+              const mid = ep.message_id || ep.file_id;
+              return mid
+                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
                 : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
             }).join('')}
           </div>
@@ -2037,8 +2054,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
     const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
     const watchBtn = locked
       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-      : (f['message_id']
-          ? `<button class="search-button" onclick="requestFilmByName('${f['message_id']}')">▶️ Дивитись</button>`
+      : ((f['message_id'] || f['file_id'])
+          ? `<button class="search-button" onclick="requestFilmByName('${(f['message_id']||f['file_id'])}')">▶️ Дивитись</button>`
           : `<button class="search-button" onclick="openVideoById('${f['Назва']}')">▶️ Дивитись</button>`);
 
     return `
@@ -2057,34 +2074,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
 });
 
 
-  // === Якщо серед унікальних результатів є серіали — групуємо їх ===
-
-
-  // === Інакше — звичайний рендер унікальних фільмів ===
-  container.innerHTML = uniqueResults.map(f => {
-    const id = safeId(f['Назва']);
-    const isPro = localStorage.getItem('isProUser') === 'true';
-    const locked = f['Доступ'] === 'PRO' && !isPro;
-    const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
-    const watchBtn = locked
-      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-      : `<button class="search-button" onclick="openVideoById('${f['Назва']}')">▶️ Дивитись</button>`;
-
-    return `
-      <div class="film-card" id="film-${id}">
-        <img src="${img}" alt="${f['Назва']}" class="film-img">
-        <h3>${maskWord(f['Назва'])}</h3>
-        <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
-        <p>${f['Опис'] || ''}</p>
-        <div class="film-actions">
-          ${renderControls(f['Назва'], f['Опис'])}
-          ${watchBtn}
-        </div>
-      </div>
-    `;
-  }).join('');
-});
-
+ 
 
 
 
@@ -2103,7 +2093,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
 function addToFavorites(title, description, message_id) {
   // Знайти реальний message_id у масиві films
   const film = films.find(f => unmaskWord(f['Назва']) === unmaskWord(title));
-  const real_message_id = film?.message_id || message_id || '';
+  const real_message_id = film?.message_id || film?.file_id || message_id || '';
 
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
   if (favs.find(f => f.title === title)) {
@@ -2362,8 +2352,9 @@ function goToSeries(seriesTitle) {
           <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${episodes.length}">
             ${episodes.map((ep, i) => {
               const label = episodeLabel(ep, i);
-              return ep.message_id
-                ? `<button class="search-button" onclick="requestFilmByName('${ep['message_id']}')">${label}</button>`
+              const mid = ep.message_id || ep.file_id;
+              return mid
+                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
                 : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
             }).join('')}
           </div>
@@ -2957,6 +2948,30 @@ function closeServiceErrorModal() {
     });
   });
 </script>
+<!-- Loader для запитів "Замовити фільм" -->
+<div id="request-loading" style="display:none;margin-top:10px;text-align:center;">
+  <span class="loader"></span>
+</div>
+
+<!-- Порожній контейнер історії, щоб не ламався .innerHTML=... -->
+<div id="history-list" style="display:none;"></div>
+
+<!-- Модалка помилки сервісу -->
+<div id="service-error-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;padding:20px;border-radius:12px;max-width:320px;text-align:center;box-shadow:0 0 20px #00f7ff;">
+    <div id="service-error-message" style="color:#fff;margin-bottom:16px;">Сервіс тимчасово недоступний</div>
+    <button onclick="document.getElementById('service-error-modal').style.display='none'"
+            style="padding:8px 16px;background:#00f7ff;color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">ОК</button>
+  </div>
+</div>
+
+<!-- Оверлей "перезавантажити" -->
+<div id="error-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;align-items:center;justify-content:center;">
+  <div style="background:#222;color:#fff;padding:20px;border-radius:12px;text-align:center;max-width:320px;">
+    <p style="margin-bottom:14px;">Втрачено з’єднання. Спробувати перезавантажити?</p>
+    <button id="reload-btn" style="padding:8px 16px;background:#00f7ff;color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Перезавантажити</button>
+  </div>
+</div>
 
   
 </body>
