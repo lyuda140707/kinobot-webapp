@@ -1174,11 +1174,7 @@ function cancelOpen() {
     setTimeout(() => { modal.style.display = 'none'; pendingLink = ""; }, 200);
   }
 
-  window.toggleEpisodes   = toggleEpisodes;
-  window.closeDonatePopup = closeDonatePopup;
-  window.openConfirm      = openConfirm;
-  window.confirmOpen      = confirmOpen;
-  window.cancelOpen       = cancelOpen;
+ 
 
 
 function closeVideo() {
@@ -2535,6 +2531,14 @@ function toggleEpisodes(id, btn) {
     : `📺 Показати серії (${grid.dataset.count})`;
 }
 
+
+  // Робимо функції глобальними для inline onClick
+  window.toggleEpisodes   = toggleEpisodes;
+  window.closeDonatePopup = closeDonatePopup;
+  window.openConfirm      = openConfirm;
+  window.confirmOpen      = confirmOpen;
+  window.cancelOpen       = cancelOpen;
+    
 // Запуск регулярної перевірки PRO-статусу
 function startProPolling() {
   if (proPollInterval) return;
