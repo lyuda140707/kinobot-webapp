@@ -10,7 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <style>
 
-    
+/* Рік під назвою */
+.film-year{
+  font-size:12px;
+  color:#bbb;
+  margin:2px 0 6px;
+}
+
 
     
     body {
@@ -858,6 +864,7 @@ function renderBatch() {
       <div class="film-card" id="film-${id}">
         <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
         <h3>${maskWord(film['Назва'])}</h3>
+        ${film['Рік'] ? `<p class="film-year">📅 ${film['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
         <p>${film['Опис'] || ''}</p>
         <div class="film-actions">
@@ -1418,6 +1425,7 @@ function showSeries(type = 'Серіал') {
       <div class="film-card" id="film-${safe}">
         <img src="${poster}" class="film-img" alt="${title}">
         <h3>${maskWord(title)}</h3>
+        ${episodes[0]['Рік'] ? `<p class="film-year">📅 ${episodes[0]['Рік']}</p>` : ''}
         ${renderControls(title, episodes[0]['Опис'])}
         <p class="film-imdb">IMDb: ${imdb}</p>
         <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
@@ -1507,6 +1515,7 @@ function filterByGenre(genre) {
       <div class="film-card" id="film-${safe}">
         <img src="${poster}" class="film-img" alt="${title}">
         <h3>${maskWord(title)}</h3>
+        ${eps[0]['Рік'] ? `<p class="film-year">📅 ${eps[0]['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
         ${renderControls(title, eps[0]['Опис'])}
         <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
@@ -1587,6 +1596,7 @@ function filterByYear(year) {
       <div class="film-card" id="film-${id}">
         <img src="${imgSrc}" alt="${film['Назва']}">
         <h3>${maskWord(film['Назва'])}</h3>
+        ${film['Рік'] ? `<p class="film-year">📅 ${film['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
         <p>${film['Опис']||''}</p>
         <div class="film-actions">
@@ -2076,6 +2086,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
         <div class="film-card" id="film-${safe}">
           <img src="${poster}" class="film-img" alt="${title}">
           <h3>${maskWord(title)}</h3>
+          ${episodes[0]['Рік'] ? `<p class="film-year">📅 ${episodes[0]['Рік']}</p>` : ''}
           <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
           <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
             📺 Показати серії (${count})
@@ -2117,6 +2128,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
       <div class="film-card" id="film-${id}">
         <img src="${img}" alt="${f['Назва']}" class="film-img">
         <h3>${maskWord(f['Назва'])}</h3>
+        ${f['Рік'] ? `<p class="film-year">📅 ${f['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
         <p>${f['Опис'] || ''}</p>
         <div class="film-actions">
@@ -2388,6 +2400,7 @@ function goToSeries(seriesTitle) {
         <div class="film-card" id="film-${safe}">
           <img src="${imgSrc}" alt="${title}" class="film-img">
           <h3>${maskWord(title)}</h3>
+          ${first['Рік'] ? `<p class="film-year">📅 ${first['Рік']}</p>` : ''}
           <p class="film-imdb">IMDb: ${imdb}</p>
           <p class="film-desc">${desc}</p>
 
