@@ -17,10 +17,44 @@
   margin:2px 0 6px;
 }
 .year-badge{
-  font-size: clamp(10px, 2.4vw, 12px);
-  padding: 4px 8px;
+  position: absolute;
+
+  /* ↘️ ставимо вниз праворуч */
+  bottom: 8px;
+  right: 8px;
+  top: auto;
+  left: auto;
+
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 10px;
+
+  /* темний фон + сильніше світіння у вашому бірюзовому стилі */
+  background: rgba(0,0,0,.45);
+  color: #eafefe;
+  border: 1px solid rgba(0,247,255,.65);
+  box-shadow:
+    0 0 10px rgba(0,247,255,.65),
+    0 0 18px rgba(0,247,255,.35);
+
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 
+/* трохи підсилюємо сяйво при наведенні на картку */
+.film-card:hover .year-badge{
+  transform: translateY(-1px) scale(1.05);
+  box-shadow:
+    0 0 12px rgba(0,247,255,.85),
+    0 0 24px rgba(0,247,255,.55);
+}
+
+.poster-wrap .year-badge{
+  bottom:8px; right:8px; top:auto; left:auto;
+}
     
     body {
       margin: 0;
@@ -280,21 +314,7 @@
   width: 100%;
 }
 
-.year-badge{
-  position:absolute;
-  top:8px; left:8px;
-  padding:4px 8px;
-  font-size:12px;
-  border-radius:10px;
-  background: rgba(0,0,0,.45);
-  color:#eafefe;
-  border:1px solid rgba(0,247,255,.5);
-  box-shadow: 0 0 10px rgba(0,247,255,.25);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
-}
+
 
 
 .film-content {
