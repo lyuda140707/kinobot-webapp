@@ -1679,58 +1679,82 @@ function removeFromFavorites(index) {
 
 
 
-    function searchInBot(query) {
-      // 🧹 Повне очищення залишків
-document.getElementById('history-list')?.innerHTML = '';
-document.getElementById('searchResults')?.innerHTML = '';
-document.querySelectorAll('.film-card').forEach(card => card.remove());
-      
-  // ❗️Спочатку ховаємо всі секції (прибирає візуальний "перекіс")
+async function searchInBot(query) {
+  // 🧹 повне очищення залишків
+  const historyList   = document.getElementById('history-list');
+  const searchResults = document.getElementById('searchResults');
+  if (historyList)   historyList.innerHTML = '';
+  if (searchResults) searchResults.innerHTML = '';
+  document.querySelectorAll('.film-card').forEach(card => card.remove());
+
+  // ❗️сховати всі секції
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  // ✅ Повертаємось на головну
-  document.getElementById('home').classList.add('active');
-  document.querySelector('[data-tab=home]')?.classList.add('active');
+  // ✅ повертаємось на головну
+  const home = document.getElementById('home');
+  if (home) home.classList.add('active');
+  const homeBtn = document.querySelector('[data-tab=home]');
+  if (homeBtn) homeBtn.classList.add('active');
 
-  const tg = window.Telegram.WebApp;
-  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
+  // 🔐 Telegram user
+  const tg   = window.Telegram && window.Telegram.WebApp;
+  const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+  if (!user || typeof user.id !== 'number') {
+    alert('⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!');
     window.location.reload();
     return;
   }
-  const user = tg.initDataUnsafe.user;
 
+  // ⏳ loader
+  const loader = document.getElementById('loading-indicator');
+  if (loader) loader.style.display = 'block';
 
-  document.getElementById("loading-indicator").style.display = "block";
+  // очистити поле пошуку
+  const searchInputEl = document.getElementById('searchInput');
+  if (searchInputEl) searchInputEl.value = '';
+  if (searchResults) searchResults.innerHTML = '';
 
-  // Очищаємо пошук
-  document.getElementById('searchInput').value = '';
-  document.getElementById('searchResults').innerHTML = '';
+  // 📨 запит до бекенда
+  const q = (query || '').toString().trim();
+  try {
+    const resp = await fetch('https://relax-time2.onrender.com/search-in-bot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id, query: q })
+    });
+    const d = await resp.json().catch(() => ({}));
 
-  fetch('https://relax-time2.onrender.com/search-in-bot', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: user.id, query })
-  }).then(r => r.json()).then(d => {
     if (d.found && d.videoUrl) {
-      const existing = JSON.parse(localStorage.getItem('history') || '[]');
-      if (!existing.find(f => f.title === query)) {
-        const film = films.find(f => f['Назва'] === query);
-        if (film) {
-          existing.unshift({ title: film['Назва'], description: film['Опис'] });
-          if (existing.length > 20) existing.pop();
-          localStorage.setItem('history', JSON.stringify(existing));
+      // оновити історію, якщо є локальний запис
+      try {
+        const existing = JSON.parse(localStorage.getItem('history') || '[]');
+        if (!existing.find(f => f.title === q)) {
+          const film = (Array.isArray(films) ? films : []).find(f => f['Назва'] === q);
+          if (film) {
+            existing.unshift({ title: film['Назва'], description: film['Опис'] });
+            if (existing.length > 20) existing.pop();
+            localStorage.setItem('history', JSON.stringify(existing));
+          }
         }
-      }
+      } catch {}
+
       window.location.href = d.videoUrl;
     } else {
-      showServiceErrorModal("Фільм не знайдено 😢");
+      (typeof showServiceErrorModal === 'function')
+        ? showServiceErrorModal('Фільм не знайдено 😢')
+        : alert('Фільм не знайдено 😢');
     }
-  }).catch(console.error).finally(() => {
-    document.getElementById("loading-indicator").style.display = "none";
-  });
+  } catch (e) {
+    console.error(e);
+    (typeof showServiceErrorModal === 'function')
+      ? showServiceErrorModal('⚠️ Сталася помилка при пошуку. Спробуйте ще раз.')
+      : alert('⚠️ Сталася помилка при пошуку. Спробуйте ще раз.');
+  } finally {
+    if (loader) loader.style.display = 'none';
+  }
 }
+
 
 
     
