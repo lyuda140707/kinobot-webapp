@@ -16,7 +16,10 @@
   color:#bbb;
   margin:2px 0 6px;
 }
-
+.year-badge{
+  font-size: clamp(10px, 2.4vw, 12px);
+  padding: 4px 8px;
+}
 
     
     body {
@@ -271,6 +274,27 @@
 }
 
 
+/* Обгортка постера + бейдж року */
+.poster-wrap{
+  position: relative;
+  width: 100%;
+}
+
+.year-badge{
+  position:absolute;
+  top:8px; left:8px;
+  padding:4px 8px;
+  font-size:12px;
+  border-radius:10px;
+  background: rgba(0,0,0,.45);
+  color:#eafefe;
+  border:1px solid rgba(0,247,255,.5);
+  box-shadow: 0 0 10px rgba(0,247,255,.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
 
 
 .film-content {
@@ -537,6 +561,13 @@ function episodeLabel(ep, i) {
   const e = (ep['Серія'] ?? ep['Епізод'] ?? '').toString().trim();
   if (s || e) return `${s ? `S${s}` : ''}${e ? `E${e}` : ''}` || `Епізод ${i+1}`;
   return (ep['Опис'] || '').trim() || `Епізод ${i+1}`;
+}
+  
+function poster(src, title, year){
+  return `<div class="poster-wrap">
+    <img src="${src}" alt="${title}" class="film-img">
+    ${year ? `<span class="year-badge">📅 ${year}</span>` : ''}
+  </div>`;
 }
 
 
@@ -862,9 +893,8 @@ function renderBatch() {
 
     return `
       <div class="film-card" id="film-${id}">
-        <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
+        ${poster(imgSrc, film['Назва'], film['Рік'])}
         <h3>${maskWord(film['Назва'])}</h3>
-        ${film['Рік'] ? `<p class="film-year">📅 ${film['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
         <p>${film['Опис'] || ''}</p>
         <div class="film-actions">
@@ -1416,16 +1446,15 @@ function showSeries(type = 'Серіал') {
 
     const safe = safeId(title);
     const isPro     = localStorage.getItem('isProUser') === 'true';
-    const isProFilm = episodes[0]['Доступ'] === 'PRO';
-    const poster    = (isProFilm && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
+    const isProFilm = episodes[0]['Доступ'] === 'PRO';const posterSrc = (isProFilm && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
+
     const count     = episodes.length;
     const imdb      = episodes[0]['IMDb'] || '—';
 
     return `
       <div class="film-card" id="film-${safe}">
-        <img src="${poster}" class="film-img" alt="${title}">
+        ${poster(posterSrc, title, episodes[0]['Рік'])}
         <h3>${maskWord(title)}</h3>
-        ${episodes[0]['Рік'] ? `<p class="film-year">📅 ${episodes[0]['Рік']}</p>` : ''}
         ${renderControls(title, episodes[0]['Опис'])}
         <p class="film-imdb">IMDb: ${imdb}</p>
         <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
@@ -1508,14 +1537,14 @@ function filterByGenre(genre) {
     const safe      = safeId(title);
     const isPro     = localStorage.getItem('isProUser') === 'true';
     const isProFilm = eps[0]['Доступ'] === 'PRO';
-    const poster    = (isProFilm && !isPro) ? placeholderImage : (eps[0]['Фото'] || placeholderImage);
+    const posterSrc = (isProFilm && !isPro) ? placeholderImage : (eps[0]['Фото'] || placeholderImage);
+
     const count     = eps.length;
 
     return `
       <div class="film-card" id="film-${safe}">
-        <img src="${poster}" class="film-img" alt="${title}">
+        ${poster(posterSrc, title, eps[0]['Рік'])}
         <h3>${maskWord(title)}</h3>
-        ${eps[0]['Рік'] ? `<p class="film-year">📅 ${eps[0]['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
         ${renderControls(title, eps[0]['Опис'])}
         <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
@@ -1594,9 +1623,8 @@ function filterByYear(year) {
 
     return `
       <div class="film-card" id="film-${id}">
-        <img src="${imgSrc}" alt="${film['Назва']}">
+        ${poster(imgSrc, film['Назва'], film['Рік'])}
         <h3>${maskWord(film['Назва'])}</h3>
-        ${film['Рік'] ? `<p class="film-year">📅 ${film['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
         <p>${film['Опис']||''}</p>
         <div class="film-actions">
@@ -2080,14 +2108,13 @@ document.getElementById('searchInput').addEventListener('input', () => {
       const count = episodes.length;
       const isPro = localStorage.getItem('isProUser') === 'true';
       const isProSeries = episodes[0]['Доступ'] === 'PRO';
-      const poster = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
+      const posterSrc = (isProSeries && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
+
 
       return `
         <div class="film-card" id="film-${safe}">
-          <img src="${poster}" class="film-img" alt="${title}">
+          ${poster(posterSrc, title, episodes[0]['Рік'])}
           <h3>${maskWord(title)}</h3>
-          ${episodes[0]['Рік'] ? `<p class="film-year">📅 ${episodes[0]['Рік']}</p>` : ''}
-          <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
           <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
             📺 Показати серії (${count})
           </button>
@@ -2126,9 +2153,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
 
     return `
       <div class="film-card" id="film-${id}">
-        <img src="${img}" alt="${f['Назва']}" class="film-img">
+        ${poster(img, f['Назва'], f['Рік'])}
         <h3>${maskWord(f['Назва'])}</h3>
-        ${f['Рік'] ? `<p class="film-year">📅 ${f['Рік']}</p>` : ''}
         <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
         <p>${f['Опис'] || ''}</p>
         <div class="film-actions">
@@ -2398,9 +2424,8 @@ function goToSeries(seriesTitle) {
 
       return `
         <div class="film-card" id="film-${safe}">
-          <img src="${imgSrc}" alt="${title}" class="film-img">
+          ${poster(imgSrc, title, first['Рік'])}
           <h3>${maskWord(title)}</h3>
-          ${first['Рік'] ? `<p class="film-year">📅 ${first['Рік']}</p>` : ''}
           <p class="film-imdb">IMDb: ${imdb}</p>
           <p class="film-desc">${desc}</p>
 
