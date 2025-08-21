@@ -9,15 +9,8 @@
   <link rel="stylesheet" href="style.css?v=50" />
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <style>
+
     
-
-.film-year {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #ccc;
-  opacity: 0.9;
-}
-
 
     
     body {
@@ -498,14 +491,6 @@ function unmaskWord(word) {
   return word.replace(/\u200B/g, '');
 }
 
-function renderTitleBlock(title, year) {
-  const y = (year ?? '').toString().trim();
-  return `
-    <h3>${maskWord(title)}</h3>
-    ${y ? `<div class="film-year">📅 ${y}</div>` : ''}
-  `;
-}
-
 
 
 function episodeKey(ep) {
@@ -872,7 +857,7 @@ function renderBatch() {
     return `
       <div class="film-card" id="film-${id}">
         <img src="${imgSrc}" alt="${film['Назва']}" class="film-img">
-        ${renderTitleBlock(film['Назва'], film['Рік'])}
+        <h3>${maskWord(film['Назва'])}</h3>
         <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
         <p>${film['Опис'] || ''}</p>
         <div class="film-actions">
@@ -1341,7 +1326,7 @@ function showYearFilters() {
 
     
 
-  function showCollections() {
+    function showCollections() {
   const container = document.getElementById('collections');
   const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
   container.innerHTML = names.map(name => {
@@ -1432,7 +1417,7 @@ function showSeries(type = 'Серіал') {
     return `
       <div class="film-card" id="film-${safe}">
         <img src="${poster}" class="film-img" alt="${title}">
-        ${renderTitleBlock(title, episodes[0]['Рік'])}
+        <h3>${maskWord(title)}</h3>
         ${renderControls(title, episodes[0]['Опис'])}
         <p class="film-imdb">IMDb: ${imdb}</p>
         <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
@@ -1521,7 +1506,7 @@ function filterByGenre(genre) {
     return `
       <div class="film-card" id="film-${safe}">
         <img src="${poster}" class="film-img" alt="${title}">
-        ${renderTitleBlock(title, eps[0]['Рік'])}
+        <h3>${maskWord(title)}</h3>
         <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
         ${renderControls(title, eps[0]['Опис'])}
         <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
@@ -1601,7 +1586,7 @@ function filterByYear(year) {
     return `
       <div class="film-card" id="film-${id}">
         <img src="${imgSrc}" alt="${film['Назва']}">
-        ${renderTitleBlock(film['Назва'], film['Рік'])}
+        <h3>${maskWord(film['Назва'])}</h3>
         <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
         <p>${film['Опис']||''}</p>
         <div class="film-actions">
@@ -1679,82 +1664,58 @@ function removeFromFavorites(index) {
 
 
 
-async function searchInBot(query) {
-  // 🧹 повне очищення залишків
-  const historyList   = document.getElementById('history-list');
-  const searchResults = document.getElementById('searchResults');
-  if (historyList)   historyList.innerHTML = '';
-  if (searchResults) searchResults.innerHTML = '';
-  document.querySelectorAll('.film-card').forEach(card => card.remove());
+    function searchInBot(query) {
+      // 🧹 Повне очищення залишків
+document.getElementById('history-list').innerHTML = '';
+document.getElementById('searchResults').innerHTML = '';
+document.querySelectorAll('.film-card').forEach(card => card.remove());
 
-  // ❗️сховати всі секції
+  // ❗️Спочатку ховаємо всі секції (прибирає візуальний "перекіс")
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  // ✅ повертаємось на головну
-  const home = document.getElementById('home');
-  if (home) home.classList.add('active');
-  const homeBtn = document.querySelector('[data-tab=home]');
-  if (homeBtn) homeBtn.classList.add('active');
+  // ✅ Повертаємось на головну
+  document.getElementById('home').classList.add('active');
+  document.querySelector('[data-tab=home]')?.classList.add('active');
 
-  // 🔐 Telegram user
-  const tg   = window.Telegram && window.Telegram.WebApp;
-  const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-  if (!user || typeof user.id !== 'number') {
-    alert('⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!');
+  const tg = window.Telegram.WebApp;
+  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
     window.location.reload();
     return;
   }
+  const user = tg.initDataUnsafe.user;
 
-  // ⏳ loader
-  const loader = document.getElementById('loading-indicator');
-  if (loader) loader.style.display = 'block';
 
-  // очистити поле пошуку
-  const searchInputEl = document.getElementById('searchInput');
-  if (searchInputEl) searchInputEl.value = '';
-  if (searchResults) searchResults.innerHTML = '';
+  document.getElementById("loading-indicator").style.display = "block";
 
-  // 📨 запит до бекенда
-  const q = (query || '').toString().trim();
-  try {
-    const resp = await fetch('https://relax-time2.onrender.com/search-in-bot', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id, query: q })
-    });
-    const d = await resp.json().catch(() => ({}));
+  // Очищаємо пошук
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
 
+  fetch('https://relax-time2.onrender.com/search-in-bot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: user.id, query })
+  }).then(r => r.json()).then(d => {
     if (d.found && d.videoUrl) {
-      // оновити історію, якщо є локальний запис
-      try {
-        const existing = JSON.parse(localStorage.getItem('history') || '[]');
-        if (!existing.find(f => f.title === q)) {
-          const film = (Array.isArray(films) ? films : []).find(f => f['Назва'] === q);
-          if (film) {
-            existing.unshift({ title: film['Назва'], description: film['Опис'] });
-            if (existing.length > 20) existing.pop();
-            localStorage.setItem('history', JSON.stringify(existing));
-          }
+      const existing = JSON.parse(localStorage.getItem('history') || '[]');
+      if (!existing.find(f => f.title === query)) {
+        const film = films.find(f => f['Назва'] === query);
+        if (film) {
+          existing.unshift({ title: film['Назва'], description: film['Опис'] });
+          if (existing.length > 20) existing.pop();
+          localStorage.setItem('history', JSON.stringify(existing));
         }
-      } catch {}
-
+      }
       window.location.href = d.videoUrl;
     } else {
-      (typeof showServiceErrorModal === 'function')
-        ? showServiceErrorModal('Фільм не знайдено 😢')
-        : alert('Фільм не знайдено 😢');
+      showServiceErrorModal("Фільм не знайдено 😢");
     }
-  } catch (e) {
-    console.error(e);
-    (typeof showServiceErrorModal === 'function')
-      ? showServiceErrorModal('⚠️ Сталася помилка при пошуку. Спробуйте ще раз.')
-      : alert('⚠️ Сталася помилка при пошуку. Спробуйте ще раз.');
-  } finally {
-    if (loader) loader.style.display = 'none';
-  }
+  }).catch(console.error).finally(() => {
+    document.getElementById("loading-indicator").style.display = "none";
+  });
 }
-
 
 
     
@@ -2114,7 +2075,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
       return `
         <div class="film-card" id="film-${safe}">
           <img src="${poster}" class="film-img" alt="${title}">
-          ${renderTitleBlock(title, eps[0]['Рік'])}
+          <h3>${maskWord(title)}</h3>
           <p class="film-imdb">IMDb: ${episodes[0]['IMDb'] || '—'}</p>
           <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
             📺 Показати серії (${count})
@@ -2155,7 +2116,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
     return `
       <div class="film-card" id="film-${id}">
         <img src="${img}" alt="${f['Назва']}" class="film-img">
-        ${renderTitleBlock(f['Назва'], f['Рік'])}
+        <h3>${maskWord(f['Назва'])}</h3>
         <p class="film-imdb">IMDb: ${f['IMDb'] || '—'}</p>
         <p>${f['Опис'] || ''}</p>
         <div class="film-actions">
@@ -2426,7 +2387,7 @@ function goToSeries(seriesTitle) {
       return `
         <div class="film-card" id="film-${safe}">
           <img src="${imgSrc}" alt="${title}" class="film-img">
-          ${renderTitleBlock(title, first['Рік'])}
+          <h3>${maskWord(title)}</h3>
           <p class="film-imdb">IMDb: ${imdb}</p>
           <p class="film-desc">${desc}</p>
 
