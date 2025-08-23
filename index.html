@@ -571,9 +571,23 @@ function groupSeriesEpisodes(list) {
   return grouped;
 }
 
-const EPISODIC_TYPES = ['серіал','мультсеріал','мультсеріали'];
+const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
 function isEpisodicType(t) {
   return EPISODIC_TYPES.includes((t||'').trim().toLowerCase());
+}
+
+function normalize(str) {
+  return (str || '').toString().trim().toLowerCase();
+}
+function splitGenres(g) {
+  // Напр.: "Драма, Детектив / Трилер" → ["драма","детектив","трилер"]
+  return normalize(g).split(/[;,/|]/).map(s => s.trim()).filter(Boolean);
+}
+function matchesGenre(value, target) {
+  const t = normalize(target);
+  const vals = splitGenres(value);
+  // ✅ сувора відповідність по токенах (без підрядка "детектив"⊆"детективні")
+  return vals.includes(t);
 }
 
 function episodeLabel(ep, i) {
@@ -1413,9 +1427,11 @@ function showSeries(type = 'Серіал') {
     types.includes(((f['Тип'] || '')).trim().toLowerCase())
   );
   if (!seriesFilms.length) {
+    container.style.display = 'grid';   // ← додай це
     container.innerHTML = '<p>Немає серіалів 😢</p>';
     return;
   }
+
 
   // Хелпери для ключа епізоду та лейблу
   const epKey = (ep) => {
@@ -1506,9 +1522,15 @@ function openSeries(id) {
 }
 
 
-  function safeId(str) {
-    return str.replace(/[^\w\d]/g, '_');
-  }
+function safeId(str) {
+  return (str||'')
+    .toString()
+    .normalize('NFKD')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')  // літери/цифри всіх мов
+    .replace(/^-+|-+$/g,'')            // прибрати тире по краях
+    .toLowerCase();
+}
+
 
 function renderControls(title, description) {
   const id = safeId(title);
@@ -1526,74 +1548,80 @@ function renderControls(title, description) {
 function filterByGenre(genre) {
   if (!genre) return;
   switchTab('categories');
-  const normalized = genre.trim().toLowerCase();
-  const container  = document.getElementById('genre-results');
 
-  // 1) Відфільтрувати за жанром/добіркою
-  let filtered = films.filter(f => {
-    const type = (f['Тип'] || '').trim().toLowerCase();
-    const g1   = (f['Жанр']    || '').trim().toLowerCase();
-    const g2   = (f['Добірка'] || '').trim().toLowerCase();
-    return (g1.includes(normalized) || g2.includes(normalized));
-  });
+  const container = document.getElementById('genre-results');
+  const isSeriesGroup = getComputedStyle(document.getElementById('group-series')).display !== 'none';
+  const isFilmsGroup  = getComputedStyle(document.getElementById('group-films')).display  !== 'none';
 
-  // 2) Якщо користувач натиснув підкатегорію серіалів — лишити тільки Серіали
-  if (document.getElementById('group-series').style.display === 'flex') {
+  // 1) точне порівняння жанру/добірки (без підрядків)
+  let filtered = films.filter(f =>
+    matchesGenre(f['Жанр'], genre) || matchesGenre(f['Добірка'], genre)
+  );
+
+  // 2) якщо відкрито підгрупу СЕРІАЛІВ — лишаємо тільки епізодичні типи
+  if (isSeriesGroup) {
     filtered = filtered.filter(f => isEpisodicType(f['Тип']));
   }
 
-  // 3) Нічого не знайдено?
+  // 3) якщо відкрито підгрупу ФІЛЬМІВ — прибираємо епізодичні типи
+  if (isFilmsGroup) {
+    filtered = filtered.filter(f => !isEpisodicType(f['Тип']));
+  }
+
+  // 4) Нічого не знайдено?
   if (!filtered.length) {
+    container.style.display = 'grid';   // ← додай це
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     container.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
-  // 4) Якщо це серіали — зібрати всі епізоди під кожною назвою
-  if (isEpisodicType(filtered[0]['Тип'])) {
-  const grouped = groupSeriesEpisodes(filtered);
+  // 5) Якщо це серіали — згрупувати епізоди під назвою
+  if (filtered.every(f => isEpisodicType(f['Тип']))) {
+    const grouped = groupSeriesEpisodes(filtered);
+    container.style.display = 'grid';
 
-  container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
-    const safe      = safeId(title);
-    const isPro     = localStorage.getItem('isProUser') === 'true';
-    const isProFilm = eps[0]['Доступ'] === 'PRO';
-    const posterSrc = (isProFilm && !isPro) ? placeholderImage : (eps[0]['Фото'] || placeholderImage);
+    container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
+      const safe      = safeId(title);
+      const isPro     = localStorage.getItem('isProUser') === 'true';
+      const isProFilm = eps[0]['Доступ'] === 'PRO';
+      const posterSrc = (isProFilm && !isPro) ? placeholderImage : (eps[0]['Фото'] || placeholderImage);
+      const count     = eps.length;
 
-    const count     = eps.length;
-
-    return `
-      <div class="film-card" id="film-${safe}">
-        ${poster(posterSrc, title, eps[0]['Рік'])}
-        <h3>${maskWord(title)}</h3>
-        <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
-        ${renderControls(title, eps[0]['Опис'])}
-        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-          📺 Показати серії (${count})
-        </button>
-        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-          ${eps.map((ep, i) => {
-            const label = episodeLabel(ep, i);
-            const mid = ep.message_id || ep.file_id;
-            return mid
-            ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-          }).join('')}
+      return `
+        <div class="film-card" id="film-${safe}">
+          ${poster(posterSrc, title, eps[0]['Рік'])}
+          <h3>${maskWord(title)}</h3>
+          <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
+          ${renderControls(title, eps[0]['Опис'])}
+          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+            📺 Показати серії (${count})
+          </button>
+          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+            ${eps.map((ep, i) => {
+              const label = episodeLabel(ep, i);
+              const mid = ep.message_id || ep.file_id;
+              return mid
+                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
+                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+            }).join('')}
+          </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
 
-  container.scrollIntoView({ behavior: 'smooth' });
-  return;
-}
+    container.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
 
-  // 5) Інакше — відмалювати як список фільмів
+  // 6) Інакше — рендеримо як список фільмів (пачками)
   currentFilms = filtered;
   container.innerHTML = '';
   offset = 0;
   renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
 }
+
 
     
 function filterByCountry(country) {
