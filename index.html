@@ -540,7 +540,9 @@ function unmaskWord(word) {
   // Знімає маскування (прибирає zero-width space)
   return word.replace(/\u200B/g, '');
 }
-
+function escHtml(s){return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function escAttr(s){return escHtml(s);}
+function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
 
 function episodeKey(ep) {
@@ -598,11 +600,20 @@ function episodeLabel(ep, i) {
 }
   
 function poster(src, title, year){
+  const safeTitle = escAttr(title);
+  const safeSrc   = escAttr(src);
+  const safePH    = escJs(placeholderImage); // для рядка всередині inline-JS
+
   return `<div class="poster-wrap">
-    <img src="${src}" alt="${title}" class="film-img">
-    ${year ? `<span class="year-badge">📅 ${year}</span>` : ''}
+    <img src="${safeSrc}" alt="${safeTitle}" class="film-img"
+         onerror="this.onerror=null; this.src='${safePH}'">
+    ${year ? `<span class="year-badge">📅 ${escHtml(String(year))}</span>` : ''}
   </div>`;
 }
+
+
+
+
 
 
 </script>
@@ -706,7 +717,7 @@ function poster(src, title, year){
   <button class="genre-btn" data-genre="Драматичні">🎭 Драматичні</button>
   <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
   <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
-  <button class="genre-btn" data-genre="Мелодраматичні ">💔 Мелодраматичні </button>
+  <button class="genre-btn" data-genre="Мелодраматичні">💔 Мелодраматичні</button>
   <button class="genre-btn" data-genre="Історичні серіали">🏰 Історичні серіали</button>
   <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
   <button class="genre-btn" data-genre="Кримінальні">🚔 Кримінальні</button>
@@ -752,7 +763,7 @@ function poster(src, title, year){
 
   </div>
 
-</div>
+
 
 
   <div id="favorites" class="section">
@@ -883,6 +894,13 @@ function poster(src, title, year){
   </div>
 </div>
 
+<!-- Оверлей "Перезавантажити" -->
+<div id="error-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;align-items:center;justify-content:center;">
+  <div style="background:#222;color:#fff;padding:20px;border-radius:12px;text-align:center;max-width:320px;">
+    <p style="margin-bottom:14px;">Втрачено з’єднання. Спробувати перезавантажити?</p>
+    <button id="reload-btn" style="padding:8px 16px;background:#00f7ff;color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Перезавантажити</button>
+  </div>
+</div>
 
 
   <script>
@@ -922,15 +940,15 @@ function renderBatch() {
      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['message_id'] || film['file_id']) {
      const mid = film['message_id'] || film['file_id'];
-     btn = `<button class="search-button" onclick="requestFilmByName('${mid}')">▶️ Дивитись</button>`;
+     btn = `<button class="search-button" onclick="requestFilmByName('${escJs(mid)}')">▶️ Дивитись</button>`;
     }
 
     return `
       <div class="film-card" id="film-${id}">
         ${poster(imgSrc, film['Назва'], film['Рік'])}
-        <h3>${maskWord(film['Назва'])}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
-        <p>${film['Опис'] || ''}</p>
+        <h3>${escHtml(maskWord(film['Назва']))}</h3>
+        <p class="film-imdb">IMDb: ${escHtml(String(film['IMDb'] || '—'))}</p>
+        <p>${escHtml(film['Опис'] || '')}</p>
         <div class="film-actions">
           ${renderControls(film['Назва'], film['Опис'])}
           ${btn}
@@ -943,63 +961,31 @@ function renderBatch() {
   offset += batch.length;
 }
 
-// ==== SUPABASE (підстав свої значення) ====
-const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co'; // перевір точний URL!
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplcmxxdmJtcXN6b21sb25kbHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzMzg3NzQsImV4cCI6MjA3MDkxNDc3NH0.8wUBYIeQRC6KVp6vdzv0oqofIf4PeZyzbV5GcD0vxTE';              // Settings → API → anon public
 
-// читаємо REST’ом і мапимо у старий формат з українськими ключами
-async function fetchFilmsFromSupabase() {
-  const pageSize = 1000;
-  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb&order=id.asc`;
+const BACKEND_BASE = 'https://relax-time2.onrender.com';
 
-  let rows = [];
-  for (let pageOffset = 0; ; pageOffset += pageSize) {
-    const res = await fetch(`${base}&limit=${pageSize}&offset=${pageOffset}`, {
-      headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
-    });
-    if (!res.ok) throw new Error('Supabase fetch failed: ' + (await res.text()));
-    const batch = await res.json();
-    rows = rows.concat(batch);
-    if (batch.length < pageSize) break; // остання сторінка
-  }
-
-  // Мапінг у ваш старий формат з українськими ключами
-  return rows.map(r => ({
-    'Назва'      : r.title ?? '',
-    'Тип'        : r.type ?? '',
-    'Жанр'       : r.genre ?? '',
-    'Опис'       : r.description ?? '',
-    'Фото'       : r.photo ?? '',
-    'IMDb'       : r.imdb ?? '',
-    'Добірка'    : r.collection ?? '',
-    'Доступ'     : r.access ?? '',
-    'Країна'     : r.country ?? '',
-    'Рік'        : r.year ?? '',
-    'message_id' : r.message_id ?? '',
-    'file_id'    : r.file_id ?? '',
-   
-    
-  }));
-}
-
-    
-
-// (необов’язково) запасний варіант — твій старий Google Sheet
-async function fetchFilmsFromGoogle() {
-  const url = `https://opensheet.vercel.app/1LlkMITwr1sXyQI_jmfhrhEPXB2L22MCh8GIXNm5aoTQ/Sheet1?cb=${Date.now()}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Google fetch failed: ' + res.status);
-  return await res.json();
-}
-
-// єдина точка: пробуємо Supabase → якщо впав, йдемо в Google
-async function fetchFilms() {
-  try { return await fetchFilmsFromSupabase(); }
-  catch (e) {
-    console.warn('Supabase недоступний, fallback до Google:', e);
-    return await fetchFilmsFromGoogle();
+async function fetchWithRetry(url, opts={}, {tries=3, timeoutMs=9000, backoffMs=800}={}){
+  for (let i=0;i<tries;i++){
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), timeoutMs);
+    try{
+      const res = await fetch(url, {...opts, signal: ctrl.signal});
+      clearTimeout(t);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res;
+    }catch(e){
+      clearTimeout(t);
+      if (i===tries-1) throw e;
+      await new Promise(r=>setTimeout(r, backoffMs*Math.pow(2,i)));
+    }
   }
 }
+
+async function fetchFilms(){
+  const r = await fetchWithRetry(`${BACKEND_BASE}/films`, {}, {tries:3, timeoutMs:9000});
+  return await r.json();
+}
+
 
 async function loadFilms() {
   const cached = localStorage.getItem('films');
@@ -1377,40 +1363,55 @@ function showGenres() {
 
 
     
-    function showCountryFilters() {
+function showCountryFilters() {
   const countries = [...new Set(films.map(f => f['Країна']).filter(Boolean))];
   const container = document.getElementById('country-filters');
   container.innerHTML = countries.map(country => `
-    <button class="genre-btn" onclick="filterByCountry('${country}')">${country}</button>
+    <button class="genre-btn"
+            onclick="filterByCountry('${escJs(country)}')">
+      ${escHtml(country)}
+    </button>
   `).join('');
   container.style.display = 'flex';
 }
+
 
 function showYearFilters() {
   const years = [...new Set(films.map(f => f['Рік']).filter(Boolean))];
   const container = document.getElementById('year-filters');
-  container.innerHTML = years.map(year => `
-    <button class="genre-btn" onclick="filterByYear('${year}')">${year}</button>
-  `).join('');
+  container.innerHTML = years.map(y => {
+    const year = String(y);
+    return `
+      <button class="genre-btn"
+              onclick="filterByYear('${escJs(year)}')">
+        ${escHtml(year)}
+      </button>
+    `;
+  }).join('');
   container.style.display = 'flex';
 }
 
+
     
 
-    function showCollections() {
+function showCollections() {
   const container = document.getElementById('collections');
   const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
   container.innerHTML = names.map(name => {
     const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
-    return `
-      <div class="collection-card" onclick="filterByGenre('${name}')">
-        <img src="${img}" alt="${name}">
-        <p>${name}</p>
+   return `
+     <div class="collection-card" onclick="filterByGenre('${escJs(name)}')">
+       <img src="${escAttr(img)}"
+         alt="${escAttr(name)}"
+         onerror="this.onerror=null;this.src='${escJs(placeholderImage)}'">
+        <p>${escHtml(name)}</p>
       </div>
     `;
+      
   }).join('');
   document.getElementById('collections').style.display = 'flex';
 }
+
 
     
 function showSeries(type = 'Серіал') {
@@ -1490,9 +1491,9 @@ function showSeries(type = 'Серіал') {
     return `
       <div class="film-card" id="film-${safe}">
         ${poster(posterSrc, title, episodes[0]['Рік'])}
-        <h3>${maskWord(title)}</h3>
+        <h3>${escHtml(maskWord(title))}</h3>
         ${renderControls(title, episodes[0]['Опис'])}
-        <p class="film-imdb">IMDb: ${imdb}</p>
+        <p class="film-imdb">IMDb: ${escHtml(String(imdb))}</p>
         <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
           📺 Показати серії (${count})
         </button>
@@ -1501,8 +1502,8 @@ function showSeries(type = 'Серіал') {
             const label = epLabel(ep, i);
             const mid = ep.message_id || ep.file_id;
             return mid
-            ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+            ? `<button class="search-button" onclick="requestFilmByName('${escJs(mid)}')">${escHtml(label)}</button>`
+            : `<button class="search-button" onclick="openVideoById('${escJs(title)}')">${escHtml(label)}</button>`;
           }).join('')}
         </div>
       </div>
@@ -1535,14 +1536,17 @@ function safeId(str) {
 function renderControls(title, description) {
   const id = safeId(title);
   const film = films.find(f => f['Назва'] === title) || {};
-  const prev = localStorage.getItem(`rating-${title}`);
-  const likeClass    = prev === 'like'    ? 'active-like'    : '';
-  const dislikeClass = prev === 'dislike' ? 'active-dislike' : '';
   return `
-  <button class="fav-button" onclick="addToFavorites('${title}','${(description||'').replace(/'/g,"\\'")}', '${film.message_id || ''}')">💛</button>
-`;
-
+    <button class="favorite-btn" onclick="addToFavorites('${escJs(title)}','${escJs(description||'')}','${escJs(film.message_id||film.file_id||'')}')">💛</button>
+    <button class="rating-button" onclick="rateFilm('${escJs(title)}','like')">
+      👍 <span id="like-count-${id}">0</span>
+    </button>
+    <button class="rating-button" onclick="rateFilm('${escJs(title)}','dislike')">
+      👎 <span id="dislike-count-${id}">0</span>
+    </button>
+  `;
 }
+
 
     
 function filterByGenre(genre) {
@@ -1591,7 +1595,7 @@ function filterByGenre(genre) {
       return `
         <div class="film-card" id="film-${safe}">
           ${poster(posterSrc, title, eps[0]['Рік'])}
-          <h3>${maskWord(title)}</h3>
+          <h3>${escHtml(maskWord(title))}</h3>
           <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
           ${renderControls(title, eps[0]['Опис'])}
           <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
@@ -1602,8 +1606,8 @@ function filterByGenre(genre) {
               const label = episodeLabel(ep, i);
               const mid = ep.message_id || ep.file_id;
               return mid
-                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+                ? `<button class="search-button" onclick="requestFilmByName('${escJs(mid)}')">${escHtml(label)}</button>`
+                : `<button class="search-button" onclick="openVideoById('${escJs(title)}')">${escHtml(label)}</button>`;
             }).join('')}
           </div>
         </div>
@@ -1646,6 +1650,7 @@ function filterByCountry(country) {
 function filterByYear(year) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
+  container.style.display = 'grid';
   const isPro = localStorage.getItem('isProUser') === 'true';
   const filtered = films.filter(f => String(f['Рік']) === String(year));
 
@@ -1666,15 +1671,15 @@ function filterByYear(year) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
    } else if (film['message_id'] || film['file_id']) {
       const mid = film['message_id'] || film['file_id'];
-      buttons = `<button class="search-button" onclick="requestFilmByName('${mid}')">▶️ Дивитись</button>`;
+      buttons = `<button class="search-button" onclick="requestFilmByName('${escJs(mid)}')">▶️ Дивитись</button>`;
     }
 
     return `
       <div class="film-card" id="film-${id}">
         ${poster(imgSrc, film['Назва'], film['Рік'])}
-        <h3>${maskWord(film['Назва'])}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
-        <p>${film['Опис']||''}</p>
+        <h3>${escHtml(maskWord(film['Назва']))}</h3>
+        <p class="film-imdb">IMDb: ${escHtml(String(film['IMDb'] || '—'))}</p>
+        <p>${escHtml(film['Опис'] || '')}</p>
         <div class="film-actions">
           ${renderControls(film['Назва'], film['Опис'])}
           ${buttons}
@@ -1688,10 +1693,7 @@ function filterByYear(year) {
 
 
 
-
-   function showFavorites() {
-  document.querySelectorAll('.film-card').forEach(el => el.remove());
-
+function showFavorites() {
   const container = document.getElementById('fav-list');
   container.innerHTML = '';
 
@@ -1699,33 +1701,34 @@ function filterByYear(year) {
 
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
-  } else {
-  container.innerHTML = favs.map(f => {
-    // Пошук фільму в масиві films по unmaskWord
+    container.style.display = 'grid';
+    return;
+  }
+
+  container.innerHTML = favs.map((f, i) => {
     const found = films.find(item =>
       unmaskWord(item['Назва']) === unmaskWord(f.title)
     );
-    const msgId = found?.message_id || f.message_id;
+    const msgId = found?.message_id || found?.file_id || f.message_id || '';
     const watchBtn = msgId
-      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName('${msgId}')">▶️ Дивитись</button>`
+      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName('${escJs(msgId)}')">▶️ Дивитись</button>`
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
+
     return `
       <div class="film-card" id="film-${safeId(f.title)}">
-      <h3>${maskWord(f.title)}</h3>
-      <p>${f.description}</p>
-      <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
-      ${watchBtn}
-    </div>
-  `;
+        <h3>${escHtml(maskWord(f.title))}</h3>
+        <p>${escHtml(f.description || '')}</p>
+        <div class="film-actions">
+          <button class="search-button" onclick="event.stopPropagation(); removeFromFavorites(${i})">🗑️ Видалити</button>
+          ${watchBtn}
+        </div>
+      </div>
+    `;
   }).join('');
-
-
-
-    
-  }
 
   container.style.display = 'grid';
 }
+
 
 function showProModal() {
   const modal = document.getElementById('pro-modal');
@@ -1752,7 +1755,6 @@ function removeFromFavorites(index) {
 
     function searchInBot(query) {
       // 🧹 Повне очищення залишків
-document.getElementById('history-list').innerHTML = '';
 document.getElementById('searchResults').innerHTML = '';
 document.querySelectorAll('.film-card').forEach(card => card.remove());
 
@@ -2115,6 +2117,18 @@ observer.observe(sentinel);
     });
   });
 
+  // 🚀 Launcher (кнопка в акаунті)
+document.getElementById('launcher-btn')?.addEventListener('click', () => {
+  const url = 'https://t.me/RelaxBox_UA_bot'; // ← підстав свого бота
+  const tg = window.Telegram?.WebApp;
+  try {
+    tg?.openTelegramLink?.(url);     // пріоритет для t.me
+  } catch {
+    window.open(url, '_blank');      // запасний варіант
+  }
+});
+
+
   // Обробники жанрів
 document.querySelectorAll('.genre-btn[data-genre]').forEach(button => {
   button.addEventListener('click', () => {
@@ -2171,8 +2185,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
               const label = episodeLabel(ep, i);
               const mid = ep.message_id || ep.file_id;
               return mid
-                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+                ? `<button class="search-button" onclick="requestFilmByName('${escJs(mid)}')">${escHtml(label)}</button>`
+                : `<button class="search-button" onclick="openVideoById('${escJs(title)}')">${escHtml(label)}</button>`;
             }).join('')}
           </div>
         </div>
@@ -2196,8 +2210,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
     const watchBtn = locked
       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
       : ((f['message_id'] || f['file_id'])
-          ? `<button class="search-button" onclick="requestFilmByName('${(f['message_id']||f['file_id'])}')">▶️ Дивитись</button>`
-          : `<button class="search-button" onclick="openVideoById('${f['Назва']}')">▶️ Дивитись</button>`);
+          ? `<button class="search-button" onclick="requestFilmByName('${escJs(f['message_id']||f['file_id'])}')">▶️ Дивитись</button>`
+          : `<button class="search-button" onclick="openVideoById('${escJs(f['Назва'])}')">▶️ Дивитись</button>`);
 
     return `
       <div class="film-card" id="film-${id}">
@@ -2265,66 +2279,45 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
 }
 
 
-function rateFilm(filmName, action) {
-  const key = `rating-${safeId(filmName)}`;
-  const previousAction = localStorage.getItem(key);
 
-  // Якщо користувач натиснув ту ж саму кнопку — нічого не робимо
-  if (previousAction === action) return;
+function rateFilm(filmName, action) {
+  const id  = safeId(filmName);
+  const key = `rating-${id}`;
+  const prev = localStorage.getItem(key);
+  if (prev === action) return;
   localStorage.setItem(key, action);
 
-  // Відправляємо оновлення на бекенд
   fetch('https://relax-time2.onrender.com/rate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      film_name: filmName,
-      action: action,
-      undo: previousAction
-    }),
-  });
+    body: JSON.stringify({ film_name: filmName, action, undo: prev }),
+  }).catch(()=>{});
 
-  // Знаходимо елементи-лічильники
-  const likeBtnCount    = document.getElementById(`like-count-btn-${safeId(filmName)}`);
-  const dislikeBtnCount = document.getElementById(`dislike-count-btn-${safeId(filmName)}`);
-  const likeDisplay     = document.getElementById(`like-count-${safeId(filmName)}`);
-  const dislikeDisplay  = document.getElementById(`dislike-count-${safeId(filmName)}`);
+  const card = document.getElementById(`film-${id}`);
+  if (!card) return;
 
-  // Функція для безпечного оновлення числа
-  function upd(el, delta) {
-    if (!el) return;
-    el.textContent = Math.max(0, Number(el.textContent || 0) + delta);
-  }
+  const likeSpan    = card.querySelector(`#like-count-${id}`);
+  const dislikeSpan = card.querySelector(`#dislike-count-${id}`);
+  const [likeBtn, dislikeBtn] = card.querySelectorAll('.rating-button');
 
-  // Інкремент/декремент відповідно до дії
+  const upd = (el, d) => { if (!el) return; el.textContent = Math.max(0, (+el.textContent||0) + d); };
+
   if (action === 'like') {
-    upd(likeBtnCount,    +1);
-    upd(likeDisplay,     +1);
-    if (previousAction === 'dislike') {
-      upd(dislikeBtnCount, -1);
-      upd(dislikeDisplay,  -1);
-    }
+    upd(likeSpan, +1);
+    if (prev === 'dislike') upd(dislikeSpan, -1);
+    likeBtn?.classList.add('active-like');
+    dislikeBtn?.classList.remove('active-dislike');
   } else {
-    upd(dislikeBtnCount, +1);
-    upd(dislikeDisplay,  +1);
-    if (previousAction === 'like') {
-      upd(likeBtnCount,   -1);
-      upd(likeDisplay,    -1);
-    }
+    upd(dislikeSpan, +1);
+    if (prev === 'like') upd(likeSpan, -1);
+    dislikeBtn?.classList.add('active-dislike');
+    likeBtn?.classList.remove('active-like');
   }
-
-  // Підсвічуємо активну кнопку
-  const card       = likeBtnCount.closest('.film-card');
-  const likeBtn    = card.querySelector('.rating-button:nth-of-type(1)');
-  const dislikeBtn = card.querySelector('.rating-button:nth-of-type(2)');
-  likeBtn.classList.remove('active-like');
-  dislikeBtn.classList.remove('active-dislike');
-  if (action === 'like')    likeBtn.classList.add('active-like');
-  if (action === 'dislike') dislikeBtn.classList.add('active-dislike');
 }
 
 
 
+ 
 async function suggestFilm() {
   const inputEl = document.getElementById('searchInput');
   const val = (inputEl?.value || '').trim(); // якщо використовуєш maskWord — можеш тут робити unmaskWord(val)
@@ -2385,32 +2378,6 @@ async function suggestFilm() {
   }
 }
 
-  
-
-    function toggleHistory() {
-  const container = document.getElementById('history-list');
-  if (container.style.display === 'block') {
-    container.style.display = 'none';
-  } else {
-    showHistory();
-  }
-}
-
-
-
-// ✅ ВИНЕСИ окремо функцію rate() після showHistory
-function rate(title, stars) {
-  localStorage.setItem(`rating_${title}`, stars);
-  showHistory();
-}
-
-
-function clearHistory() {
-  localStorage.removeItem('history');
-  showHistory(); // одразу оновлює вивід
-}
-      
- 
 
    function goToCartoons() {
   switchTab('categories', document.querySelector('[data-tab=categories]'));
@@ -2487,8 +2454,8 @@ function goToSeries(seriesTitle) {
               const label = episodeLabel(ep, i);
               const mid = ep.message_id || ep.file_id;
               return mid
-                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+                ? `<button class="search-button" onclick="requestFilmByName('${escJs(mid)}')">${escHtml(label)}</button>`
+                : `<button class="search-button" onclick="openVideoById('${escJs(title)}')">${escHtml(label)}</button>`;
             }).join('')}
           </div>
         </div>
@@ -2775,12 +2742,17 @@ document.addEventListener("visibilitychange", function() {
 
 function showRetryOverlay() {
   const overlay = document.getElementById('error-overlay');
-  overlay.style.display = 'block';
-  // коли користувач натисне «Перезавантажити» — оновити сторінку
-  document.getElementById('reload-btn').onclick = () => {
-    window.location.reload();
-  };
+  if (!overlay) return;
+  overlay.style.display = 'flex'; // важливо: flex, щоб центрилось
+  const btn = document.getElementById('reload-btn');
+  if (btn) btn.onclick = () => window.location.reload();
 }
+function hideRetryOverlay() {
+  const overlay = document.getElementById('error-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+window.addEventListener('offline', showRetryOverlay);
+window.addEventListener('online', hideRetryOverlay);
 
 document.getElementById('contact-admin-btn').onclick = function() {
   document.getElementById('admin-message-modal').style.display = 'block';
@@ -2981,108 +2953,78 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
     }
   }
 
-  function showServiceErrorModal(msg) {
+function showServiceErrorModal(msg) {
   const modal = document.getElementById('service-error-modal');
-  document.getElementById('service-error-message').innerHTML = msg || 'Сервіс тимчасово недоступний,<br>спробуйте ще раз через хвилину.';
+  const text  = document.getElementById('service-error-message');
+  if (!modal || !text) { alert(msg || 'Сервіс тимчасово недоступний'); return; }
+  text.textContent = msg || 'Сервіс тимчасово недоступний, спробуйте ще раз.';
   modal.style.display = 'flex';
-  setTimeout(() => modal.style.opacity = '1', 10);
+  requestAnimationFrame(() => { modal.style.opacity = '1'; });
 }
+
 
 function closeServiceErrorModal() {
   const modal = document.getElementById('service-error-modal');
+  if (!modal) return;
   modal.style.opacity = '0';
-  setTimeout(() => modal.style.display = 'none', 300);
+  setTimeout(() => { modal.style.display = 'none'; }, 300); // час має збігатися з transition
 }
+
+
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  try { closeProModal(); } catch {}
+  try { closeServiceErrorModal(); } catch {}
+  try { const m = document.getElementById('confirm-modal'); if (m && m.style.display !== 'none') cancelOpen(); } catch {}
+  try { const m = document.getElementById('suggest-modal'); if (m && m.style.display !== 'none') closeSuggestModal(); } catch {}
+  try { const m = document.getElementById('admin-message-modal'); if (m && m.style.display !== 'none') m.style.display = 'none'; } catch {}
+  try { const m = document.getElementById('video-overlay'); if (m && m.style.display !== 'none') closeVideo(); } catch {}
+});
+
+
+
+
 
 </script>
 
-
-</div>
-
-<div id="request-loading" style="
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.6);
-  z-index: 9999;
-  display: none;
-  font-size: 18px;
-  color: #00f7ff;
-  text-align: center;
-">
-  <div style="
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  ">
-    <div class="loader"></div>
-    <div style="margin-top:12px;">Надсилаємо запит...</div>
-  </div>
-</div>
-<!-- Overlay для помилки перевірки підписки -->
 <div id="error-overlay" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.85);
-  color: #fff;
-  font-family: sans-serif;
-  text-align: center;
-  padding-top: 40vh;
-  z-index: 10000;
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+  color:#fff; font-family:sans-serif; text-align:center; z-index:10000;
+  padding: 0 18px;
 ">
-  <p style="font-size: 20px; margin-bottom: 20px;">❌ Помилка перевірки підписки</p>
-  <button id="reload-btn" style="
-    padding: 12px 24px;
-    font-size: 18px;
-    background: #00f7ff;
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 0 10px #00f7ff;
-  ">
-    🔄 Перезавантажити
-  </button>
-</div>
-<!-- Модальне вікно помилки сервісу -->
-<div id="service-error-modal" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.85);
-  z-index: 99999;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s;
-">
-  <div style="
-    background: #1a1a1a;
-    padding: 28px 22px;
-    border-radius: 14px;
-    max-width: 320px;
-    text-align: center;
-    box-shadow: 0 0 24px #00f7ff;
-  ">
-    <div style="font-size:32px; margin-bottom:15px;">😢</div>
-    <div id="service-error-message" style="color:#00f7ff; font-size:17px; margin-bottom:22px;">
-      Сервіс тимчасово недоступний,<br>спробуйте ще раз через хвилину.
-    </div>
-    <button onclick="closeServiceErrorModal()" style="
-      padding: 8px 20px; background: #00f7ff; color: #000;
-      border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-      font-size: 16px;
-    ">OK</button>
+  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); max-width:460px; width:100%;">
+    <p style="font-size:20px; margin-bottom:10px;">😕 Проблема з перевіркою підписки</p>
+    <p style="color:#ccc; margin-bottom:16px;">
+      Перевірте інтернет і спробуйте ще раз.
+    </p>
+    <button id="reload-btn" style="padding:10px 18px; border:none; border-radius:10px; background:#00f7ff; color:#000; font-weight:700;">
+      🔄 Перезавантажити
+    </button>
   </div>
 </div>
+
+
+<!-- Модальне вікно помилки сервісу -->
+<div id="service-error-modal"
+     role="dialog" aria-modal="true"
+     onclick="if (event.target === this) closeServiceErrorModal()"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+            z-index:99999; justify-content:center; align-items:center;
+            opacity:0; transition:opacity .3s ease;">
+  <div style="background:#222; padding:20px; border-radius:12px; max-width:320px; width:90%;
+              text-align:center; box-shadow:0 0 15px #0ff;">
+    <div id="service-error-message" style="color:#fff; margin-bottom:16px;"></div>
+    <button type="button" onclick="closeServiceErrorModal()"
+            style="padding:8px 16px; background:#00f7ff; color:#000; border:none;
+                   border-radius:8px; font-weight:bold; cursor:pointer;">
+      ОК
+    </button>
+  </div>
+</div>
+
+
+
 
 <script>
   // Відкрити чат з лаунчер-ботом із payload'ом (хто натиснув)
@@ -3106,28 +3048,56 @@ function closeServiceErrorModal() {
     });
   });
 </script>
-<!-- Loader для запитів "Замовити фільм" -->
-<div id="request-loading" style="display:none;margin-top:10px;text-align:center;">
-  <span class="loader"></span>
-</div>
+
 
 <!-- Порожній контейнер історії, щоб не ламався .innerHTML=... -->
 <div id="history-list" style="display:none;"></div>
 
-<!-- Модалка помилки сервісу -->
-<div id="service-error-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;align-items:center;justify-content:center;">
-  <div style="background:#1a1a1a;padding:20px;border-radius:12px;max-width:320px;text-align:center;box-shadow:0 0 20px #00f7ff;">
-    <div id="service-error-message" style="color:#fff;margin-bottom:16px;">Сервіс тимчасово недоступний</div>
-    <button onclick="document.getElementById('service-error-modal').style.display='none'"
-            style="padding:8px 16px;background:#00f7ff;color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">ОК</button>
+
+
+
+<div id="net-banner" style="display:none;position:fixed;top:0;left:0;right:0;padding:10px;text-align:center;z-index:9999;color:#fff;font-size:14px;"></div>
+<script>
+function showNetBanner(isOffline){
+  const b = document.getElementById('net-banner');
+  b.textContent = isOffline ? '🔌 Немає інтернету. Відновлюю…' : '✅ Зʼєднання відновлено';
+  b.style.background = isOffline ? '#a33' : '#2a4';
+  b.style.display = 'block';
+  if (!isOffline) setTimeout(()=> b.style.display='none', 1500);
+}
+window.addEventListener('online',  () => { showNetBanner(false); loadFilmsSafely(); });
+window.addEventListener('offline', () => { showNetBanner(true); });
+
+let __loadingFilms = false;
+async function loadFilmsSafely(){
+  if (__loadingFilms) return;
+  __loadingFilms = true;
+  try { await loadFilms(); } finally { __loadingFilms = false; }
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  if (!navigator.onLine){ showNetBanner(true); return; }
+  loadFilmsSafely();
+});
+</script>
+<!-- Service error modal (перед </body>) -->
+<div id="service-error-modal"
+     onclick="if (event.target === this) closeServiceErrorModal()"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85);
+            z-index:11000; justify-content:center; align-items:center;
+            opacity:0; transition:opacity .3s ease;">
+  <div style="background:#222; padding:20px; border-radius:12px; max-width:320px;
+              text-align:center; box-shadow:0 0 15px #0ff;">
+    <div id="service-error-message" style="color:#fff; font-size:16px; line-height:1.4;"></div>
+    <button onclick="closeServiceErrorModal()" style="margin-top:14px; padding:8px 16px; background:#00f7ff; color:#000; border:none; border-radius:8px; font-weight:bold;">ОК</button>
   </div>
 </div>
 
-<!-- Оверлей "перезавантажити" -->
-<div id="error-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;align-items:center;justify-content:center;">
-  <div style="background:#222;color:#fff;padding:20px;border-radius:12px;text-align:center;max-width:320px;">
-    <p style="margin-bottom:14px;">Втрачено з’єднання. Спробувати перезавантажити?</p>
-    <button id="reload-btn" style="padding:8px 16px;background:#00f7ff;color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Перезавантажити</button>
+<!-- Service error modal -->
+<div id="service-error-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:10000; justify-content:center; align-items:center; opacity:0; transition:opacity .3s ease;">
+  <div style="background:#222; padding:20px; border-radius:12px; max-width:320px; text-align:center; box-shadow:0 0 15px #0ff;">
+    <div id="service-error-message" style="color:#fff; font-size:16px; line-height:1.4;"></div>
+    <button onclick="closeServiceErrorModal()" style="margin-top:14px; padding:8px 16px; background:#00f7ff; color:#000; border:none; border-radius:8px; font-weight:bold;">ОК</button>
   </div>
 </div>
 
