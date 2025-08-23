@@ -494,6 +494,26 @@
     0 0 10px rgba(255, 105, 180, .6);
 }
 
+.collection-card{
+  flex:0 0 auto;
+  width:150px;
+  scroll-snap-align:start;
+  background:#1a1a1a;
+  border:1px solid #00f7ff33;
+  border-radius:12px;
+  padding:8px;
+  box-shadow:0 0 8px rgba(0,247,255,.25);
+  text-align:center;
+}
+.collection-card img{
+  width:100%;
+  height:90px;
+  object-fit:cover;
+  border-radius:8px;
+  display:block;
+}
+.collection-card p{ margin:8px 0 0; font-weight:600; font-size:13px; }
+
 
   </style>
  
@@ -601,15 +621,16 @@ function episodeLabel(ep, i) {
   
 function poster(src, title, year){
   const safeTitle = escAttr(title);
-  const safeSrc   = escAttr(src);
-  const safePH    = escJs(placeholderImage); // для рядка всередині inline-JS
-
+  const realSrc   = src && src.trim() ? src : placeholderImage; // ⬅️ головне
+  const safeSrc   = escAttr(realSrc);
+  const safePH    = escJs(placeholderImage);
   return `<div class="poster-wrap">
     <img src="${safeSrc}" alt="${safeTitle}" class="film-img"
          onerror="this.onerror=null; this.src='${safePH}'">
     ${year ? `<span class="year-badge">📅 ${escHtml(String(year))}</span>` : ''}
   </div>`;
 }
+
 
 
 
@@ -987,15 +1008,84 @@ async function fetchWithRetry(url, opts={}, {tries=3, timeoutMs=9000, backoffMs=
   }
 }
 
-async function fetchFilms() {
-  const r = await fetch(`${BACKEND_BASE}/films?t=${Date.now()}`, {
-    method: 'GET',
-    cache: 'no-store',
-    headers: { 'Accept': 'application/json' }
-  });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return await r.json();
+// унікальний ключ для фільмів/епізодів
+function filmKey(f){
+  const name = (f['Назва']||'').trim().toLowerCase();
+  const t    = (f['Тип']||'').trim().toLowerCase();
+  const s    = (f['Сезон']||'').toString().trim();
+  const e    = (f['Серія']||f['Епізод']||'').toString().trim();
+  const mid  = (f['message_id']||f['file_id']||'').toString().trim();
+  return mid || `${name}|${t}|${s}|${e}`;
 }
+
+async function fetchFilms(){
+  // 1) спроба: все одразу
+  try{
+    const r = await fetch(`${BACKEND_BASE}/films?limit=50000&t=${Date.now()}`, { cache:'no-store' });
+    if (r.ok){
+      const j = await r.json();
+      if (Array.isArray(j) && j.length) return j;
+      if (j && Array.isArray(j.items) && j.items.length && !j.next_cursor) return j.items;
+      if (j && Array.isArray(j.items) && j.items.length && j.next_cursor){
+        const all = [...j.items];
+        let cursor = j.next_cursor, guard=0, seen=new Set(all.map(f=>filmKey(f)));
+        while (cursor && guard++ < 50){
+          const r2 = await fetch(`${BACKEND_BASE}/films?cursor=${encodeURIComponent(cursor)}&t=${Date.now()}`, { cache:'no-store' });
+          if (!r2.ok) break;
+          const j2 = await r2.json();
+          if (!j2 || !Array.isArray(j2.items) || !j2.items.length) break;
+          for (const f of j2.items){ const k=filmKey(f); if(!seen.has(k)){ seen.add(k); all.push(f); } }
+          cursor = j2.next_cursor;
+        }
+        return all;
+      }
+    }
+  }catch(e){}
+
+  // 2) offset/limit 1000-ми порціями
+  try{
+    const LIMIT = 1000;
+    let offset = 0, all=[], seen=new Set(), guard=0;
+
+    const first = await fetch(`${BACKEND_BASE}/films?offset=${offset}&limit=${LIMIT}&t=${Date.now()}`, { cache:'no-store' });
+    if (first.ok){
+      let arr = await first.json();
+      if (Array.isArray(arr)){
+        for (const f of arr){ const k=filmKey(f); if(!seen.has(k)){ seen.add(k); all.push(f);} }
+        while (arr.length === LIMIT && guard++ < 50){
+          offset += LIMIT;
+          const r = await fetch(`${BACKEND_BASE}/films?offset=${offset}&limit=${LIMIT}&t=${Date.now()}`, { cache:'no-store' });
+          if (!r.ok) break;
+          arr = await r.json();
+          if (!Array.isArray(arr) || !arr.length) break;
+          for (const f of arr){ const k=filmKey(f); if(!seen.has(k)){ seen.add(k); all.push(f);} }
+        }
+        if (all.length) return all;
+      }
+    }
+  }catch(e){}
+
+  // 3) page=1..N
+  try{
+    let page=1, all=[], seen=new Set(), guard=0;
+    while (guard++ < 50){
+      const r = await fetch(`${BACKEND_BASE}/films?page=${page}&t=${Date.now()}`, { cache:'no-store' });
+      if (!r.ok) break;
+      const arr = await r.json();
+      if (!Array.isArray(arr) || !arr.length) break;
+      for (const f of arr){ const k=filmKey(f); if(!seen.has(k)){ seen.add(k); all.push(f);} }
+      page++;
+    }
+    if (all.length) return all;
+  }catch(e){}
+
+  // 4) запасний — як було
+  const r = await fetch(`${BACKEND_BASE}/films?t=${Date.now()}`, { cache:'no-store' });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const j = await r.json();
+  return Array.isArray(j) ? j : (Array.isArray(j?.items) ? j.items : []);
+}
+
 
 
 
@@ -1406,24 +1496,31 @@ function showYearFilters() {
 
     
 
+function getCollectionName(f){
+  return f['Добірка'] || f['Колекція'] || f['Підбірка'] || f['Подборка'] || f['Collection'] || '';
+}
 function showCollections() {
   const container = document.getElementById('collections');
-  const names = [...new Set(films.map(f => f['Добірка']).filter(Boolean))];
+  const names = [...new Set(films.map(f => getCollectionName(f)).filter(Boolean))];
+
+  if (!names.length){
+    container.style.display = 'none';
+    return;
+  }
+
   container.innerHTML = names.map(name => {
-    const img = films.find(f => f['Добірка'] === name)?.['Фото'] || '';
-   return `
-     <div class="collection-card" onclick="filterByGenre('${escJs(name)}')">
-       <img src="${escAttr(img)}"
-         alt="${escAttr(name)}"
-         onerror="this.onerror=null;this.src='${escJs(placeholderImage)}'">
+    const coverFilm = films.find(f => getCollectionName(f) === name && f['Фото']);
+    const img = (coverFilm && coverFilm['Фото']) ? coverFilm['Фото'] : placeholderImage;
+    return `
+      <div class="collection-card" onclick="filterByGenre('${escJs(name)}')">
+        <img src="${escAttr(img)}" alt="${escAttr(name)}"
+             onerror="this.onerror=null;this.src='${escJs(placeholderImage)}'">
         <p>${escHtml(name)}</p>
       </div>
     `;
-      
   }).join('');
-  document.getElementById('collections').style.display = 'flex';
+  container.style.display = 'flex';
 }
-
 
     
 function showSeries(type = 'Серіал') {
@@ -2303,7 +2400,7 @@ function addToFavorites(title, description, message_id) {
 
 
      let isSending = false;
-async function requestWithRetry(url, options, retries = 3, delay = 10000) {
+async function requestWithRetry(url, options, retries = 3, delay = 1000) {
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetch(url, options);
