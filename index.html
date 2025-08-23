@@ -2303,7 +2303,7 @@ function addToFavorites(title, description, message_id) {
 
 
      let isSending = false;
-async function requestWithRetry(url, options, retries = 3, delay = 1000) {
+async function requestWithRetry(url, options, retries = 3, delay = 10000) {
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetch(url, options);
