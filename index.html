@@ -1534,18 +1534,13 @@ function safeId(str) {
 
 
 function renderControls(title, description) {
-  const id = safeId(title);
   const film = films.find(f => f['Назва'] === title) || {};
+  const mid  = film.message_id || film.file_id || '';
   return `
-    <button class="favorite-btn" onclick="addToFavorites('${escJs(title)}','${escJs(description||'')}','${escJs(film.message_id||film.file_id||'')}')">💛</button>
-    <button class="rating-button" onclick="rateFilm('${escJs(title)}','like')">
-      👍 <span id="like-count-${id}">0</span>
-    </button>
-    <button class="rating-button" onclick="rateFilm('${escJs(title)}','dislike')">
-      👎 <span id="dislike-count-${id}">0</span>
-    </button>
+    <button class="favorite-btn" onclick="addToFavorites('${escJs(title)}','${escJs(description||'')}','${escJs(mid)}')">💛</button>
   `;
 }
+
 
 
     
@@ -2280,40 +2275,6 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
 
 
 
-function rateFilm(filmName, action) {
-  const id  = safeId(filmName);
-  const key = `rating-${id}`;
-  const prev = localStorage.getItem(key);
-  if (prev === action) return;
-  localStorage.setItem(key, action);
-
-  fetch('https://relax-time2.onrender.com/rate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ film_name: filmName, action, undo: prev }),
-  }).catch(()=>{});
-
-  const card = document.getElementById(`film-${id}`);
-  if (!card) return;
-
-  const likeSpan    = card.querySelector(`#like-count-${id}`);
-  const dislikeSpan = card.querySelector(`#dislike-count-${id}`);
-  const [likeBtn, dislikeBtn] = card.querySelectorAll('.rating-button');
-
-  const upd = (el, d) => { if (!el) return; el.textContent = Math.max(0, (+el.textContent||0) + d); };
-
-  if (action === 'like') {
-    upd(likeSpan, +1);
-    if (prev === 'dislike') upd(dislikeSpan, -1);
-    likeBtn?.classList.add('active-like');
-    dislikeBtn?.classList.remove('active-dislike');
-  } else {
-    upd(dislikeSpan, +1);
-    if (prev === 'like') upd(likeSpan, -1);
-    dislikeBtn?.classList.add('active-dislike');
-    likeBtn?.classList.remove('active-like');
-  }
-}
 
 
 
