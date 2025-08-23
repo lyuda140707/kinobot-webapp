@@ -906,6 +906,12 @@ function poster(src, title, year){
   <script>
 
     const placeholderImage = "https://i.postimg.cc/6q9Cd9sQ/d9d66124-1900-49be-a89c-007edc35bd13.png";
+    // 🔧 bump це число при КОЖНОМУ деплої
+    const APP_DATA_VERSION = '53';
+    const FILMS_KEY = 'films';
+    const FILMS_TS_KEY = 'filmsTimestamp';
+    const FILMS_VER_KEY = 'filmsDataVersion';
+
     
     let films = [];
     let isDataLoaded = false;
@@ -981,10 +987,16 @@ async function fetchWithRetry(url, opts={}, {tries=3, timeoutMs=9000, backoffMs=
   }
 }
 
-async function fetchFilms(){
-  const r = await fetchWithRetry(`${BACKEND_BASE}/films`, {}, {tries:3, timeoutMs:9000});
+async function fetchFilms() {
+  const r = await fetch(`${BACKEND_BASE}/films?t=${Date.now()}`, {
+    method: 'GET',
+    cache: 'no-store',
+    headers: { 'Accept': 'application/json' }
+  });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return await r.json();
 }
+
 
 
 async function loadFilms() {
@@ -1886,6 +1898,14 @@ function showSkeletonCollections() {
 
 
   document.addEventListener('DOMContentLoaded', async () => {
+      // 💣 якщо версія змінилась — чистимо кеш і ставимо нову
+  const prevVer = localStorage.getItem(FILMS_VER_KEY);
+  if (prevVer !== APP_DATA_VERSION) {
+    localStorage.removeItem(FILMS_KEY);
+    localStorage.removeItem(FILMS_TS_KEY);
+    localStorage.setItem(FILMS_VER_KEY, APP_DATA_VERSION);
+  }
+
     // Перевірка зʼєднання з Telegram після завантаження сторінки
     if (!window.Telegram.WebApp.initDataUnsafe?.user) {
       document.body.innerHTML = `
@@ -2041,6 +2061,20 @@ try {
 
   // Завантажити фільми і факти
   await loadFilms();
+  (function showCount(){
+  const badge = document.createElement('div');
+  badge.style.cssText = 'position:fixed;right:8px;bottom:72px;background:#222;padding:6px 10px;border-radius:10px;border:1px solid #00f7ff;box-shadow:0 0 8px #00f7ff;font-size:12px;z-index:10000;color:#eafefe';
+  badge.textContent = `Фільмів у пам’яті: ${films.length}`;
+  document.body.appendChild(badge);
+
+  // якщо десь згодом переливаємо масив — оновлювати текст
+  const _renderBatch = renderBatch;
+  renderBatch = function() {
+    _renderBatch();
+    badge.textContent = `Фільмів у пам’яті: ${films.length}`;
+  };
+})();
+
 
   // --- Lazy load observer ---
 const sentinel = document.getElementById('list-end-sentinel');
@@ -2054,6 +2088,15 @@ const observer = new IntersectionObserver(entries => {
 
 });
 observer.observe(sentinel);
+// 🧯 fallback — кнопка "Показати ще"
+const moreBtn = document.createElement('button');
+moreBtn.textContent = 'Показати ще';
+moreBtn.className = 'genre-btn';
+moreBtn.style.margin = '12px auto';
+moreBtn.onclick = () => {
+  if (offset < currentFilms.length) renderBatch();
+};
+document.getElementById('categories').appendChild(moreBtn);
 
 
   
