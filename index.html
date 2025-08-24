@@ -1133,11 +1133,11 @@ async function openVideoById(filmName) {
       if (data.success) {
         showRedirectButton();
       } else {
-        showServiceErrorModal(`❗️ ${data.error || 'Невідома помилка'}`);
+        showServiceErrorModal(`❗️ ${data.error || 'Невідома помилка'}`, () => openVideoById(filmName));
       }
     } catch (error) {
       console.error('❗️ Помилка при запиті:', error);
-      showServiceErrorModal();
+      showServiceErrorModal("❗️ Помилка при запиті.<br>Спробуйте ще раз.", () => openVideoById(filmName));
     } finally {
       document.getElementById("loading-indicator").style.display = "none";
     }
@@ -1179,7 +1179,7 @@ async function requestFilmByName(fileId) {
       }
     } catch (error) {
       console.error(error);
-      alert("❗️ Сталася помилка при надсиланні фільму");
+      showServiceErrorModal("❗️ Сталася помилка при надсиланні фільму.<br>Спробуйте ще раз.", () => requestFilmByName(fileId));
     } finally {
       // Ховаємо індикатор завантаження
       document.getElementById("loading-indicator").style.display = "none";
@@ -1767,12 +1767,15 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
       }
       window.location.href = d.videoUrl;
     } else {
-      showServiceErrorModal("Фільм не знайдено 😢");
+      showServiceErrorModal("Фільм не знайдено 😢"); // без retry – кнопка не з'явиться
     }
-  }).catch(console.error).finally(() => {
+  }).catch(err => {
+    console.error(err);
+    showServiceErrorModal("❗️ Помилка пошуку.<br>Спробуйте ще раз.", () => searchInBot(query));
+  }).finally(() => {
     document.getElementById("loading-indicator").style.display = "none";
   });
-}
+  }
 
 
     
@@ -2951,9 +2954,19 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
     }
   }
 
-  function showServiceErrorModal(msg) {
-  const modal = document.getElementById('service-error-modal');
-  document.getElementById('service-error-message').innerHTML = msg || 'Сервіс тимчасово недоступний,<br>спробуйте ще раз через хвилину.';
+let serviceErrorRetry = null;
+
+function showServiceErrorModal(msg, onRetry = null) {
+  const modal   = document.getElementById('service-error-modal');
+  const msgBox  = document.getElementById('service-error-message');
+  const retryBtn= document.getElementById('service-retry-btn');
+
+  if (msgBox) msgBox.innerHTML = msg || 'Сервіс тимчасово недоступний,<br>спробуйте ще раз через хвилину.';
+  serviceErrorRetry = (typeof onRetry === 'function') ? onRetry : null;
+
+  // показуємо/ховаємо кнопку "Спробувати ще раз" залежно від наявності колбеку
+  if (retryBtn) retryBtn.style.display = serviceErrorRetry ? 'inline-block' : 'none';
+
   modal.style.display = 'flex';
   setTimeout(() => modal.style.opacity = '1', 10);
 }
@@ -2963,6 +2976,7 @@ function closeServiceErrorModal() {
   modal.style.opacity = '0';
   setTimeout(() => modal.style.display = 'none', 300);
 }
+
 
 </script>
 
@@ -2993,13 +3007,40 @@ function closeServiceErrorModal() {
     <div id="service-error-message" style="color:#00f7ff; font-size:17px; margin-bottom:22px;">
       Сервіс тимчасово недоступний,<br>спробуйте ще раз через хвилину.
     </div>
-    <button onclick="closeServiceErrorModal()" style="
-      padding: 8px 20px; background: #00f7ff; color: #000;
-      border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-      font-size: 16px;
-    ">OK</button>
+
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+      <button id="service-retry-btn" style="
+        padding: 8px 14px; background: #00f7ff; color: #000;
+        border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+        font-size: 15px;
+      ">🔄 Спробувати ще раз</button>
+
+      <button id="service-reload-btn" style="
+        padding: 8px 14px; background: #444; color: #fff;
+        border: none; border-radius: 8px; cursor: pointer; font-size: 15px;
+      ">⟲ Перезавантажити</button>
+
+      <button id="service-ok-btn" style="
+        padding: 8px 14px; background: #2b2b2b; color: #ddd;
+        border: 1px solid #555; border-radius: 8px; cursor: pointer; font-size: 15px;
+      ">OK</button>
+    </div>
   </div>
 </div>
+<script>
+  document.getElementById('service-retry-btn').addEventListener('click', () => {
+    closeServiceErrorModal();
+    try { serviceErrorRetry && serviceErrorRetry(); } catch (e) { console.warn(e); }
+  });
+
+  document.getElementById('service-reload-btn').addEventListener('click', () => {
+    location.reload();
+  });
+
+  document.getElementById('service-ok-btn').addEventListener('click', () => {
+    closeServiceErrorModal();
+  });
+</script>
 
 <script>
   // Відкрити чат з лаунчер-ботом із payload'ом (хто натиснув)
