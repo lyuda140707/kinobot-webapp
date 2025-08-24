@@ -1837,16 +1837,14 @@ function switchTab(tabId, btn) {
   }
 
   if (tabId === 'account') {
-    if (!isDataLoaded) {
-      alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше.");
-      return;
-    }
+    if (!isDataLoaded) { alert("⏳ Дані ще завантажуються. Спробуй трохи пізніше."); return; }
     closeDonatePopup();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    checkProPendingStatus();
+    if (typeof window.checkProPendingStatus === 'function') {
+      window.checkProPendingStatus();
+    }
   }
-}
 
 
 
@@ -2700,7 +2698,7 @@ function updateUIAfterPro(expireDate) {
   document.getElementById("getProBtn").after(notice);
 }
 // Додай цю функцію в кінець свого основного <script> блоку (або туди, де інші функції)
-async function checkProPendingStatus() {
+window.checkProPendingStatus = async function checkProPendingStatus() {
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
   if (!user) return;
