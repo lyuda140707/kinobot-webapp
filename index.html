@@ -947,7 +947,11 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 // читаємо REST’ом і мапимо у старий формат з українськими ключами
 async function fetchFilmsFromSupabase() {
   const pageSize = 1000;
-  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb&order=id.asc`;
+  // ⬇️ додали season,episode у select і відразу відсортували за title → season → episode
+  const base =
+    `${SUPABASE_URL}/rest/v1/films` +
+    `?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb,season,episode` +
+    `&order=title.asc&order=season.asc&order=episode.asc`;
 
   let rows = [];
   for (let pageOffset = 0; ; pageOffset += pageSize) {
@@ -957,10 +961,10 @@ async function fetchFilmsFromSupabase() {
     if (!res.ok) throw new Error('Supabase fetch failed: ' + (await res.text()));
     const batch = await res.json();
     rows = rows.concat(batch);
-    if (batch.length < pageSize) break; // остання сторінка
+    if (batch.length < pageSize) break;
   }
 
-  // Мапінг у ваш старий формат з українськими ключами
+  // ⬇️ тут додай мапінг СЕЗОН/СЕРІЯ
   return rows.map(r => ({
     'Назва'      : r.title ?? '',
     'Тип'        : r.type ?? '',
@@ -974,8 +978,9 @@ async function fetchFilmsFromSupabase() {
     'Рік'        : r.year ?? '',
     'message_id' : r.message_id ?? '',
     'file_id'    : r.file_id ?? '',
-   
-    
+    // ✅ нове:
+    'Сезон'      : r.season ?? '',
+    'Серія'      : r.episode ?? '',
   }));
 }
 
@@ -1004,8 +1009,6 @@ async function loadFilms() {
   // 1) Якщо є кеш — миттєво рендеримо з нього
   if (cached) {
     films = JSON.parse(cached);
-    shuffleArray(films);
-
     showFilmOfTheDay();
     showCollections();
     showGenres();
@@ -1067,7 +1070,7 @@ async function fetchAndUpdateFilms() {
     }
 
     films = loadedFilms;
-    shuffleArray(films);
+    
 
     localStorage.setItem('films', JSON.stringify(films));
     localStorage.setItem('filmsTimestamp', Date.now().toString());
