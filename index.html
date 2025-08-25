@@ -572,6 +572,17 @@ function groupSeriesEpisodes(list) {
 }
 
 const EPISODIC_TYPES = ['серіал','мультсеріал','мультсеріали'];
+// ⬇️ точне входження жанру як токена (а не підрядка)
+function hasExactGenre(value, target) {
+  if (!value) return false;
+  const tokens = value
+    .toLowerCase()
+    .split(/[,\|\/;·•]+|\s{2,}/)  // кома, слеш, пайп, крапки тощо + подвійні пробіли
+    .map(s => s.trim())
+    .filter(Boolean);
+  return tokens.includes(target.toLowerCase());
+}
+
 function isEpisodicType(t) {
   return EPISODIC_TYPES.includes((t||'').trim().toLowerCase());
 }
@@ -1528,17 +1539,18 @@ function filterByGenre(genre) {
   const normalized = genre.trim().toLowerCase();
   const container  = document.getElementById('genre-results');
 
-  // 1) Відфільтрувати за жанром/добіркою
+  // 1) Точний збіг по ЖАНРУ; у Добірці дозволяємо вільний текст
   let filtered = films.filter(f => {
-    const type = (f['Тип'] || '').trim().toLowerCase();
-    const g1   = (f['Жанр']    || '').trim().toLowerCase();
-    const g2   = (f['Добірка'] || '').trim().toLowerCase();
-    return (g1.includes(normalized) || g2.includes(normalized));
+    const g1 = f['Жанр']    || '';
+    const g2 = f['Добірка'] || '';
+    return hasExactGenre(g1, normalized) || g2.toLowerCase().includes(normalized);
   });
 
-  // 2) Якщо користувач натиснув підкатегорію серіалів — лишити тільки Серіали
+  // 2) Примусово лишаємо потрібний ТИП залежно від відкритої підгрупи
   if (document.getElementById('group-series').style.display === 'flex') {
     filtered = filtered.filter(f => isEpisodicType(f['Тип']));
+  } else if (document.getElementById('group-films').style.display === 'flex') {
+    filtered = filtered.filter(f => !isEpisodicType(f['Тип']));
   }
 
   // 3) Нічого не знайдено?
@@ -1548,45 +1560,43 @@ function filterByGenre(genre) {
     return;
   }
 
-  // 4) Якщо це серіали — зібрати всі епізоди під кожною назвою
+  // 4) Якщо це серіали — зібрати епізоди
   if (isEpisodicType(filtered[0]['Тип'])) {
-  const grouped = groupSeriesEpisodes(filtered);
+    const grouped = groupSeriesEpisodes(filtered);
+    container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
+      const safe      = safeId(title);
+      const isPro     = localStorage.getItem('isProUser') === 'true';
+      const isProFilm = eps[0]['Доступ'] === 'PRO';
+      const posterSrc = (isProFilm && !isPro) ? placeholderImage : (eps[0]['Фото'] || placeholderImage);
+      const count     = eps.length;
 
-  container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
-    const safe      = safeId(title);
-    const isPro     = localStorage.getItem('isProUser') === 'true';
-    const isProFilm = eps[0]['Доступ'] === 'PRO';
-    const posterSrc = (isProFilm && !isPro) ? placeholderImage : (eps[0]['Фото'] || placeholderImage);
-
-    const count     = eps.length;
-
-    return `
-      <div class="film-card" id="film-${safe}">
-        ${poster(posterSrc, title, eps[0]['Рік'])}
-        <h3>${maskWord(title)}</h3>
-        <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
-        ${renderControls(title, eps[0]['Опис'])}
-        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-          📺 Показати серії (${count})
-        </button>
-        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-          ${eps.map((ep, i) => {
-            const label = episodeLabel(ep, i);
-            const mid = ep.message_id || ep.file_id;
-            return mid
-            ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-          }).join('')}
+      return `
+        <div class="film-card" id="film-${safe}">
+          ${poster(posterSrc, title, eps[0]['Рік'])}
+          <h3>${maskWord(title)}</h3>
+          <p class="film-imdb">IMDb: ${eps[0]['IMDb'] || '—'}</p>
+          ${renderControls(title, eps[0]['Опис'])}
+          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+            📺 Показати серії (${count})
+          </button>
+          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
+            ${eps.map((ep, i) => {
+              const label = episodeLabel(ep, i);
+              const mid = ep.message_id || ep.file_id;
+              return mid
+                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
+                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
+            }).join('')}
+          </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
 
-  container.scrollIntoView({ behavior: 'smooth' });
-  return;
-}
+    container.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
 
-  // 5) Інакше — відмалювати як список фільмів
+  // 5) Інакше — звичайний список фільмів
   currentFilms = filtered;
   container.innerHTML = '';
   offset = 0;
