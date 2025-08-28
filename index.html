@@ -839,6 +839,39 @@ function sortByParsedEpisode(list) {
   <input type="checkbox" id="theme-toggle" />
 </div>
 
+<!-- 🎁 Реферальна програма -->
+<h3 style="margin-top:24px">🎁 Запроси друзів</h3>
+<p id="ref-desc" style="font-size:14px;color:#ccc;margin:6px 0 10px">
+  Запроси <b>3 друзів</b>, хай відкриють застосунок — і я вручну увімкну тобі <b>PRO на 7 днів</b>.
+</p>
+
+<div id="referral-box" style="background:#151515;border:1px solid #2a2a2a;border-radius:12px;padding:12px">
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button id="ref-get-link" class="account-button" style="background:#00f7ff;color:#000;font-weight:700">
+      🔗 Отримати реф-посилання
+    </button>
+    <button id="ref-copy" class="account-button" style="background:#444;color:#fff">📋 Скопіювати</button>
+    <button id="ref-share" class="account-button" style="background:#444;color:#fff">📤 Поділитися</button>
+    <button id="ref-refresh" class="account-button" style="background:#333;color:#fff">🔄 Оновити</button>
+  </div>
+
+  <div style="margin-top:12px;font-size:13px;color:#aaa;word-break:break-all">
+    <span id="ref-link">—</span>
+  </div>
+
+  <div style="margin-top:12px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#ccc">
+      <span>Прогрес</span><span><b id="ref-count">0</b> / 3</span>
+    </div>
+    <div style="height:8px;border-radius:8px;background:#2a2a2a;margin-top:6px;overflow:hidden">
+      <div id="ref-bar" style="height:100%;width:0%;background:#00f7ff;transition:width .25s"></div>
+    </div>
+  </div>
+
+  <p style="margin-top:10px;font-size:12px;color:#888">
+    Коли буде 3/3 — напиши мені через «Написати адміну», я перевірю та активую PRO на 7 днів ✅
+  </p>
+</div>
 
   <!-- Підтримка проекту -->
   <h3>🤝 Підтримати проєкт</h3>
@@ -915,6 +948,8 @@ function sortByParsedEpisode(list) {
     const BATCH_SIZE = 50;
     let currentFilms = [];
     let offset = 0;
+
+    const BACKEND = 'https://relax-time2.onrender.com';
     
   function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -1001,6 +1036,102 @@ async function fetchFilmsFromSupabase() {
   }));
 }
 
+// 1) Якщо користувач зайшов за чиєюсь рефкою (?ref=ID) — відправимо хіт на бекенд
+async function handleReferralOpen() {
+  const tg = window.Telegram?.WebApp;
+  const me = tg?.initDataUnsafe?.user?.id;
+  if (!me) return;
+
+  const url = new URL(window.location.href);
+  const ref = url.searchParams.get('ref'); // referrer_id
+  if (!ref) return;
+  if (String(ref) === String(me)) return; // самореф — ігноримо
+
+  try {
+    await fetch(`${BACKEND}/ref-hit`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ referrer_id: Number(ref), referred_id: Number(me) })
+    });
+  } catch(e) {
+    console.warn('ref-hit fail', e);
+  }
+}
+
+// 2) Згенерувати моє реф-посилання
+async function getMyRefLink() {
+  const tg = window.Telegram?.WebApp;
+  const me = tg?.initDataUnsafe?.user?.id;
+  if (!me) { alert('Потрібен Telegram ID'); return; }
+
+  // Прямий URL твого WebApp + ?ref=ID
+  const base = window.location.origin + window.location.pathname;
+  const link = `${base}?ref=${me}`;
+  document.getElementById('ref-link').textContent = link;
+  return link;
+}
+
+// 3) Скопіювати
+async function copyRefLink() {
+  const link = document.getElementById('ref-link').textContent.trim();
+  if (!link || link === '—') {
+    const l = await getMyRefLink();
+    await navigator.clipboard.writeText(l);
+  } else {
+    await navigator.clipboard.writeText(link);
+  }
+  alert('Скопійовано ✅');
+}
+
+// 4) Поділитися
+async function shareRefLink() {
+  const link = document.getElementById('ref-link').textContent.trim() || await getMyRefLink();
+  const text = `Залетай у наш кіно WebApp 🎬 ${link}`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'КіноТочка', text, url: link }); } catch {}
+    return;
+  }
+  try {
+    window.Telegram?.WebApp?.openTelegramLink?.(
+      `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
+    );
+  } catch {
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
+  }
+}
+
+// 5) Запит прогресу (скільки унікальних друзів відкрили WebApp)
+async function refreshRefProgress() {
+  const tg = window.Telegram?.WebApp;
+  const me = tg?.initDataUnsafe?.user?.id;
+  if (!me) return;
+
+  try {
+    const r = await fetch(`${BACKEND}/ref-status`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ referrer_id: Number(me) })
+    });
+    const data = await r.json();
+    const cnt = Number(data.count || 0);
+    document.getElementById('ref-count').textContent = Math.min(cnt, 3);
+    document.getElementById('ref-bar').style.width = `${Math.min(100, Math.round(cnt/3*100))}%`;
+  } catch(e) {
+    console.warn('ref-status fail', e);
+  }
+}
+
+// 6) Прив'язуємо кнопки
+function bindReferralUI() {
+  const btnLink    = document.getElementById('ref-get-link');
+  const btnCopy    = document.getElementById('ref-copy');
+  const btnShare   = document.getElementById('ref-share');
+  const btnRefresh = document.getElementById('ref-refresh');
+  if (btnLink)    btnLink.onclick    = getMyRefLink;
+  if (btnCopy)    btnCopy.onclick    = copyRefLink;
+  if (btnShare)   btnShare.onclick   = shareRefLink;
+  if (btnRefresh) btnRefresh.onclick = refreshRefProgress;
+}
     
 
 // (необов’язково) запасний варіант — твій старий Google Sheet
@@ -1913,7 +2044,7 @@ function showSkeletonCollections() {
     console.warn('⚠️ Бекенд не прокинувся:', e);
   }
 
-  fetch('https://relax-time2.onrender.com/ping').catch(console.warn);
+  
   Telegram.WebApp.ready();
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
@@ -2039,8 +2170,10 @@ try {
 }
 
   // 🟢 Якщо підписаний, тільки тоді все інше:
-  
-
+  // ⬇️ реферал-логіка: фіксуємо відкриття за рефкою + в’яжемо кнопки + тягнемо прогрес
+  await handleReferralOpen();
+  bindReferralUI();
+  refreshRefProgress();
 
 
   // Показати скелетони
