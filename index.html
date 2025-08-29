@@ -257,6 +257,19 @@
   line-height: 1.1;
   text-align: center;
 }
+/* === Seasons UI === */
+.seasons-row{
+  display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
+  margin:8px 0 6px;
+}
+.season-btn{
+  background:#222; border:1px solid #444; border-radius:14px;
+  padding:6px 10px; font-weight:700; font-size:13px;
+  color:#00f7ff; cursor:pointer;
+  box-shadow:0 0 6px #00f7ff, 0 0 12px rgba(0,255,255,.35);
+}
+.season-btn.active{ background:#00f7ff; color:#000; }
+.series-episodes-season{ display:none; margin-top:8px; }
 
 
 .series-poster {
@@ -540,6 +553,19 @@ function unmaskWord(word) {
   // Знімає маскування (прибирає zero-width space)
   return word.replace(/\u200B/g, '');
 }
+function safeId(str) {
+  return String(str || '').replace(/[^\w\d]/g, '_');
+}
+
+function renderControls(title, description) {
+  const film = films.find(f => f['Назва'] === title) || {};
+  return `
+    <button class="favorite-btn"
+      onclick='addToFavorites(${JSON.stringify(title)}, ${JSON.stringify(description || "")}, ${JSON.stringify(film.message_id || "")})'>
+      💛
+    </button>
+  `;
+}
 
 
 
@@ -571,7 +597,8 @@ function groupSeriesEpisodes(list) {
   return grouped;
 }
 
-const EPISODIC_TYPES = ['серіал','мультсеріал','мультсеріали'];
+const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
+
 // ⬇️ точне входження жанру як токена (а не підрядка)
 function hasExactGenre(value, target) {
   if (!value) return false;
@@ -621,6 +648,123 @@ function sortByParsedEpisode(list) {
     .map((ep, i) => ({ ep, i, n: parseEpisodeNumber(ep) }))
     .sort((a, b) => (a.n - b.n) || (a.i - b.i))
     .map(x => x.ep);
+}
+// --- СЕЗОНИ: беремо або з поля "Сезон", або з тексту опису (fallback) ---
+function getSeasonNum(ep){
+  const raw = (ep['Сезон'] ?? ep['Season'] ?? '').toString().trim();
+  if (raw) { const n = parseInt(raw, 10); if (!isNaN(n) && n > 0) return n; }
+  const s = `${ep['Опис'] || ep['Назва'] || ''}`;
+  let m = s.match(/сезон\s*(\d{1,3})/i); if (m) return parseInt(m[1],10);
+  m = s.match(/(\d{1,3})\s*сезон/i);     if (m) return parseInt(m[1],10);
+  return 1;
+}
+
+function groupBySeason(list){
+  const map = {};
+  for (const ep of list){
+    const s = getSeasonNum(ep);
+    (map[s] ||= []).push(ep);
+  }
+  for (const k of Object.keys(map)){
+    map[k] = sortByParsedEpisode(map[k].slice()); // серії сортуємо по номеру з description
+  }
+  return map;
+}
+
+// Універсальний рендер картки серіалу (з сезонами або без)
+function renderSeriesCard(title, episodes){
+  const safe   = safeId(title);
+  const count  = episodes.length;
+  const first  = episodes[0] || {};
+  const isPro  = localStorage.getItem('isProUser') === 'true';
+  const locked = (first['Доступ'] === 'PRO' && !isPro);
+
+  const posterSrc = locked ? placeholderImage : (first['Фото'] || placeholderImage);
+  const imdb   = first['IMDb'] || '—';
+  const year   = first['Рік'];
+
+  const seasonsMap = groupBySeason(episodes);
+  const seasons = Object.keys(seasonsMap).map(n=>parseInt(n,10)).sort((a,b)=>a-b);
+
+  // 1 сезон → показуємо одразу серії
+  if (seasons.length <= 1){
+    const eps = seasons.length ? seasonsMap[seasons[0]] : sortByParsedEpisode(episodes);
+    return `
+      <div class="film-card" id="film-${safe}">
+        ${poster(posterSrc, title, year)}
+        <h3>${maskWord(title)}</h3>
+        <p class="film-imdb">IMDb: ${imdb}</p>
+        ${renderControls(title, first['Опис'] || '')}
+        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+          📺 Показати серії (${count})
+        </button>
+        <div id="episodes-${safe}" class="series-episodes-grid" data-count="${count}" style="display:none;">
+          ${eps.map((ep,i)=>{
+            const label = episodeLabel(ep,i);
+            const mid = ep.message_id || ep.file_id;
+            return locked
+              ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+              : (mid
+                  ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
+                  : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`);
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // Кілька сезонів → таби
+  const firstSeason = seasons[0];
+  return `
+    <div class="film-card" id="film-${safe}">
+      ${poster(posterSrc, title, year)}
+      <h3>${maskWord(title)}</h3>
+      <p class="film-imdb">IMDb: ${imdb}</p>
+      ${renderControls(title, first['Опис'] || '')}
+
+      <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+        📚 Сезони: ${seasons.length} | Серій: ${count}
+      </button>
+
+      <div id="seasonswrap-${safe}" data-count="${count}" style="display:none;">
+        <div class="seasons-row" id="seasons-${safe}">
+          ${seasons.map(s=>`<button class="season-btn ${s===firstSeason?'active':''}" onclick="toggleSeason('${safe}', ${s})">S${s}</button>`).join('')}
+        </div>
+
+        ${seasons.map(s=>{
+          const list = seasonsMap[s];
+          return `
+            <div class="series-episodes-grid series-episodes-season" id="episodes-${safe}-s${s}" style="display:${s===firstSeason?'grid':'none'};">
+              ${list.map((ep,i)=>{
+                const label = episodeLabel(ep,i);
+                const mid = ep.message_id || ep.file_id;
+                return locked
+                  ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+                  : (mid
+                      ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
+                      : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`);
+              }).join('')}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+ 
+function toggleSeason(seriesId, season){
+  const row = document.getElementById(`seasons-${seriesId}`);
+  if (row){
+    row.querySelectorAll('.season-btn').forEach(b=>b.classList.remove('active'));
+    const btn = Array.from(row.querySelectorAll('.season-btn'))
+      .find(b => (b.textContent||'').replace(/\D/g,'') === String(season));
+    if (btn) btn.classList.add('active');
+  }
+  document.querySelectorAll(`#film-${seriesId} .series-episodes-season`)
+    .forEach(el => el.style.display = 'none');
+  const grid = document.getElementById(`episodes-${seriesId}-s${season}`);
+  if (grid) grid.style.display = 'grid';
 }
 
 
@@ -969,7 +1113,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 // читаємо REST’ом і мапимо у старий формат з українськими ключами
 async function fetchFilmsFromSupabase() {
   const pageSize = 1000;
-  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb&order=id.asc`;
+  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb,season&order=title.asc,season.asc,id.asc`;
 
   let rows = [];
   for (let pageOffset = 0; ; pageOffset += pageSize) {
@@ -996,6 +1140,7 @@ async function fetchFilmsFromSupabase() {
     'Рік'        : r.year ?? '',
     'message_id' : r.message_id ?? '',
     'file_id'    : r.file_id ?? '',
+    'Сезон'      : r.season ?? ''
    
     
   }));
@@ -1436,120 +1581,30 @@ function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
   container.innerHTML = '';
 
-  // Підтримка одного типу або масиву типів
   const types = Array.isArray(type)
     ? type.map(t => (t || '').trim().toLowerCase())
     : [(type || '').trim().toLowerCase()];
 
-  // Фільтруємо епізоди потрібних типів
   const seriesFilms = films.filter(f =>
     types.includes(((f['Тип'] || '')).trim().toLowerCase())
   );
+
   if (!seriesFilms.length) {
     container.innerHTML = '<p>Немає серіалів 😢</p>';
     return;
   }
 
-  // Хелпери для ключа епізоду та лейблу
-  const epKey = (ep) => {
-    const s = (ep['Сезон'] ?? '').toString().trim();
-    const e = (ep['Серія'] ?? ep['Епізод'] ?? '').toString().trim();
-    const mid = (ep['message_id'] ?? ep['file_id'] ?? ep['Посилання'] ?? '').toString().trim();
-    if (s || e) return `se:${s}|${e}`.toLowerCase();
-    if (mid)   return `mid:${mid}`;
-    // якщо немає даних для однозначного ключа — НЕ прибираємо (повертаємо пусто)
-    return '';
-  };
+  const grouped = groupSeriesEpisodes(seriesFilms);
+  container.innerHTML = Object.entries(grouped)
+    .map(([title, eps]) => renderSeriesCard(title, eps))
+    .join('');
 
-  const epLabel = (ep, i) => {
-    const s = (ep['Сезон'] ?? '').toString().trim();
-    const e = (ep['Серія'] ?? ep['Епізод'] ?? '').toString().trim();
-    if (s || e) return `${s ? `S${s}` : ''}${e ? `E${e}` : ''}` || `Епізод ${i+1}`;
-    return (ep['Опис'] || '').trim() || `Епізод ${i+1}`;
-  };
-
-  // Групуємо за назвою та уникалізуємо епізоди розумно
-  const grouped = seriesFilms.reduce((acc, ep) => {
-    const title = ep['Назва'];
-    if (!acc[title]) acc[title] = { list: [], seen: new Set() };
-
-    const k = epKey(ep);
-    if (k) {
-      if (!acc[title].seen.has(k)) {
-        acc[title].seen.add(k);
-        acc[title].list.push(ep);
-      }
-    } else {
-      // немає надійного ключа — залишаємо епізод (НЕ обрізаємо за описом)
-      acc[title].list.push(ep);
-    }
-    return acc;
-  }, {});
-
-  // Рендер
-const html = Object.entries(grouped).map(([title, box]) => {
-  // Сортуємо епізоди за номером із description
-  const episodes = sortByParsedEpisode(box.list.slice());
-
-  const safe       = safeId(title);
-  const isPro      = localStorage.getItem('isProUser') === 'true';
-  const isProFilm  = episodes[0]['Доступ'] === 'PRO';
-  const posterSrc  = (isProFilm && !isPro) ? placeholderImage : (episodes[0]['Фото'] || placeholderImage);
-  const count      = episodes.length;
-  const imdb       = episodes[0]['IMDb'] || '—';
-
-  return `
-    <div class="film-card" id="film-${safe}">
-      ${poster(posterSrc, title, episodes[0]['Рік'])}
-      <h3>${maskWord(title)}</h3>
-      ${renderControls(title, episodes[0]['Опис'])}
-      <p class="film-imdb">IMDb: ${imdb}</p>
-      <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-        📺 Показати серії (${count})
-      </button>
-      <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-        ${episodes.map((ep, i) => {
-          const label = episodeLabel(ep, i);
-          const mid = ep.message_id || ep.file_id;
-          return mid
-            ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-            : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-}).join('');
-
-
-  container.innerHTML = html;
   container.scrollIntoView({ behavior: 'smooth' });
 }
 
 
-function openSeries(id) {
-  const block = document.getElementById(`series-${id}`);
-  if (block) {
-    block.style.display = (block.style.display === 'none') ? 'block' : 'none';
-  }
-}
 
 
-  function safeId(str) {
-    return str.replace(/[^\w\d]/g, '_');
-  }
-
-function renderControls(title, description) {
-  const film = films.find(f => f['Назва'] === title) || {};
-  return `
-    <button class="favorite-btn"
-      onclick='addToFavorites(${JSON.stringify(title)}, ${JSON.stringify(description || "")}, ${JSON.stringify(film.message_id || "")})'>
-      💛
-    </button>
-  `;
-}
-
-
-    
 function filterByGenre(genre) {
   if (!genre) return;
   switchTab('categories');
@@ -1577,46 +1632,17 @@ function filterByGenre(genre) {
     return;
   }
 
-  // 4) Якщо це серіали — зібрати епізоди
-// 4) Якщо це серіали — зібрати епізоди
+
 if (isEpisodicType(filtered[0]['Тип'])) {
   const grouped = groupSeriesEpisodes(filtered);
-
-  container.innerHTML = Object.entries(grouped).map(([title, eps]) => {
-    // Сортуємо епізоди за номером із description
-    const epsSorted = sortByParsedEpisode(eps.slice());
-
-    const safe      = safeId(title);
-    const isPro     = localStorage.getItem('isProUser') === 'true';
-    const isProFilm = epsSorted[0]['Доступ'] === 'PRO';
-    const posterSrc = (isProFilm && !isPro) ? placeholderImage : (epsSorted[0]['Фото'] || placeholderImage);
-    const count     = epsSorted.length;
-
-    return `
-      <div class="film-card" id="film-${safe}">
-        ${poster(posterSrc, title, epsSorted[0]['Рік'])}
-        <h3>${maskWord(title)}</h3>
-        <p class="film-imdb">IMDb: ${epsSorted[0]['IMDb'] || '—'}</p>
-        ${renderControls(title, epsSorted[0]['Опис'])}
-        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-          📺 Показати серії (${count})
-        </button>
-        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-          ${epsSorted.map((ep, i) => {
-            const label = episodeLabel(ep, i);
-            const mid = ep.message_id || ep.file_id;
-            return mid
-              ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-          }).join('')}
-        </div>
-      </div>
-    `;
-  }).join('');
-
+  container.innerHTML = Object.entries(grouped)
+    .map(([title, eps]) => renderSeriesCard(title, eps))
+    .join('');
   container.scrollIntoView({ behavior: 'smooth' });
   return;
 }
+
+
 
   // 5) Інакше — звичайний список фільмів
   currentFilms = filtered;
@@ -2156,37 +2182,13 @@ document.getElementById('searchInput').addEventListener('input', () => {
   const seriesHits = hits.filter(f => isEpisodicType(f['Тип']));
 if (seriesHits.length > 0) {
   const groupedSeries = groupSeriesEpisodes(seriesHits);
-  container.innerHTML = Object.entries(groupedSeries).map(([title, episodes]) => {
-    // ✅ додано: сортуємо епізоди за номером із description
-    const episodesSorted = sortByParsedEpisode(episodes.slice());
-
-    const safe = safeId(title);
-    const count = episodesSorted.length;
-    const isPro = localStorage.getItem('isProUser') === 'true';
-    const isProSeries = episodesSorted[0]['Доступ'] === 'PRO';
-    const posterSrc = (isProSeries && !isPro) ? placeholderImage : (episodesSorted[0]['Фото'] || placeholderImage);
-
-    return `
-      <div class="film-card" id="film-${safe}">
-        ${poster(posterSrc, title, episodesSorted[0]['Рік'])}
-        <h3>${maskWord(title)}</h3>
-        <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-          📺 Показати серії (${count})
-        </button>
-        <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${count}">
-          ${episodesSorted.map((ep, i) => {
-            const label = episodeLabel(ep, i);
-            const mid = ep.message_id || ep.file_id;
-            return mid
-              ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-              : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-          }).join('')}
-        </div>
-      </div>
-    `;
-  }).join('');
+  container.innerHTML = Object.entries(groupedSeries)
+    .map(([title, episodes]) => renderSeriesCard(title, episodes))
+    .join('');
+  container.scrollIntoView({ behavior: 'smooth' }); // (необовʼязково)
   return;
 }
+
 
 
   // 4) Інакше — звичайні фільми, прибираємо дублікати за назвою
@@ -2459,53 +2461,14 @@ function goToSeries(seriesTitle) {
   openGenreGroup('series');
 
   setTimeout(() => {
-    // Беремо всі епізоди цього тайтлу + тільки серіальні типи
     const filtered = films.filter(f => f['Назва'] === seriesTitle && isEpisodicType(f['Тип']));
-    if (filtered.length === 0) {
-      alert('Серіал не знайдено 😢');
-      return;
-    }
-
+    if (!filtered.length) { alert('Серіал не знайдено 😢'); return; }
     const container = document.getElementById('genre-results');
-    const grouped = groupSeriesEpisodes(filtered);
-
-    container.innerHTML = Object.entries(grouped).map(([title, episodes]) => {
-      const first = episodes[0];
-      const isPro = localStorage.getItem('isProUser') === 'true';
-      const isProFilm = first['Доступ'] === 'PRO';
-      const imgSrc = (isProFilm && !isPro) ? placeholderImage : (first['Фото'] || placeholderImage);
-      const imdb = first['IMDb'] || '—';
-      const desc = first['Опис'] || '';
-      const safe = safeId(title);
-
-      return `
-        <div class="film-card" id="film-${safe}">
-          ${poster(imgSrc, title, first['Рік'])}
-          <h3>${maskWord(title)}</h3>
-          <p class="film-imdb">IMDb: ${imdb}</p>
-          <p class="film-desc">${desc}</p>
-
-          ${renderControls(title, desc)}
-
-          <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${episodes.length}">
-            📺 Показати серії (${episodes.length})
-          </button>
-          <div id="episodes-${safe}" class="series-episodes-grid" style="display:none;" data-count="${episodes.length}">
-            ${episodes.map((ep, i) => {
-              const label = episodeLabel(ep, i);
-              const mid = ep.message_id || ep.file_id;
-              return mid
-                ? `<button class="search-button" onclick="requestFilmByName('${mid}')">${label}</button>`
-                : `<button class="search-button" onclick="openVideoById('${title}')">${label}</button>`;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }).join('');
-
+    container.innerHTML = renderSeriesCard(seriesTitle, filtered);
     container.scrollIntoView({ behavior: 'smooth' });
   }, 300);
 }
+
 
 document.getElementById('getProBtn').addEventListener('click', () => {
     const tg = window.Telegram.WebApp;
@@ -2672,15 +2635,26 @@ function sendFilm(film_id) {
 }
 
 
-function toggleEpisodes(id, btn) {
-  const grid = document.getElementById(`episodes-${id}`);
-  const isHidden = getComputedStyle(grid).display === 'none';
+function toggleEpisodes(id, btn){
+  const wrap = document.getElementById(`seasonswrap-${id}`); // коли багато сезонів
+  const grid = document.getElementById(`episodes-${id}`);    // коли сезон один
+  const target = wrap || grid;
+  if (!target) return;
 
-  grid.style.display = isHidden ? 'grid' : 'none';
-  btn.textContent = isHidden
-    ? `🔽 Сховати серії`
-    : `📺 Показати серії (${grid.dataset.count})`;
+  const displayType = wrap ? 'block' : 'grid';
+  const isHidden = getComputedStyle(target).display === 'none';
+  target.style.display = isHidden ? displayType : 'none';
+
+  if (isHidden){
+    btn.textContent = '🔽 Сховати';
+  } else {
+    const total = target.dataset.count || btn.dataset.count || '';
+    btn.textContent = grid
+      ? `📺 Показати серії (${total})`
+      : `📚 Показати сезони (${total})`;
+  }
 }
+
 
 
   // Робимо функції глобальними для inline onClick
@@ -2703,6 +2677,7 @@ function toggleEpisodes(id, btn) {
   window.goToCartoons = goToCartoons; // для кнопки "Мультфільми" на Головній
   window.showAllFilms = showAllFilms; // для кнопки "Фільми" на Головній
   window.showSeries   = showSeries;   // для кнопки "Серіали" на Головній
+  window.toggleSeason = toggleSeason;
     
 // Запуск регулярної перевірки PRO-статусу
 function startProPolling() {
@@ -3103,7 +3078,6 @@ function closeServiceErrorModal() {
 
 <!-- Порожній контейнер історії, щоб не ламався .innerHTML=... -->
 <div id="history-list" style="display:none;"></div>
-
 
 
 <!-- Оверлей "перезавантажити" -->
