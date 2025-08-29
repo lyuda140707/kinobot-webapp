@@ -615,11 +615,17 @@ function isEpisodicType(t) {
 }
 
 function episodeLabel(ep, i) {
-  const s = (ep['Сезон'] ?? '').toString().trim();
-  const e = (ep['Серія'] ?? ep['Епізод'] ?? '').toString().trim();
-  if (s || e) return `${s ? `S${s}` : ''}${e ? `E${e}` : ''}` || `Епізод ${i+1}`;
-  return (ep['Опис'] || '').trim() || `Епізод ${i+1}`;
+  const e = (ep['Серія'] ?? ep['Епізод'] ?? ep['Episode'] ?? '').toString().trim();
+  if (e) return `Серія ${e}`;
+
+  // якщо номер серії витягується з опису — використаємо його
+  const n = parseEpisodeNumber(ep);
+  if (Number.isFinite(n)) return `Серія ${n}`;
+
+  // запасний варіант
+  return `Серія ${i + 1}`;
 }
+
   
 function poster(src, title, year){
   return `<div class="poster-wrap">
@@ -728,7 +734,8 @@ function renderSeriesCard(title, episodes){
 
       <div id="seasonswrap-${safe}" data-count="${count}" style="display:none;">
         <div class="seasons-row" id="seasons-${safe}">
-          ${seasons.map(s=>`<button class="season-btn ${s===firstSeason?'active':''}" onclick="toggleSeason('${safe}', ${s})">S${s}</button>`).join('')}
+          ${seasons.map(s=>`<button class="season-btn ${s===firstSeason?'active':''}" onclick="toggleSeason('${safe}', ${s})">Сезон ${s}</button>`).join('')}
+
         </div>
 
         ${seasons.map(s=>{
