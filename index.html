@@ -569,33 +569,53 @@ function renderControls(title, description) {
 
 
 
-function episodeKey(ep) {
-  const s = (ep['Сезон'] ?? '').toString().trim();
-  const e = (ep['Серія'] ?? ep['Епізод'] ?? '').toString().trim();
-  const mid = (ep['message_id'] ?? ep['file_id'] ?? ep['Посилання'] ?? '').toString().trim();
-  const desc = (ep['Опис'] ?? '').toString().trim().toLowerCase();
-  return (s || e) ? `${s}|${e}`.toLowerCase() : (mid || `${(ep['Назва']||'')}|${desc}`);
+// НОВА версія: не склеює різні рядки без ID/номерів
+function episodeKey(ep, i) {
+  const s = (ep['Сезон'] ?? ep['Season'] ?? '').toString().trim();
+  const e = (ep['Серія'] ?? ep['Епізод'] ?? ep['Episode'] ?? '').toString().trim();
+  const mid = (ep['message_id'] ?? ep['file_id'] ?? '').toString().trim();
+
+  if (mid) return `mid:${mid}`;          // унікально за файлом/повідомленням
+  if (s || e) return `se:${s}|${e}`;     // якщо є хоч щось з номерів
+  return `idx:${i}`;                     // інакше — унікальний індекс, щоб не склеїти
 }
 
 function groupSeriesEpisodes(list) {
   const byTitle = new Map();
-  for (const ep of list) {
+
+  list.forEach((ep, i) => {
     const title = ep['Назва'];
-    const key   = episodeKey(ep);
     if (!byTitle.has(title)) byTitle.set(title, new Map());
+
     const m = byTitle.get(title);
-    if (!m.has(key)) m.set(key, ep);
-  }
+    const key = episodeKey(ep, i);
+
+    // дедуп лише коли справжній дубль одного і того ж файла/епізоду
+    if (!m.has(key)) {
+      m.set(key, ep);
+    }
+  });
+
   const grouped = {};
   for (const [title, m] of byTitle.entries()) {
     const arr = Array.from(m.values());
-    arr.sort((a,b) => {
-      const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '0')||0;
-      const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '0')||0;
-      const ea = parseInt(a['Серія'] ?? a['Епізод'] ?? a['Episode'] ?? '0')||0;
-      const eb = parseInt(b['Серія'] ?? b['Епізод'] ?? b['Episode'] ?? '0')||0;
-      return sa !== sb ? sa - sb : ea - eb;
+
+    // Сортування: сезон → серія; якщо серія порожня, парсимо з опису
+    arr.sort((a, b) => {
+      const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '1') || 1;
+      const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '1') || 1;
+
+      const eaRaw = a['Серія'] ?? a['Епізод'] ?? a['Episode'] ?? '';
+      const ebRaw = b['Серія'] ?? b['Епізод'] ?? b['Episode'] ?? '';
+      const ea = parseInt(eaRaw, 10);
+      const eb = parseInt(ebRaw, 10);
+
+      const eaNum = Number.isFinite(ea) ? ea : (parseEpisodeNumber(a) || 9999);
+      const ebNum = Number.isFinite(eb) ? eb : (parseEpisodeNumber(b) || 9999);
+
+      return sa !== sb ? sa - sb : eaNum - ebNum;
     });
+
     grouped[title] = arr;
   }
   return grouped;
@@ -688,7 +708,10 @@ function renderSeriesCard(title, episodes){
   const count  = episodes.length;
   const first  = episodes[0] || {};
   const isPro  = localStorage.getItem('isProUser') === 'true';
-  const locked = (first['Доступ'] === 'PRO' && !isPro);
+  // якщо в тайтлі є ХОЧ ОДНА безкоштовна серія — не лочимо картку
+  const hasFree = episodes.some(ep => ep['Доступ'] !== 'PRO');
+  const locked  = !hasFree && !isPro;
+
 
   const posterSrc = locked ? placeholderImage : (first['Фото'] || placeholderImage);
   const imdb   = first['IMDb'] || '—';
