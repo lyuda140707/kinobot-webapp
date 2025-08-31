@@ -748,43 +748,44 @@ function renderSeriesCard(title, episodes){
   }
 
   // Кілька сезонів → таби
-  const firstSeason = seasons[0];
-  return `
-    <div class="film-card" id="film-${safe}">
-      ${poster(posterSrc, title, year)}
-      <h3>${maskWord(title)}</h3>
-      <p class="film-imdb">IMDb: ${imdb}</p>
-      ${renderControls(title, first['Опис'] || '')}
+return `
+  <div class="film-card" id="film-${safe}">
+    ${poster(posterSrc, title, year)}
+    <h3>${maskWord(title)}</h3>
+    <p class="film-imdb">IMDb: ${imdb}</p>
+    ${renderControls(title, first['Опис'] || '')}
 
-      <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
-        📚 Сезони: ${seasons.length} | Серій: ${count}
-      </button>
+    <button class="search-button" onclick="toggleEpisodes('${safe}', this)" data-count="${count}">
+      📚 Показати сезони (${seasons.length})
+    </button>
 
-      <div id="seasonswrap-${safe}" data-count="${count}" style="display:none;">
-        <div class="seasons-row" id="seasons-${safe}">
-          ${seasons.map(s=>`<button class="season-btn ${s===firstSeason?'active':''}" onclick="toggleSeason('${safe}', ${s})">Сезон ${s}</button>`).join('')}
-
-        </div>
-
-        ${seasons.map(s=>{
-          const list = seasonsMap[s];
-          return `
-            <div class="series-episodes-grid series-episodes-season" id="episodes-${safe}-s${s}" style="display:${s===firstSeason?'grid':'none'};">
-              ${list.map((ep,i)=>{
-                const label = episodeLabel(ep,i);
-                const mid = ep.message_id || ep.file_id;
-                return locked
-                  ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-                  : (mid
-                      ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}')">${label}</button>`
-                      : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
-              }).join('')}
-            </div>
-          `;
-        }).join('')}
+    <div id="seasonswrap-${safe}" data-count="${count}" style="display:none;">
+      <div class="seasons-row" id="seasons-${safe}">
+        ${seasons.map(s => `
+          <button class="season-btn" onclick="toggleSeason('${safe}', ${s})">Сезон ${s}</button>
+        `).join('')}
       </div>
+
+      ${seasons.map(s => {
+        const list = seasonsMap[s];
+        return `
+          <div class="series-episodes-grid series-episodes-season" id="episodes-${safe}-s${s}" style="display:none;">
+            ${list.map((ep,i) => {
+              const label = episodeLabel(ep,i);
+              const mid = ep.message_id || ep.file_id;
+              return locked
+                ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+                : (mid
+                    ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}')">${label}</button>`
+                    : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
+            }).join('')}
+          </div>
+        `;
+      }).join('')}
     </div>
-  `;
+  </div>
+`;
+
 }
 
  
