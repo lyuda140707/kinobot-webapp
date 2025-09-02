@@ -177,80 +177,68 @@
   }
 }
 
-/* === DONATE POPUP (скло + неон) === */
-#donate-popup{
-  display:none;                 /* керуємо через JS */
+/* === НОВИЙ СТИЛЬ ДЛЯ DONATE-POPUP === */
+#donate-popup {
+  display: none; /* цю властивість JS керує */
   position: fixed;
+  bottom: 120px;
   left: 50%;
-  bottom: 96px;
   transform: translateX(-50%);
-  z-index: 10020;
-  width: min(92vw, 420px);
-  padding: 16px 14px;
-  border-radius: 16px;
-
-  background: rgba(10, 18, 22, 0.65);
-  border: 1px solid rgba(0, 247, 255, 0.35);
+  background: linear-gradient(135deg, #ff7f50, #ff4500);
+  border: 2px solid #fff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
   box-shadow:
-    0 0 18px rgba(0, 247, 255, 0.18),
-    0 0 36px rgba(0, 247, 255, 0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  color: #eafefe;
-  text-align:center;
-
-  opacity: 0;                   /* для плавної появи */
-  pointer-events: none;
-  transition: opacity .3s ease, transform .25s ease;
-}
-#donate-popup.show{
-  display:block;
-  opacity: 1;
-  pointer-events: auto;
+    0 0 12px rgba(255,69,0,0.8),
+    0 0 24px rgba(255,140,0,0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 9999;
 }
 
-#donate-popup .title{
-  margin: 0 0 6px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  color: #00f7ff;
-  text-shadow: 0 0 8px rgba(0,247,255,.5);
-}
-#donate-popup .subtitle{
-  margin: 0 0 14px;
-  color: #ffec8a;
-  font-weight: 600;
+#donate-popup:hover {
+  transform: translateX(-50%) translateY(-4px);
+  box-shadow:
+    0 0 16px rgba(255,69,0,1),
+    0 0 32px rgba(255,140,0,0.8);
 }
 
-#donate-popup .actions{
-  display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+/* кнопка «Підтримати» */
+#donate-popup .btn-donate {
+  display: inline-block;
+  background-color: #ffd700;
+  color: #000;
+  padding: 12px 24px;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 8px;
+  text-shadow: 0 0 6px rgba(255,215,0,0.8);
+  box-shadow: 0 0 10px rgba(255,215,0,0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-#donate-popup .btn-primary,
-#donate-popup .btn-ghost{
+#donate-popup .btn-donate:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 14px rgba(255,215,0,1),
+    0 0 28px rgba(255,215,0,0.8);
+}
+
+/* хрестик закриття */
+#donate-popup > button {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  background: none;
   border: none;
-  border-radius: 10px;
-  padding: 10px 16px;
-  font-weight: 800;
+  font-size: 20px;
   cursor: pointer;
+  color: #fff;
+  transition: transform 0.2s ease;
 }
 
-#donate-popup .btn-primary{
-  background: #00f7ff;
-  color:#000;
-  box-shadow: 0 0 10px rgba(0,247,255,.7);
-}
-#donate-popup .btn-ghost{
-  background:#2a2a2a;
-  color:#eaeaea;
-}
-
-#donate-popup .close-btn{
-  position:absolute;
-  top:8px; right:10px;
-  background:none; border:none; color:#eafefe;
-  font-size:20px; cursor:pointer;
+#donate-popup > button:hover {
+  transform: scale(1.2);
 }
 
 
@@ -1239,7 +1227,6 @@ async function loadFilms() {
     showGenres();
     showCountryFilters();
     showYearFilters();
-    scheduleDonatePopup();
 
     isDataLoaded = true;
     currentFilms = films;
@@ -2485,40 +2472,25 @@ function clearHistory() {
   }, 300);
 }
 
-// === Donate popup logic (кулдаун, плавна поява) ===
-const DONATE_COOLDOWN_DAYS = 7;  // не турбувати 7 днів після показу/кліку
-
-function canShowDonatePopup(){
-  const until = Number(localStorage.getItem('donateSeenUntil') || 0);
-  return Date.now() > until;
+function closeDonatePopup() {
+  const popup = document.getElementById('donate-popup');
+  if (popup) {
+    popup.style.opacity = '0';
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 300);
+  }
 }
-function rememberDonateSeen(days = DONATE_COOLDOWN_DAYS){
-  const ms = days * 24 * 60 * 60 * 1000;
-  localStorage.setItem('donateSeenUntil', String(Date.now() + ms));
-}
-
-function openDonatePopup(){
-  const el = document.getElementById('donate-popup');
-  if (!el) return;
-  el.style.display = 'block';
-  requestAnimationFrame(() => el.classList.add('show'));
-}
-function closeDonatePopup(){
-  rememberDonateSeen(); // фіксуємо, щоб не з’являвся деякий час
-  const el = document.getElementById('donate-popup');
-  if (!el) return;
-  el.classList.remove('show');
-  setTimeout(() => { el.style.display = 'none'; }, 300);
-}
-
-// Показати через 20с, якщо дозволено кулдауном
-function scheduleDonatePopup(delayMs = 20000){
-  if (!canShowDonatePopup()) return;
-  setTimeout(() => {
-    if (canShowDonatePopup()) openDonatePopup();
-  }, delayMs);
-}
-
+// ✅ Автоматичне стабільне віконце донату через 20 секунд
+setTimeout(() => {
+  const popup = document.getElementById('donate-popup');
+  if (popup) {
+    popup.style.display = 'block';
+    popup.style.opacity = '0';
+    popup.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => popup.style.opacity = '1', 10);
+  }
+}, 20000);
 
 
 function goToSeries(seriesTitle) {
@@ -2725,7 +2697,6 @@ function toggleEpisodes(id, btn){
   // Робимо функції глобальними для inline onClick
   window.toggleEpisodes   = toggleEpisodes;
   window.closeDonatePopup = closeDonatePopup;
-  window.rememberDonateSeen = rememberDonateSeen;
   window.openConfirm      = openConfirm;
   window.confirmOpen      = confirmOpen;
   window.cancelOpen       = cancelOpen;
@@ -2895,7 +2866,24 @@ document.getElementById('send-admin-message-btn').onclick = async function() {
   </div>
 </div>
 
+<div id="donate-popup" style="display:none; position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:9999;">
 
+  
+  <button onclick="closeDonatePopup()" style="
+    position:absolute; top:6px; right:10px; background:none; 
+    border:none; color:#fff; font-size:20px; cursor:pointer;">✖️</button>
+
+  <p style="margin-bottom:10px; font-size:16px;">
+    <span style="color:#00f7ff;">Твій донат</span> = 
+    <span style="color:#ffcc00;">наша мотивація</span> працювати ще краще 💪
+  </p>
+
+  <a href="https://send.monobank.ua/jar/9wTjSL3xu2" target="_blank" style="
+    padding:12px 24px; background:#00f7ff; color:#000; font-weight:bold;
+    text-decoration:none; border-radius:10px; display:inline-block;
+    box-shadow:0 0 15px #00f7ff; font-size:16px;
+  ">☕ Підтримати RelaxTime</a>
+</div>
 
 
 
@@ -3137,18 +3125,6 @@ function closeServiceErrorModal() {
   </div>
 </div>
 
-<!-- ✅ Donate popup (новий) -->
-<div id="donate-popup" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Підтримати проєкт">
-  <button class="close-btn" onclick="closeDonatePopup()" aria-label="Закрити">✖️</button>
-  <p class="title">Твій донат = наша мотивація 💪</p>
-  <p class="subtitle">Будь-яка сума дуже допомагає розвивати RelaxTime</p>
-  <div class="actions">
-    <a class="btn-primary" href="https://send.monobank.ua/jar/9wTjSL3xu2"
-       target="_blank" rel="noopener"
-       onclick="rememberDonateSeen()">☕ Підтримати RelaxTime</a>
-    <button class="btn-ghost" onclick="closeDonatePopup()">Можливо пізніше</button>
-  </div>
-</div>
   
 </body>
 </html>
