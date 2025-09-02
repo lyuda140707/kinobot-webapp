@@ -627,14 +627,23 @@ const EPISODIC_TYPES = ['серіал','серіали','мультсеріал'
 // ⬇️ точне входження жанру як токена (а не підрядка)
 function hasExactGenre(value, target) {
   if (!value) return false;
+
   const tokens = value
     .toLowerCase()
     .split(/[,\|\/;·•]+|\s{2,}/)  // кома, слеш, пайп, крапки тощо + подвійні пробіли
     .map(s => s.trim())
     .filter(Boolean);
-  return tokens.includes(target.toLowerCase());
-}
 
+  const t = (target || '').toLowerCase();
+
+  // aliases для різних написань/чисел
+  const aliases = [t];
+  if (t === 'документальний') {
+    aliases.push('документальні', 'документальний серіал', 'документальні серіали');
+  }
+
+  return tokens.some(tok => aliases.includes(tok));
+}
 function isEpisodicType(t) {
   return EPISODIC_TYPES.includes((t||'').trim().toLowerCase());
 }
@@ -905,6 +914,7 @@ function toggleSeason(seriesId, season){
   <button class="genre-btn" data-genre="Драматичні">🎭 Драматичні</button>
   <button class="genre-btn" data-genre="Пригодницькі">🌄 Пригодницькі</button>
   <button class="genre-btn" data-genre="Комедійні">😂 Комедійні</button>
+  <button class="genre-btn" data-genre="Документальний">📚 Документальні</button>
   <button class="genre-btn" data-genre="Мелодраматичні ">💔 Мелодраматичні </button>
   <button class="genre-btn" data-genre="Історичні серіали">🏰 Історичні серіали</button>
   <button class="genre-btn" data-genre="Фантастичні">👽 Фантастичні</button>
