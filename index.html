@@ -6,8 +6,14 @@
   <title>RelaxTime Web App</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="https://example.com/my-favicon.ico">
-  <link rel="stylesheet" href="style.css?v=50" />
+  <link rel="preload" href="style.css?v=50" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="style.css?v=50"></noscript>
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://relax-time2.onrender.com" crossorigin>
+  <link rel="preconnect" href="https://zerlqvbmqszomlondlte.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <style>
 
 /* Рік під назвою */
@@ -512,9 +518,15 @@
  
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    // Поліфіл, щоб працювало скрізь
+    window.requestIdleCallback ||= (cb) => setTimeout(cb, 1);
+    window.cancelIdleCallback  ||= (id) => clearTimeout(id);
+  </script>
+
 
   
-    <!-- Після <script src="https://telegram.org/js/telegram-web-app.js"></script> -->
+    
   <script>
     // 1) Перевіряємо, що працюємо всередині Telegram WebApp
     if (!window.Telegram || !window.Telegram.WebApp) {
@@ -663,10 +675,12 @@ function episodeLabel(ep, i) {
   
 function poster(src, title, year){
   return `<div class="poster-wrap">
-    <img src="${src}" alt="${title}" class="film-img">
+    <img src="${src}" alt="${title}" class="film-img"
+         loading="lazy" decoding="async" width="320" height="180">
     ${year ? `<span class="year-badge">📅 ${year}</span>` : ''}
   </div>`;
 }
+
 
 function parseEpisodeNumber(ep) {
   const s = `${ep['Опис'] || ep['Назва'] || ''}`.trim();
@@ -821,7 +835,7 @@ function toggleSeason(seriesId, season){
     <h2>🎯 Топ за сьогодні</h2>
    <div id="film-of-the-day" class="film-day-card">
   <div class="image-wrapper" style="position: relative;">
-    <img id="film-day-img" src="" alt="Топ за сьогодні">
+    <img id="film-day-img" src="" alt="Топ за сьогодні" decoding="async" width="640" height="360">
     <div class="film-title-overlay" id="film-title">Назва фільму</div>
   </div>
   <div class="btn-container">
@@ -985,7 +999,7 @@ function toggleSeason(seriesId, season){
   <h3>🔒 PRO Доступ</h3>
   <p style="font-size:14px; color:#ccc;">Відкриває доступ до всіх відео</p>
   <button id="getProBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold;">🚀 Отримати PRO</button>
-  <p style="font-size:11px; color:#aaa; margin-top:5px;">Будь-яка сума — PRO доступ</p>
+  <p style="font-size:11px; color:#aaa; margin-top:5px;">Будь-яка сума (від 20 грн ) — PRO доступ</p>
 
 
   <button id="confirmPaidBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold; display:none;">
@@ -1102,7 +1116,7 @@ function toggleSeason(seriesId, season){
     let isDataLoaded = false;
     let proPollInterval = null;
 
-    const BATCH_SIZE = 50;
+    const BATCH_SIZE = 30;
     let currentFilms = [];
     let offset = 0;
     
@@ -1119,38 +1133,39 @@ function renderBatch() {
   const isPro = localStorage.getItem('isProUser') === 'true';
   const batch = currentFilms.slice(offset, offset + BATCH_SIZE);
 
-  const html = batch.map(film => {
+  const frag = document.createDocumentFragment();
+
+  for (const film of batch) {
     const isProFilm = film['Доступ'] === 'PRO';
-    const imgSrc    = (isProFilm && !isPro)
-                      ? placeholderImage
-                      : (film['Фото'] || placeholderImage);
-    const id        = safeId(film['Назва']);
+    const imgSrc = (isProFilm && !isPro) ? placeholderImage : (film['Фото'] || placeholderImage);
+    const id = safeId(film['Назва']);
 
-   let btn = '';
-   if (isProFilm && !isPro) {
-     btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['message_id'] || film['file_id']) {
-     const mid = film['message_id'] || film['file_id'];
-     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}')">▶️ Дивитись</button>`;
-    }
-
-    return `
-      <div class="film-card" id="film-${id}">
-        ${poster(imgSrc, film['Назва'], film['Рік'])}
-        <h3>${maskWord(film['Назва'])}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
-        <p>${film['Опис'] || ''}</p>
-        <div class="film-actions">
-          ${renderControls(film['Назва'], film['Опис'])}
-          ${btn}
-        </div>
+    const div = document.createElement('div');
+    div.className = 'film-card';
+    div.id = `film-${id}`;
+    div.innerHTML = `
+      ${poster(imgSrc, film['Назва'], film['Рік'])}
+      <h3>${maskWord(film['Назва'])}</h3>
+      <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
+      <p>${film['Опис'] || ''}</p>
+      <div class="film-actions">
+        ${renderControls(film['Назва'], film['Опис'])}
+        ${
+          (isProFilm && !isPro)
+            ? `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`
+            : ((film['message_id'] || film['file_id'])
+                ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
+                : ``)
+        }
       </div>
     `;
-  }).join('');
+    frag.appendChild(div);
+  }
 
-  container.insertAdjacentHTML('beforeend', html);
+  container.appendChild(frag);
   offset += batch.length;
 }
+
 
 // ==== SUPABASE (підстав свої значення) ====
 const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co'; // перевір точний URL!
@@ -1158,7 +1173,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 // читаємо REST’ом і мапимо у старий формат з українськими ключами
 async function fetchFilmsFromSupabase() {
-  const pageSize = 1000;
+  const pageSize = 300;
   const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb,season,episode&order=title.asc,season.asc,episode.asc,id.asc`;
 
 
@@ -1220,14 +1235,15 @@ async function loadFilms() {
   // 1) Якщо є кеш — миттєво рендеримо з нього
   if (cached) {
     films = JSON.parse(cached);
-    shuffleArray(films);
-
+    
     showFilmOfTheDay();
-    showCollections();
     showGenres();
-    showCountryFilters();
-    showYearFilters();
-
+    requestIdleCallback(() => {
+      showCollections();
+      showCountryFilters();
+      showYearFilters();
+    });
+    
     isDataLoaded = true;
     currentFilms = films;
     offset = 0;
@@ -1245,19 +1261,22 @@ async function loadFilms() {
 
     if (Array.isArray(fresh) && fresh.length) {
       films = fresh;
-      shuffleArray(films);
       localStorage.setItem('films', JSON.stringify(films));
       localStorage.setItem('filmsTimestamp', Date.now().toString());
-
-      // легкий перерендер актуальними даними
+      
+      // ...
       document.getElementById('genre-results').innerHTML = '';
       currentFilms = films;
       offset = 0;
       renderBatch();
+
       showFilmOfTheDay();
-      showCollections();
-      showCountryFilters();
-      showYearFilters();
+      requestIdleCallback(() => {
+        showCollections();
+        showCountryFilters();
+        showYearFilters();
+      });
+
     }
   } catch (e) {
     console.warn('Не вдалося оновити дані з мережі:', e);
@@ -1283,16 +1302,20 @@ async function fetchAndUpdateFilms() {
     }
 
     films = loadedFilms;
-    shuffleArray(films);
+
 
     localStorage.setItem('films', JSON.stringify(films));
     localStorage.setItem('filmsTimestamp', Date.now().toString());
 
     showFilmOfTheDay();
-    showCollections();
     showGenres();
-    showCountryFilters();
-    showYearFilters();
+    requestIdleCallback(() => {
+      showCollections();
+      showCountryFilters();
+      showYearFilters();
+    });
+
+    
   } catch (error) {
     console.error('Помилка завантаження фільмів:', error);
 
@@ -1968,13 +1991,11 @@ function showSkeletonCollections() {
     `;
     }
         
-    // Прокидаємо бекенд Render, щоб не спав
-  try {
-    await fetch('https://relax-time2.onrender.com/ping');
-    console.log('✅ Бекенд прокинувся');
-  } catch (e) {
-    console.warn('⚠️ Бекенд не прокинувся:', e);
-  }
+      // Відкладаємо «пробудження» бекенду, щоб не блокувати перший рендер
+  requestIdleCallback(() => {
+    fetch('https://relax-time2.onrender.com/ping').catch(()=>{});
+  });
+
 
   
   Telegram.WebApp.ready();
