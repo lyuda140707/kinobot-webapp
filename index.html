@@ -3119,7 +3119,7 @@ function closeServiceErrorModal() {
     });
   });
 
- document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
 
@@ -3127,10 +3127,10 @@ function closeServiceErrorModal() {
     const inviteBtn = document.getElementById("invite-btn");
     const statusDiv = document.getElementById("invite-status");
 
-    // якщо друг відкрив за посиланням ?ref=123
-    const urlParams = new URLSearchParams(window.location.search);
-    const inviter = urlParams.get("ref");
-    if (inviter) {
+    // ✅ Перевіряємо стартовий параметр від Telegram (referral)
+    const refParam = tg.initDataUnsafe?.start_param;
+    if (refParam && refParam.startsWith("ref_")) {
+      const inviter = refParam.replace("ref_", "");
       fetch("https://relax-time2.onrender.com/referral", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3138,13 +3138,37 @@ function closeServiceErrorModal() {
       });
     }
 
-    // кнопка запрошення
+    // ✅ Кнопка запрошення
     inviteBtn.addEventListener("click", () => {
-      const link = `https://relaxbox.site/?ref=${user.id}`;
-      if (tg.openTelegramLink) tg.openTelegramLink(link);
-      else tg.openLink(link);
+      const botUsername = "RelaxBox_UA_bot"; // твій бот
+      const link = `https://t.me/${botUsername}?startapp=ref_${user.id}`;
+      tg.openTelegramLink(link);
     });
 
+    // ✅ Перевірка прогресу
+    fetch("https://relax-time2.onrender.com/check-referrals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: user.id })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          statusDiv.textContent = `Запрошено: ${data.count}/3`;
+        }
+      });
+  }
+});
+
+
+    // кнопка запрошення
+    inviteBtn.addEventListener("click", () => {
+      const botUsername = "RelaxBox_UA_bot"; // твій бот
+      const link = `https://t.me/${botUsername}?startapp=ref_${user.id}`;
+      tg.openTelegramLink(link);
+    });
+
+    
     // перевіряємо прогрес
     fetch("https://relax-time2.onrender.com/check-referrals", {
       method: "POST",
