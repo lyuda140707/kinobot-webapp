@@ -3119,9 +3119,10 @@ function closeServiceErrorModal() {
     });
   });
 
-    // === Реферальна система ===
+ document.addEventListener("DOMContentLoaded", () => {
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
+
   if (user) {
     const inviteBtn = document.getElementById("invite-btn");
     const statusDiv = document.getElementById("invite-status");
@@ -3140,7 +3141,8 @@ function closeServiceErrorModal() {
     // кнопка запрошення
     inviteBtn.addEventListener("click", () => {
       const link = `https://relaxbox.site/?ref=${user.id}`;
-      tg.openLink(link);
+      if (tg.openTelegramLink) tg.openTelegramLink(link);
+      else tg.openLink(link);
     });
 
     // перевіряємо прогрес
@@ -3156,6 +3158,8 @@ function closeServiceErrorModal() {
         }
       });
   }
+});
+
 
 </script>
 
