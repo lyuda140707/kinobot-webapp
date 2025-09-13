@@ -1000,6 +1000,14 @@ function toggleSeason(seriesId, season){
     </button>
   </div>
 
+<!-- 🔹 Блок рефералів -->
+<section id="referrals">
+  <h3>🎁 Запроси друзів</h3>
+  <button id="invite-btn">Запросити друзів</button>
+  <p id="invite-status">Запрошено: 0/3</p>
+</section>
+
+
   <!-- Модальне вікно для введення повідомлення адміну -->
   <div id="admin-message-modal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6)">
     <div style="background:#222; color:#fff; border-radius:18px; padding:24px; width:96vw; max-width:420px; margin:10vh auto; display:flex; flex-direction:column;">
@@ -3110,6 +3118,45 @@ function closeServiceErrorModal() {
       }
     });
   });
+
+    // === Реферальна система ===
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+  if (user) {
+    const inviteBtn = document.getElementById("invite-btn");
+    const statusDiv = document.getElementById("invite-status");
+
+    // якщо друг відкрив за посиланням ?ref=123
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviter = urlParams.get("ref");
+    if (inviter) {
+      fetch("https://relax-time2.onrender.com/referral", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviter_id: inviter, friend_id: user.id })
+      });
+    }
+
+    // кнопка запрошення
+    inviteBtn.addEventListener("click", () => {
+      const link = `https://relaxbox.site/?ref=${user.id}`;
+      tg.openLink(link);
+    });
+
+    // перевіряємо прогрес
+    fetch("https://relax-time2.onrender.com/check-referrals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: user.id })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          statusDiv.textContent = `Запрошено: ${data.count}/3`;
+        }
+      });
+  }
+
 </script>
 
 
