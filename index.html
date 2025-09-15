@@ -991,13 +991,6 @@ function toggleSeason(seriesId, season){
   <button id="confirmPaidBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold; display:none;">
     ✅ Я оплатив
   </button>
-   <!-- 🎁 Реферальна програма -->
-<div id="referral-section" style="margin-top:20px; padding:12px; border:1px solid #00f7ff; border-radius:12px; background:rgba(0,247,255,0.05);">
-  <h3>🎁 Запроси друзів</h3>
-  <p>Запроси <b>3 друзів</b> та отримай <b>7 днів PRO</b>!</p>
-  <button id="invite-btn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold;">👥 Запросити друзів</button>
-  <p id="referral-counter" style="margin-top:10px; font-size:13px; color:#aaa;">Ви запросили: 0 / 3</p>
-</div>
 
 
   <!-- Додай цю кнопку у профіль (аккаунт) -->
@@ -3117,40 +3110,6 @@ function closeServiceErrorModal() {
       }
     });
   });
-
-// === Referral System ===
-document.addEventListener("DOMContentLoaded", () => {
-  const tg = window.Telegram.WebApp;
-  const user = tg?.initDataUnsafe?.user;
-
-  // кнопка "Запросити друзів"
-  const inviteBtn = document.getElementById("invite-btn");
-  if (inviteBtn && user) {
-    inviteBtn.addEventListener("click", () => {
-      const link = `https://t.me/${tg.initDataUnsafe?.bot_username}?start=ref_${user.id}`;
-      if (tg.openTelegramLink) tg.openTelegramLink(link);
-      else window.open(link, "_blank");
-    });
-  }
-
-  // отримуємо кількість запрошених
-  if (user) {
-    fetch("https://relax-time2.onrender.com/referral-count", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: user.id })
-    })
-    .then(r => r.json())
-    .then(d => {
-      if (d.ok) {
-        document.getElementById("referral-counter").textContent =
-          `Ви запросили: ${d.count} / 3`;
-      }
-    })
-    .catch(console.warn);
-  }
-});
-
 </script>
 
 
