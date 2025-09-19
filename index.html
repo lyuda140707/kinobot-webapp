@@ -817,17 +817,16 @@ function toggleSeason(seriesId, season){
 
 </head>
 <body>
-  <div id="home" class="section active">
-    <h2>🎯 Топ за сьогодні</h2>
-   <div id="film-of-the-day" class="film-day-card">
-  <div class="image-wrapper" style="position: relative;">
-    <img id="film-day-img" src="" alt="Топ за сьогодні">
-    <div class="film-title-overlay" id="film-title">Назва фільму</div>
-  </div>
-  <div class="btn-container">
-    <button id="openVideoById" class="watch-btn">👀 Поглянути</button>
-  </div>
-</div>
+ <h2>🆕 Останні додані</h2>
+<div id="latest-films" style="
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 10px 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+"></div>
 
 
 
@@ -1222,7 +1221,7 @@ async function loadFilms() {
     films = JSON.parse(cached);
     shuffleArray(films);
 
-    showFilmOfTheDay();
+    showLatestFilms();
     showCollections();
     showGenres();
     showCountryFilters();
@@ -1288,7 +1287,7 @@ async function fetchAndUpdateFilms() {
     localStorage.setItem('films', JSON.stringify(films));
     localStorage.setItem('filmsTimestamp', Date.now().toString());
 
-    showFilmOfTheDay();
+    showLatestFilms();
     showCollections();
     showGenres();
     showCountryFilters();
@@ -1527,13 +1526,43 @@ function showFilmOfTheDay() {
   document.getElementById('film-day-img').src = film['Фото'];
 
   document.getElementById('openVideoById').onclick = () => {
-    const videoUrl = film['message_id']; // ⬅️ тут тепер 'Посилання'
-    openVideoById(null, film['Назва']);  // null — бо не з інлайн-кнопки
+    const videoUrl = film['message_id'];
+    openVideoById(null, film['Назва']);
   };
 
   document.getElementById('film-title').textContent = maskWord(film['Назва']);
-
 }
+
+function showLatestFilms(limit = 12) {
+  const container = document.getElementById('latest-films');
+  if (!container) return;
+
+  const latest = [...films]
+    .sort((a, b) => (b.id || 0) - (a.id || 0))
+    .slice(0, limit);
+
+  container.innerHTML = latest.map(film => {
+    const img = film['Фото'] || placeholderImage;
+    const id  = safeId(film['Назва']);
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const locked = film['Доступ'] === 'PRO' && !isPro;
+
+    const btn = locked
+      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+      : (film['message_id'] || film['file_id'])
+        ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
+        : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
+
+    return `
+      <div class="film-card" id="film-${id}" style="min-width:150px;scroll-snap-align:start;">
+        ${poster(img, film['Назва'], film['Рік'])}
+        <h4 style="font-size:14px;margin:6px 0;">${maskWord(film['Назва'])}</h4>
+        ${btn}
+      </div>
+    `;
+  }).join('');
+}
+
 
 
     function showSkeletonFilmOfTheDay() {
