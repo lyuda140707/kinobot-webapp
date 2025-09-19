@@ -10,44 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <style>
 
-.film-day-card {
-  max-width: 100%;
-  margin: 0 auto 15px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.film-title-overlay {
-  position: absolute;
-  bottom: 10px;
-  left: 15px;
-  right: 15px;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
-}
-
-.film-day-card .btn-container {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.latest-grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
-}
-.latest-grid .film-card {
-  min-width: unset !important;
-  max-width: 160px;
-}
-.latest-grid img {
-  height: 200px;
-  object-fit: cover;
-}
-
 /* Рік під назвою */
 .film-year{
   font-size:12px;
@@ -855,13 +817,17 @@ function toggleSeason(seriesId, season){
 
 </head>
 <body>
-<h2>🆕 Останні додані</h2>
-<div id="latest-main"></div>
-<div id="latest-more" style="display:none; margin-top:15px;"></div>
-<div style="text-align:center; margin:15px 0;">
-  <button id="showMoreBtn" class="search-button" onclick="toggleLatest()">➡️ Показати ще</button>
+  <div id="home" class="section active">
+    <h2>🎯 Топ за сьогодні</h2>
+   <div id="film-of-the-day" class="film-day-card">
+  <div class="image-wrapper" style="position: relative;">
+    <img id="film-day-img" src="" alt="Топ за сьогодні">
+    <div class="film-title-overlay" id="film-title">Назва фільму</div>
+  </div>
+  <div class="btn-container">
+    <button id="openVideoById" class="watch-btn">👀 Поглянути</button>
+  </div>
 </div>
-
 
 
 
@@ -1254,56 +1220,42 @@ async function loadFilms() {
   // 1) Якщо є кеш — миттєво рендеримо з нього
   if (cached) {
     films = JSON.parse(cached);
-    // ⛔️ shuffleArray(films);  // оригінал не чіпаємо
+    shuffleArray(films);
 
-    // 🆕 показуємо останні додані
-    showLatestMain();
-
-    // ✅ перемішуємо копію для категорій/жанрів
-    const shuffled = [...films];
-    shuffleArray(shuffled);
-
-    currentFilms = shuffled;
-    offset = 0;
-    document.getElementById('genre-results').innerHTML = '';
-    renderBatch();
-
+    showFilmOfTheDay();
     showCollections();
     showGenres();
     showCountryFilters();
     showYearFilters();
 
     isDataLoaded = true;
+    currentFilms = films;
+    offset = 0;
+    document.getElementById('genre-results').innerHTML = '';
+    renderBatch();
   } else {
-    // Якщо кешу немає — показуємо спінер
+    // Якщо кешу немає — можна показати спінер (якщо хочете)
     const loader = document.getElementById('home-loading');
     if (loader) loader.style.display = 'block';
   }
 
   // 2) Завжди пробуємо підтягнути свіже у фоні
   try {
-    const fresh = await fetchFilms();
+    const fresh = await fetchFilms();   // ← і все
 
     if (Array.isArray(fresh) && fresh.length) {
       films = fresh;
-      // ⛔️ shuffleArray(films); // оригінал не чіпаємо
+      shuffleArray(films);
       localStorage.setItem('films', JSON.stringify(films));
       localStorage.setItem('filmsTimestamp', Date.now().toString());
 
-      // 🆕 показуємо останні додані
-      showLatestMain();
-
-      // ✅ перемішуємо копію для категорій/жанрів
-      const shuffled = [...films];
-      shuffleArray(shuffled);
-
-      currentFilms = shuffled;
-      offset = 0;
+      // легкий перерендер актуальними даними
       document.getElementById('genre-results').innerHTML = '';
+      currentFilms = films;
+      offset = 0;
       renderBatch();
-
+      showFilmOfTheDay();
       showCollections();
-      showGenres();
       showCountryFilters();
       showYearFilters();
     }
@@ -1317,37 +1269,30 @@ async function loadFilms() {
 }
 
 
+
+
 async function fetchAndUpdateFilms() {
   try {
     document.getElementById('home-loading').style.display = 'block';
 
-    const loadedFilms = await fetchFilms();
+    const loadedFilms = await fetchFilms();   // ← і все
+
+
     if (!loadedFilms || loadedFilms.length === 0) {
       throw new Error('Отримано пустий список фільмів');
     }
 
     films = loadedFilms;
-    // ⛔️ shuffleArray(films); // оригінал не чіпаємо
+    shuffleArray(films);
+
     localStorage.setItem('films', JSON.stringify(films));
     localStorage.setItem('filmsTimestamp', Date.now().toString());
 
-    // 🆕 показуємо останні додані
-    showLatestMain();
-
-    // ✅ перемішуємо копію для категорій/жанрів
-    const shuffled = [...films];
-    shuffleArray(shuffled);
-
-    currentFilms = shuffled;
-    offset = 0;
-    document.getElementById('genre-results').innerHTML = '';
-    renderBatch();
-
+    showFilmOfTheDay();
     showCollections();
     showGenres();
     showCountryFilters();
     showYearFilters();
-
   } catch (error) {
     console.error('Помилка завантаження фільмів:', error);
 
@@ -1582,70 +1527,12 @@ function showFilmOfTheDay() {
   document.getElementById('film-day-img').src = film['Фото'];
 
   document.getElementById('openVideoById').onclick = () => {
-    const videoUrl = film['message_id'];
-    openVideoById(null, film['Назва']);
+    const videoUrl = film['message_id']; // ⬅️ тут тепер 'Посилання'
+    openVideoById(null, film['Назва']);  // null — бо не з інлайн-кнопки
   };
 
   document.getElementById('film-title').textContent = maskWord(film['Назва']);
-}
 
-function showLatestFilms(limit = 12) {
-  const container = document.getElementById('latest-films');
-  if (!container) return;
-
-  const latest = [...films]
-    .sort((a, b) => (b.id || 0) - (a.id || 0))
-    .slice(0, limit);
-
-  container.innerHTML = latest.map(film => {
-    const img = film['Фото'] || placeholderImage;
-    const id  = safeId(film['Назва']);
-    const isPro = localStorage.getItem('isProUser') === 'true';
-    const locked = film['Доступ'] === 'PRO' && !isPro;
-
-    const btn = locked
-      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-      : (film['message_id'] || film['file_id'])
-        ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
-        : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
-
-    return `
-      <div class="film-card" id="film-${id}" style="min-width:150px;scroll-snap-align:start;">
-        ${poster(img, film['Назва'], film['Рік'])}
-        <h4 style="font-size:14px;margin:6px 0;">${maskWord(film['Назва'])}</h4>
-        ${btn}
-      </div>
-    `;
-  }).join('');
-}
-
-function showAllLatest() {
-  const container = document.getElementById('latest-films');
-  if (!container) return;
-
-  const latest = [...films]
-    .sort((a, b) => (b.id || 0) - (a.id || 0));
-
-  container.innerHTML = latest.map(film => {
-    const img = film['Фото'] || placeholderImage;
-    const id  = safeId(film['Назва']);
-    const isPro = localStorage.getItem('isProUser') === 'true';
-    const locked = film['Доступ'] === 'PRO' && !isPro;
-
-    const btn = locked
-      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-      : (film['message_id'] || film['file_id'])
-        ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
-        : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
-
-    return `
-      <div class="film-card" id="film-${id}">
-        ${poster(img, film['Назва'], film['Рік'])}
-        <h4 style="font-size:14px;margin:6px 0;">${maskWord(film['Назва'])}</h4>
-        ${btn}
-      </div>
-    `;
-  }).join('');
 }
 
 
@@ -1726,77 +1613,6 @@ function showYearFilters() {
   document.getElementById('collections').style.display = 'flex';
 }
 
-function showLatestMain() {
-  const container = document.getElementById('latest-main');
-  if (!container) return;
-
-  const latest = [...films].sort((a, b) => (b.id || 0) - (a.id || 0));
-
-  if (latest.length > 0) {
-    const film = latest[0]; // найновіший
-    const img = film['Фото'] || placeholderImage;
-    const isPro = localStorage.getItem('isProUser') === 'true';
-    const locked = film['Доступ'] === 'PRO' && !isPro;
-
-    const btn = locked
-      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-      : (film['message_id'] || film['file_id'])
-        ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
-        : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
-
-    container.innerHTML = `
-      <div class="film-day-card">
-        <div class="image-wrapper" style="position: relative;">
-          <img src="${img}" alt="${film['Назва']}" style="width:100%;border-radius:12px;object-fit:cover;max-height:300px;">
-          <div class="film-title-overlay">${maskWord(film['Назва'])}</div>
-        </div>
-        <div class="btn-container">
-          ${btn}
-        </div>
-      </div>
-    `;
-  }
-}
-
-
-function toggleLatest() {
-  const container = document.getElementById('latest-more');
-  const btn = document.getElementById('showMoreBtn');
-
-  if (container.style.display === 'none') {
-    // показуємо ще (крім першого)
-    const latest = [...films].sort((a, b) => (b.id || 0) - (a.id || 0));
-    container.innerHTML = latest.slice(1, 12).map(film => {
-      const img = film['Фото'] || placeholderImage;
-      const id  = safeId(film['Назва']);
-      const isPro = localStorage.getItem('isProUser') === 'true';
-      const locked = film['Доступ'] === 'PRO' && !isPro;
-
-      const btn = locked
-        ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-        : (film['message_id'] || film['file_id'])
-          ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
-          : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
-
-      return `
-        <div class="film-card" id="film-${id}">
-          ${poster(img, film['Назва'], film['Рік'])}
-          <h4 style="font-size:14px;margin:6px 0;">${maskWord(film['Назва'])}</h4>
-          ${btn}
-        </div>
-      `;
-    }).join('');
-
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
-    container.style.gap = '12px';
-
-    btn.textContent = '⬆️ Приховати';
-  } else {
-    container.style.display = 'none';
-    btn.textContent = '➡️ Показати ще';
-  }
-}
     
 function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
@@ -1838,8 +1654,6 @@ function filterByGenre(genre) {
     const g2 = f['Добірка'] || '';
     return hasExactGenre(g1, normalized) || g2.toLowerCase().includes(normalized);
   });
-  shuffleArray(filtered);
-
 
   // 2) Примусово лишаємо потрібний ТИП залежно від відкритої підгрупи
   if (document.getElementById('group-series').style.display === 'flex') {
@@ -1883,13 +1697,10 @@ function filterByCountry(country) {
   container.innerHTML = '';
 
   currentFilms = films.filter(f => f['Країна'] === country);
-  shuffleArray(currentFilms);
   if (!currentFilms.length) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
     return;
-}
-
-
+  }
   offset = 0;
   renderBatch();
   container.scrollIntoView({ behavior: 'smooth' });
@@ -1902,9 +1713,7 @@ function filterByYear(year) {
   switchTab('categories');
   const container = document.getElementById('genre-results');
   const isPro = localStorage.getItem('isProUser') === 'true';
-  let filtered = films.filter(f => String(f['Рік']) === String(year));
-shuffleArray(filtered);
-
+  const filtered = films.filter(f => String(f['Рік']) === String(year));
 
   if (!filtered.length) {
     container.innerHTML = '<p>Нічого не знайдено 😢</p>';
@@ -2299,7 +2108,7 @@ try {
 
   // Показати скелетони
   showSkeletonCollections();
-  
+  showSkeletonFilmOfTheDay();
 
   // Завантажити фільми і факти
   await loadFilms();
