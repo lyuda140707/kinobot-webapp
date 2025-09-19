@@ -831,9 +831,10 @@ function toggleSeason(seriesId, season){
 </head>
 <body>
 <h2>🆕 Останні додані</h2>
-<div id="latest-films" class="latest-grid"></div>
+<div id="latest-main"></div>
+<div id="latest-more" style="display:none; margin-top:15px;"></div>
 <div style="text-align:center; margin:15px 0;">
-  <button onclick="showAllLatest()" class="search-button">➡️ Переглянути всі новинки</button>
+  <button id="showMoreBtn" class="search-button" onclick="toggleLatest()">➡️ Показати ще</button>
 </div>
 
 
@@ -1230,7 +1231,7 @@ async function loadFilms() {
     films = JSON.parse(cached);
     shuffleArray(films);
 
-    showLatestFilms();
+    showLatestMain();
     showCollections();
     showGenres();
     showCountryFilters();
@@ -1296,7 +1297,7 @@ async function fetchAndUpdateFilms() {
     localStorage.setItem('films', JSON.stringify(films));
     localStorage.setItem('filmsTimestamp', Date.now().toString());
 
-    showLatestFilms();
+    showLatestMain();
     showCollections();
     showGenres();
     showCountryFilters();
@@ -1679,6 +1680,73 @@ function showYearFilters() {
   document.getElementById('collections').style.display = 'flex';
 }
 
+function showLatestMain() {
+  const container = document.getElementById('latest-main');
+  if (!container) return;
+
+  const latest = [...films].sort((a, b) => (b.id || 0) - (a.id || 0));
+
+  if (latest.length > 0) {
+    const film = latest[0]; // найновіший
+    const img = film['Фото'] || placeholderImage;
+    const id  = safeId(film['Назва']);
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const locked = film['Доступ'] === 'PRO' && !isPro;
+
+    const btn = locked
+      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+      : (film['message_id'] || film['file_id'])
+        ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
+        : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
+
+    container.innerHTML = `
+      <div class="film-card" id="film-${id}">
+        ${poster(img, film['Назва'], film['Рік'])}
+        <h4 style="font-size:16px;margin:6px 0;">${maskWord(film['Назва'])}</h4>
+        ${btn}
+      </div>
+    `;
+  }
+}
+
+function toggleLatest() {
+  const container = document.getElementById('latest-more');
+  const btn = document.getElementById('showMoreBtn');
+
+  if (container.style.display === 'none') {
+    // показуємо ще (крім першого)
+    const latest = [...films].sort((a, b) => (b.id || 0) - (a.id || 0));
+    container.innerHTML = latest.slice(1, 12).map(film => {
+      const img = film['Фото'] || placeholderImage;
+      const id  = safeId(film['Назва']);
+      const isPro = localStorage.getItem('isProUser') === 'true';
+      const locked = film['Доступ'] === 'PRO' && !isPro;
+
+      const btn = locked
+        ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+        : (film['message_id'] || film['file_id'])
+          ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
+          : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
+
+      return `
+        <div class="film-card" id="film-${id}">
+          ${poster(img, film['Назва'], film['Рік'])}
+          <h4 style="font-size:14px;margin:6px 0;">${maskWord(film['Назва'])}</h4>
+          ${btn}
+        </div>
+      `;
+    }).join('');
+
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+    container.style.gap = '12px';
+
+    btn.textContent = '⬆️ Приховати';
+  } else {
+    container.style.display = 'none';
+    btn.textContent = '➡️ Показати ще';
+  }
+}
     
 function showSeries(type = 'Серіал') {
   const container = document.getElementById('genre-results');
