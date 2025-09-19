@@ -9,6 +9,19 @@
   <link rel="stylesheet" href="style.css?v=50" />
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <style>
+.latest-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.latest-grid .film-card {
+  min-width: unset !important;
+  max-width: 160px;
+}
+.latest-grid img {
+  height: 200px;
+  object-fit: cover;
+}
 
 /* Рік під назвою */
 .film-year{
@@ -817,16 +830,12 @@ function toggleSeason(seriesId, season){
 
 </head>
 <body>
- <h2>🆕 Останні додані</h2>
-<div id="latest-films" style="
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  gap: 16px;
-  padding: 10px 0;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-"></div>
+<h2>🆕 Останні додані</h2>
+<div id="latest-films" class="latest-grid"></div>
+<div style="text-align:center; margin:15px 0;">
+  <button onclick="showAllLatest()" class="search-button">➡️ Переглянути всі новинки</button>
+</div>
+
 
 
 
@@ -1563,6 +1572,34 @@ function showLatestFilms(limit = 12) {
   }).join('');
 }
 
+function showAllLatest() {
+  const container = document.getElementById('latest-films');
+  if (!container) return;
+
+  const latest = [...films]
+    .sort((a, b) => (b.id || 0) - (a.id || 0));
+
+  container.innerHTML = latest.map(film => {
+    const img = film['Фото'] || placeholderImage;
+    const id  = safeId(film['Назва']);
+    const isPro = localStorage.getItem('isProUser') === 'true';
+    const locked = film['Доступ'] === 'PRO' && !isPro;
+
+    const btn = locked
+      ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
+      : (film['message_id'] || film['file_id'])
+        ? `<button class="search-button" onclick="requestFilmByName(this,'${film['message_id'] || film['file_id']}')">▶️ Дивитись</button>`
+        : `<button class="search-button" onclick="openVideoById(this,'${film['Назва']}')">▶️ Дивитись</button>`;
+
+    return `
+      <div class="film-card" id="film-${id}">
+        ${poster(img, film['Назва'], film['Рік'])}
+        <h4 style="font-size:14px;margin:6px 0;">${maskWord(film['Назва'])}</h4>
+        ${btn}
+      </div>
+    `;
+  }).join('');
+}
 
 
     function showSkeletonFilmOfTheDay() {
