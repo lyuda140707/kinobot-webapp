@@ -584,16 +584,27 @@ function groupSeriesEpisodes(list) {
   const byTitle = new Map();
 
   list.forEach((ep, i) => {
-  const title = (ep['Назва'] || '').toLowerCase().trim();
-  if (!byTitle.has(title)) byTitle.set(title, new Map());
+    const title = (ep['Назва'] || '').toLowerCase().trim();
+    const type = (ep['Тип'] || '').toLowerCase().trim();
+    const uniqueKey = `${title}__${type}`; // 👈 ключ = назва + тип
 
-  const m = byTitle.get(title);
-  const key = episodeKey(ep, i);
+    if (!byTitle.has(uniqueKey)) byTitle.set(uniqueKey, new Map());
 
-  if (!m.has(key)) {
-    m.set(key, ep);
+    const m = byTitle.get(uniqueKey);
+    const key = episodeKey(ep, i);
+
+    if (!m.has(key)) {
+      m.set(key, ep);
+    }
+  });
+
+  const grouped = {};
+  for (const [key, m] of byTitle.entries()) {
+    grouped[key] = Array.from(m.values());
   }
-});
+
+  return grouped;
+}
 
 
   const grouped = {};
