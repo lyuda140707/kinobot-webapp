@@ -3106,42 +3106,37 @@ function closeServiceErrorModal() {
 </div>
 <script>
   // ✅ Отримуємо дані користувача з Telegram WebApp
-  const tg = window.Telegram?.WebApp || tg;
+  const tg = window.Telegram.WebApp;
   const userId = tg.initDataUnsafe?.user?.id || null;
   const username = tg.initDataUnsafe?.user?.username || "";
   const firstName = tg.initDataUnsafe?.user?.first_name || "";
 
   // ✅ Кнопка "Отримати PRO"
   async function getPro() {
-  try {
-    const resp = await fetch("https://relax-time2.onrender.com/create-payment", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        user_id: userId,
-        username: username,
-        first_name: firstName,
-        plan: "pro30"
-      })
-    });
-    const data = await resp.json();
-    if (data.ok) {
-      localStorage.setItem("invoice_id", data.invoice_id);
-      alert("✔️ Запит на PRO створено! Зараз відкриється Monobank. Після оплати натисни 'Я оплатив'.");
-
-      // ✅ відкриває банку у Telegram WebApp (телефон)
-      tg.openLink("https://send.monobank.ua/jar/7EZ9XdZe7B");
-
-      // показуємо кнопку "Я оплатив"
-      document.getElementById("confirmPaidBtn").style.display = "block";
-    } else {
-      alert("❌ Помилка при створенні оплати");
+    try {
+      const resp = await fetch("https://relax-time2.onrender.com/create-payment", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          user_id: userId,
+          username: username,
+          first_name: firstName,
+          plan: "pro30"
+        })
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        localStorage.setItem("invoice_id", data.invoice_id);
+        alert("✔️ Запит на PRO створено! Зараз відкриється Monobank. Після оплати натисни 'Я оплатив'.");
+        tg.openLink("https://send.monobank.ua/jar/7EZ9XdZe7B");  // ✅ відкриває банку
+        document.getElementById("confirmPaidBtn").style.display = "block";
+      } else {
+        alert("❌ Помилка при створенні оплати");
+      }
+    } catch (err) {
+      console.error("Помилка /create-payment:", err);
     }
-  } catch (err) {
-    console.error("Помилка /create-payment:", err);
   }
-}
-
 
   // ✅ Кнопка "Я оплатив"
   async function notifyPaid() {
@@ -3165,9 +3160,11 @@ function closeServiceErrorModal() {
     }
   }
 
-  // 🔗 Прив'язуємо кнопки
-  document.getElementById('getProBtn').addEventListener('click', getPro);
-  document.getElementById('confirmPaidBtn').addEventListener('click', notifyPaid);
+  // 🔗 Прив'язуємо кнопки після завантаження DOM
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('getProBtn')?.addEventListener('click', getPro);
+    document.getElementById('confirmPaidBtn')?.addEventListener('click', notifyPaid);
+  });
 </script>
 </body>
 </html>
