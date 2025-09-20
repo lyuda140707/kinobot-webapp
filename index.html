@@ -581,34 +581,43 @@ function episodeKey(ep, i) {
 }
 
 function groupSeriesEpisodes(list) {
+  const byTitle = new Map();
+
+  list.forEach((ep, i) => {
+    const title = ep['Назва'];
+    if (!byTitle.has(title)) byTitle.set(title, new Map());
+
+    const m = byTitle.get(title);
+    const key = episodeKey(ep, i);
+
+    // дедуп лише коли справжній дубль одного і того ж файла/епізоду
+    if (!m.has(key)) {
+      m.set(key, ep);
+    }
+  });
+
   const grouped = {};
+  for (const [title, m] of byTitle.entries()) {
+    const arr = Array.from(m.values());
 
-  list.forEach(ep => {
-    const title = ep['Назва'] || ep['title'];
-    const season = getSeasonNum(ep);
-    const episode = parseEpisodeNumber(ep);
+    // Сортування: сезон → серія; якщо серія порожня, парсимо з опису
+    arr.sort((a, b) => {
+      const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '1') || 1;
+      const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '1') || 1;
 
-    // робимо ключ назви + сезону
-    const key = `${title} (Сезон ${season})`;
+      const eaRaw = a['Серія'] ?? a['Епізод'] ?? a['Episode'] ?? '';
+      const ebRaw = b['Серія'] ?? b['Епізод'] ?? b['Episode'] ?? '';
+      const ea = parseInt(eaRaw, 10);
+      const eb = parseInt(ebRaw, 10);
 
-    if (!grouped[key]) {
-      grouped[key] = [];
-    }
+      const eaNum = Number.isFinite(ea) ? ea : (parseEpisodeNumber(a) || 9999);
+      const ebNum = Number.isFinite(eb) ? eb : (parseEpisodeNumber(b) || 9999);
 
-    // перевірка на дубль серії
-    const already = grouped[key].some(e =>
-      parseEpisodeNumber(e) === episode
-    );
-    if (!already) {
-      grouped[key].push(ep);
-    }
-  });
+      return sa !== sb ? sa - sb : eaNum - ebNum;
+    });
 
-  // сортування всередині сезону
-  Object.keys(grouped).forEach(key => {
-    grouped[key].sort((a, b) => parseEpisodeNumber(a) - parseEpisodeNumber(b));
-  });
-
+    grouped[title] = arr;
+  }
   return grouped;
 }
 
