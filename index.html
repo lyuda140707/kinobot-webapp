@@ -584,17 +584,17 @@ function groupSeriesEpisodes(list) {
   const byTitle = new Map();
 
   list.forEach((ep, i) => {
-    const title = ep['Назва'];
-    if (!byTitle.has(title)) byTitle.set(title, new Map());
+  const title = (ep['Назва'] || '').toLowerCase().trim();
+  if (!byTitle.has(title)) byTitle.set(title, new Map());
 
-    const m = byTitle.get(title);
-    const key = episodeKey(ep, i);
+  const m = byTitle.get(title);
+  const key = episodeKey(ep, i);
 
-    // дедуп лише коли справжній дубль одного і того ж файла/епізоду
-    if (!m.has(key)) {
-      m.set(key, ep);
-    }
-  });
+  if (!m.has(key)) {
+    m.set(key, ep);
+  }
+});
+
 
   const grouped = {};
   for (const [title, m] of byTitle.entries()) {
