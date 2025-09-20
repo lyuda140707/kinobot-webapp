@@ -584,25 +584,23 @@ function groupSeriesEpisodes(list) {
   const byTitle = new Map();
 
   list.forEach((ep, i) => {
-    const title = (ep['Назва'] || '').toLowerCase().trim();
-    const type = (ep['Тип'] || '').toLowerCase().trim();
-    const uniqueKey = `${title}__${type}`; // 👈 ключ = назва + тип
+  const title = (ep['Назва'] || '').toLowerCase().trim();
+  if (!byTitle.has(title)) byTitle.set(title, new Map());
 
-    if (!byTitle.has(uniqueKey)) byTitle.set(uniqueKey, new Map());
+  const m = byTitle.get(title);
+  const key = episodeKey(ep, i);
 
-    const m = byTitle.get(uniqueKey);
-    const key = episodeKey(ep, i);
+  if (!m.has(key)) {
+    m.set(key, ep);
+  }
+});
 
-    if (!m.has(key)) {
-      m.set(key, ep);
-    }
-  });
 
   const grouped = {};
-  for (const [key, m] of byTitle.entries()) {
+  for (const [title, m] of byTitle.entries()) {
     const arr = Array.from(m.values());
 
-    // Сортування: сезон → серія
+    // Сортування: сезон → серія; якщо серія порожня, парсимо з опису
     arr.sort((a, b) => {
       const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '1') || 1;
       const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '1') || 1;
@@ -618,12 +616,15 @@ function groupSeriesEpisodes(list) {
       return sa !== sb ? sa - sb : eaNum - ebNum;
     });
 
-    grouped[key] = arr;
+    grouped[title] = arr;
   }
-
   return grouped;
 }
 
+
+const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
+
+// ⬇️ точне входження жанру як токена (а не підрядка)
 function hasExactGenre(value, target) {
   if (!value) return false;
 
