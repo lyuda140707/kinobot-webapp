@@ -581,27 +581,19 @@ function episodeKey(ep, i) {
 }
 
 function groupSeriesEpisodes(list) {
-  const byKey = new Map();
+  const grouped = {};
 
   list.forEach((ep, i) => {
-    // точний ключ: Назва + Тип
-    const key = `${(ep['Назва'] || '').trim()}__${(ep['Тип'] || '').trim()}`;
-    if (!byKey.has(key)) byKey.set(key, new Map());
+    const title = (ep['Назва'] || '').trim();
+    const type  = (ep['Тип'] || '').trim();
+    const key   = `${title}__${type}`;   // внутрішній ключ
+    if (!grouped[key]) grouped[key] = { title, type, episodes: [] };
 
-    const m = byKey.get(key);
-    const ek = episodeKey(ep, i);
-    if (!m.has(ek)) m.set(ek, ep);
+    grouped[key].episodes.push(ep);
   });
 
-  const grouped = {};
-  for (const [key, m] of byKey.entries()) {
-    grouped[key] = Array.from(m.values());
-  }
   return grouped;
 }
-
-
-
 
 const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
 
@@ -1610,9 +1602,10 @@ function showSeries(type = 'Серіал') {
   }
 
   const grouped = groupSeriesEpisodes(seriesFilms);
-  container.innerHTML = Object.entries(grouped)
-    .map(([title, eps]) => renderSeriesCard(title, eps))
+  container.innerHTML = Object.values(grouped)
+    .map(g => renderSeriesCard(g.title, g.episodes))
     .join('');
+
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
@@ -1649,10 +1642,11 @@ function filterByGenre(genre) {
 
 
 if (isEpisodicType(filtered[0]['Тип'])) {
-  const grouped = groupSeriesEpisodes(filtered);
-  container.innerHTML = Object.entries(grouped)
-    .map(([title, eps]) => renderSeriesCard(title, eps))
+  const grouped = groupSeriesEpisodes(seriesFilms);
+  container.innerHTML = Object.values(grouped)
+    .map(g => renderSeriesCard(g.title, g.episodes))
     .join('');
+
   container.scrollIntoView({ behavior: 'smooth' });
   return;
 }
