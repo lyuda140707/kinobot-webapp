@@ -3127,7 +3127,9 @@ function closeServiceErrorModal() {
       const data = await resp.json();
       if (data.ok) {
         localStorage.setItem("invoice_id", data.invoice_id);
-        alert("✔️ Запит на PRO створено! Тепер зроби оплату і натисни 'Я оплатив'");
+        alert("✔️ Запит на PRO створено! Зараз відкриється банку Monobank. Після оплати натисни 'Я оплатив'.");        
+        window.open("https://send.monobank.ua/jar/7EZ9XdZe7B", "_blank");
+
         // показуємо кнопку "Я оплатив"
         document.getElementById("confirmPaidBtn").style.display = "block";
       } else {
