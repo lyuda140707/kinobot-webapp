@@ -524,7 +524,7 @@
         </div>`;
       throw new Error('Не веб-App Telegram');
     }
-    
+    const tg = window.Telegram.WebApp;
     tg.ready();
 
     // 2) Перевіряємо, що отримали валідні дані користувача
