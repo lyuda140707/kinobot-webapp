@@ -3113,32 +3113,35 @@ function closeServiceErrorModal() {
 
   // ✅ Кнопка "Отримати PRO"
   async function getPro() {
-    try {
-      const resp = await fetch("https://relax-time2.onrender.com/create-payment", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          user_id: userId,
-          username: username,
-          first_name: firstName,
-          plan: "pro30"
-        })
-      });
-      const data = await resp.json();
-      if (data.ok) {
-        localStorage.setItem("invoice_id", data.invoice_id);
-        alert("✔️ Запит на PRO створено! Зараз відкриється банку Monobank. Після оплати натисни 'Я оплатив'.");        
-        window.open("https://send.monobank.ua/jar/7EZ9XdZe7B", "_blank");
+  try {
+    const resp = await fetch("https://relax-time2.onrender.com/create-payment", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        user_id: userId,
+        username: username,
+        first_name: firstName,
+        plan: "pro30"
+      })
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      localStorage.setItem("invoice_id", data.invoice_id);
+      alert("✔️ Запит на PRO створено! Зараз відкриється Monobank. Після оплати натисни 'Я оплатив'.");
 
-        // показуємо кнопку "Я оплатив"
-        document.getElementById("confirmPaidBtn").style.display = "block";
-      } else {
-        alert("❌ Помилка при створенні оплати");
-      }
-    } catch (err) {
-      console.error("Помилка /create-payment:", err);
+      // ✅ відкриває банку у Telegram WebApp (телефон)
+      tg.openLink("https://send.monobank.ua/jar/7EZ9XdZe7B");
+
+      // показуємо кнопку "Я оплатив"
+      document.getElementById("confirmPaidBtn").style.display = "block";
+    } else {
+      alert("❌ Помилка при створенні оплати");
     }
+  } catch (err) {
+    console.error("Помилка /create-payment:", err);
   }
+}
+
 
   // ✅ Кнопка "Я оплатив"
   async function notifyPaid() {
