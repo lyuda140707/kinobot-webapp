@@ -581,19 +581,46 @@ function episodeKey(ep, i) {
 }
 
 function groupSeriesEpisodes(list) {
-  const grouped = {};
+  const byTitle = new Map();
 
   list.forEach((ep, i) => {
-    const title = (ep['Назва'] || '').trim();
-    const type  = (ep['Тип'] || '').trim();
-    const key   = `${title}__${type}`;   // внутрішній ключ
-    if (!grouped[key]) grouped[key] = { title, type, episodes: [] };
+  const title = (ep['Назва'] || '').toLowerCase().trim();
+  if (!byTitle.has(title)) byTitle.set(title, new Map());
 
-    grouped[key].episodes.push(ep);
-  });
+  const m = byTitle.get(title);
+  const key = episodeKey(ep, i);
 
+  if (!m.has(key)) {
+    m.set(key, ep);
+  }
+});
+
+
+  const grouped = {};
+  for (const [title, m] of byTitle.entries()) {
+    const arr = Array.from(m.values());
+
+    // Сортування: сезон → серія; якщо серія порожня, парсимо з опису
+    arr.sort((a, b) => {
+      const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '1') || 1;
+      const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '1') || 1;
+
+      const eaRaw = a['Серія'] ?? a['Епізод'] ?? a['Episode'] ?? '';
+      const ebRaw = b['Серія'] ?? b['Епізод'] ?? b['Episode'] ?? '';
+      const ea = parseInt(eaRaw, 10);
+      const eb = parseInt(ebRaw, 10);
+
+      const eaNum = Number.isFinite(ea) ? ea : (parseEpisodeNumber(a) || 9999);
+      const ebNum = Number.isFinite(eb) ? eb : (parseEpisodeNumber(b) || 9999);
+
+      return sa !== sb ? sa - sb : eaNum - ebNum;
+    });
+
+    grouped[title] = arr;
+  }
   return grouped;
 }
+
 
 const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
 
@@ -682,7 +709,7 @@ function groupBySeason(list){
 
 // Універсальний рендер картки серіалу (з сезонами або без)
 function renderSeriesCard(title, episodes){
-  const safe   = safeId(title).replace(/__+/g, "_"); // щоб ключ був стабільний
+  const safe   = safeId(title);
   const count  = episodes.length;
   const first  = episodes[0] || {};
   const isPro  = localStorage.getItem('isProUser') === 'true';
@@ -1602,10 +1629,9 @@ function showSeries(type = 'Серіал') {
   }
 
   const grouped = groupSeriesEpisodes(seriesFilms);
-  container.innerHTML = Object.values(grouped)
-    .map(g => renderSeriesCard(g.title, g.episodes))
+  container.innerHTML = Object.entries(grouped)
+    .map(([title, eps]) => renderSeriesCard(title, eps))
     .join('');
-
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
@@ -1642,11 +1668,10 @@ function filterByGenre(genre) {
 
 
 if (isEpisodicType(filtered[0]['Тип'])) {
-  const grouped = groupSeriesEpisodes(seriesFilms);
-  container.innerHTML = Object.values(grouped)
-    .map(g => renderSeriesCard(g.title, g.episodes))
+  const grouped = groupSeriesEpisodes(filtered);
+  container.innerHTML = Object.entries(grouped)
+    .map(([title, eps]) => renderSeriesCard(title, eps))
     .join('');
-
   container.scrollIntoView({ behavior: 'smooth' });
   return;
 }
