@@ -669,19 +669,14 @@ function poster(src, title, year){
 }
 
 function parseEpisodeNumber(ep) {
-  const s = `${ep['Опис'] || ep['Назва'] || ''}`.trim();
-
-  // "Серія 1" (будь-який регістр)
-  let m = s.match(/сер(ія|iя)\s*(\d{1,3})/i);
-  if (m) return parseInt(m[2], 10);
-
-  // "1 серія"
-  m = s.match(/(\d{1,3})\s*сер(ія|iя)/i);
-  if (m) return parseInt(m[1], 10);
-
-  // немає числа → ставимо Infinity, щоб пішло в кінець
-  return Infinity;
+  const raw = (ep['Серія'] ?? ep['Епізод'] ?? ep['Episode'] ?? '').toString().trim();
+  if (raw) {
+    const n = parseInt(raw, 10);
+    if (!isNaN(n) && n > 0) return n;
+  }
+  return Infinity; // серія не вказана
 }
+
 
 function sortByParsedEpisode(list) {
   return list
@@ -692,12 +687,13 @@ function sortByParsedEpisode(list) {
 // --- СЕЗОНИ: беремо або з поля "Сезон", або з тексту опису (fallback) ---
 function getSeasonNum(ep){
   const raw = (ep['Сезон'] ?? ep['Season'] ?? '').toString().trim();
-  if (raw) { const n = parseInt(raw, 10); if (!isNaN(n) && n > 0) return n; }
-  const s = `${ep['Опис'] || ep['Назва'] || ''}`;
-  let m = s.match(/сезон\s*(\d{1,3})/i); if (m) return parseInt(m[1],10);
-  m = s.match(/(\d{1,3})\s*сезон/i);     if (m) return parseInt(m[1],10);
-  return 1;
+  if (raw) { 
+    const n = parseInt(raw, 10); 
+    if (!isNaN(n) && n > 0) return n; 
+  }
+  return 1; // якщо нічого немає
 }
+
 
 function groupBySeason(list){
   const map = {};
