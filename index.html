@@ -3108,7 +3108,7 @@ function closeServiceErrorModal() {
 </div>
 <script>
   // ✅ Отримуємо дані користувача з Telegram WebApp
-  const tg = window.Telegram.WebApp;
+  const tg = window.Telegram?.WebApp || tg;
   const userId = tg.initDataUnsafe?.user?.id || null;
   const username = tg.initDataUnsafe?.user?.username || "";
   const firstName = tg.initDataUnsafe?.user?.first_name || "";
