@@ -581,27 +581,25 @@ function episodeKey(ep, i) {
 }
 
 function groupSeriesEpisodes(list) {
-  const byTitle = new Map();
+  const byKey = new Map();
 
   list.forEach((ep, i) => {
-    // Ключ = точна назва + тип (щоб фільм/серіал з однаковою назвою не злипались)
+    // точний ключ: Назва + Тип
     const key = `${(ep['Назва'] || '').trim()}__${(ep['Тип'] || '').trim()}`;
-    if (!byTitle.has(key)) byTitle.set(key, new Map());
+    if (!byKey.has(key)) byKey.set(key, new Map());
 
-    const m = byTitle.get(key);
+    const m = byKey.get(key);
     const ek = episodeKey(ep, i);
-
-    if (!m.has(ek)) {
-      m.set(ek, ep);
-    }
+    if (!m.has(ek)) m.set(ek, ep);
   });
 
   const grouped = {};
-  for (const [key, m] of byTitle.entries()) {
+  for (const [key, m] of byKey.entries()) {
     grouped[key] = Array.from(m.values());
   }
   return grouped;
 }
+
 
 
 
@@ -692,7 +690,7 @@ function groupBySeason(list){
 
 // Універсальний рендер картки серіалу (з сезонами або без)
 function renderSeriesCard(title, episodes){
-  const safe   = safeId(title);
+  const safe   = safeId(title).replace(/__+/g, "_"); // щоб ключ був стабільний
   const count  = episodes.length;
   const first  = episodes[0] || {};
   const isPro  = localStorage.getItem('isProUser') === 'true';
