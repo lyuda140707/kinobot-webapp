@@ -580,21 +580,20 @@ function episodeKey(ep, i) {
   return `idx:${i}`;                     // інакше — унікальний індекс, щоб не склеїти
 }
 
-list.forEach((ep, i) => {
-  const title = (ep['Назва'] || '').trim();
-  const type = (ep['Тип'] || '').trim().toLowerCase();
-  const uniqueKey = `${title}__${type}`; // ключ = назва + тип
+function groupSeriesEpisodes(list) {
+  const byTitle = new Map();
 
-  if (!byTitle.has(uniqueKey)) byTitle.set(uniqueKey, new Map());
+  list.forEach((ep, i) => {
+  const title = (ep['Назва'] || '').toLowerCase().trim();
+  if (!byTitle.has(title)) byTitle.set(title, new Map());
 
-  const m = byTitle.get(uniqueKey);
+  const m = byTitle.get(title);
   const key = episodeKey(ep, i);
 
   if (!m.has(key)) {
     m.set(key, ep);
   }
 });
-
 
 
   const grouped = {};
