@@ -600,18 +600,9 @@ function groupSeriesEpisodes(list) {
 
   const grouped = {};
   for (const [key, m] of byTitle.entries()) {
-    grouped[key] = Array.from(m.values());
-  }
-
-  return grouped;
-}
-
-
-  const grouped = {};
-  for (const [title, m] of byTitle.entries()) {
     const arr = Array.from(m.values());
 
-    // Сортування: сезон → серія; якщо серія порожня, парсимо з опису
+    // Сортування: сезон → серія
     arr.sort((a, b) => {
       const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '1') || 1;
       const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '1') || 1;
@@ -627,15 +618,12 @@ function groupSeriesEpisodes(list) {
       return sa !== sb ? sa - sb : eaNum - ebNum;
     });
 
-    grouped[title] = arr;
+    grouped[key] = arr;
   }
+
   return grouped;
 }
 
-
-const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
-
-// ⬇️ точне входження жанру як токена (а не підрядка)
 function hasExactGenre(value, target) {
   if (!value) return false;
 
