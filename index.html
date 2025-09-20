@@ -588,33 +588,29 @@ function groupSeriesEpisodes(list) {
     const season = getSeasonNum(ep);
     const episode = parseEpisodeNumber(ep);
 
-    // унікальний ключ для сезону
-    const key = `${title}__season${season}`;
+    // робимо ключ назви + сезону
+    const key = `${title} (Сезон ${season})`;
+
     if (!grouped[key]) {
-      grouped[key] = {
-        title,
-        season,
-        episodes: {}
-      };
+      grouped[key] = [];
     }
 
-    // унікальний ключ для серії
-    const epKey = `ep${episode}`;
-    grouped[key].episodes[epKey] = ep;
+    // перевірка на дубль серії
+    const already = grouped[key].some(e =>
+      parseEpisodeNumber(e) === episode
+    );
+    if (!already) {
+      grouped[key].push(ep);
+    }
   });
 
-  // перетворюємо назад у масиви
-  return Object.values(grouped).map(group => ({
-    title: group.title,
-    season: group.season,
-    episodes: Object.values(group.episodes).sort((a, b) => {
-      const ea = parseEpisodeNumber(a);
-      const eb = parseEpisodeNumber(b);
-      return ea - eb;
-    })
-  }));
-}
+  // сортування всередині сезону
+  Object.keys(grouped).forEach(key => {
+    grouped[key].sort((a, b) => parseEpisodeNumber(a) - parseEpisodeNumber(b));
+  });
 
+  return grouped;
+}
 
 
 const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
