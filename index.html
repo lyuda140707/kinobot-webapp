@@ -581,45 +581,40 @@ function episodeKey(ep, i) {
 }
 
 function groupSeriesEpisodes(list) {
-  const byTitle = new Map();
+  const grouped = {};
 
-  list.forEach((ep, i) => {
-    const title = ep['Назва'];
-    if (!byTitle.has(title)) byTitle.set(title, new Map());
+  list.forEach(ep => {
+    const title = ep['Назва'] || ep['title'];
+    const season = getSeasonNum(ep);
+    const episode = parseEpisodeNumber(ep);
 
-    const m = byTitle.get(title);
-    const key = episodeKey(ep, i);
-
-    // дедуп лише коли справжній дубль одного і того ж файла/епізоду
-    if (!m.has(key)) {
-      m.set(key, ep);
+    // унікальний ключ для сезону
+    const key = `${title}__season${season}`;
+    if (!grouped[key]) {
+      grouped[key] = {
+        title,
+        season,
+        episodes: {}
+      };
     }
+
+    // унікальний ключ для серії
+    const epKey = `ep${episode}`;
+    grouped[key].episodes[epKey] = ep;
   });
 
-  const grouped = {};
-  for (const [title, m] of byTitle.entries()) {
-    const arr = Array.from(m.values());
-
-    // Сортування: сезон → серія; якщо серія порожня, парсимо з опису
-    arr.sort((a, b) => {
-      const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '1') || 1;
-      const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '1') || 1;
-
-      const eaRaw = a['Серія'] ?? a['Епізод'] ?? a['Episode'] ?? '';
-      const ebRaw = b['Серія'] ?? b['Епізод'] ?? b['Episode'] ?? '';
-      const ea = parseInt(eaRaw, 10);
-      const eb = parseInt(ebRaw, 10);
-
-      const eaNum = Number.isFinite(ea) ? ea : (parseEpisodeNumber(a) || 9999);
-      const ebNum = Number.isFinite(eb) ? eb : (parseEpisodeNumber(b) || 9999);
-
-      return sa !== sb ? sa - sb : eaNum - ebNum;
-    });
-
-    grouped[title] = arr;
-  }
-  return grouped;
+  // перетворюємо назад у масиви
+  return Object.values(grouped).map(group => ({
+    title: group.title,
+    season: group.season,
+    episodes: Object.values(group.episodes).sort((a, b) => {
+      const ea = parseEpisodeNumber(a);
+      const eb = parseEpisodeNumber(b);
+      return ea - eb;
+    })
+  }));
 }
+
 
 
 const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
