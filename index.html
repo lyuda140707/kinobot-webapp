@@ -814,61 +814,6 @@ function toggleSeason(seriesId, season){
 
 
 </script>
-<script>
-  // ✅ Отримуємо дані користувача з Telegram WebApp
-  const tg = window.Telegram.WebApp;
-  const userId = tg.initDataUnsafe?.user?.id || null;
-  const username = tg.initDataUnsafe?.user?.username || "";
-  const firstName = tg.initDataUnsafe?.user?.first_name || "";
-
-  // ✅ Кнопка "Отримати PRO"
-  async function getPro() {
-    try {
-      const resp = await fetch("https://relax-time2.onrender.com/create-payment", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          user_id: userId,
-          username: username,
-          first_name: firstName,
-          plan: "pro30"
-        })
-      });
-      const data = await resp.json();
-      if (data.ok) {
-        console.log("Invoice створено:", data.invoice_id);
-        localStorage.setItem("invoice_id", data.invoice_id);
-        alert("✔️ Запит на PRO створено! Тепер зроби оплату і натисни 'Я оплатив'");
-      } else {
-        alert("❌ Помилка при створенні оплати");
-      }
-    } catch (err) {
-      console.error("Помилка /create-payment:", err);
-    }
-  }
-
-  // ✅ Кнопка "Я оплатив"
-  async function notifyPaid() {
-    const invoiceId = localStorage.getItem("invoice_id");
-    if (!invoiceId) {
-      alert("⚠️ Спочатку натисни 'Отримати PRO'");
-      return;
-    }
-    try {
-      await fetch("https://relax-time2.onrender.com/notify-payment", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          user_id: userId,
-          invoice_id: invoiceId
-        })
-      });
-      alert("✅ Запит на підтвердження відправлено!");
-    } catch (err) {
-      console.error("Помилка /notify-payment:", err);
-    }
-  }
-</script>
 
 </head>
 <body>
@@ -2561,11 +2506,6 @@ function goToSeries(seriesTitle) {
   }, 300);
 }
 
-// Кнопка "Отримати PRO"
-document.getElementById('getProBtn').addEventListener('click', getPro);
-
-// Кнопка "Я оплатив"
-document.getElementById('confirmPaidBtn').addEventListener('click', notifyPaid);
 
 
 
@@ -3166,6 +3106,39 @@ function closeServiceErrorModal() {
     <button id="reload-btn" style="padding:8px 16px;background:#00f7ff;color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Перезавантажити</button>
   </div>
 </div>
+<script>
+  // ✅ Отримуємо дані користувача з Telegram WebApp
+  const tg = window.Telegram.WebApp;
+  const userId = tg.initDataUnsafe?.user?.id || null;
+  const username = tg.initDataUnsafe?.user?.username || "";
+  const firstName = tg.initDataUnsafe?.user?.first_name || "";
+
+  // ✅ Кнопка "Отримати PRO"
+  async function notifyPaid() {
+    const invoiceId = localStorage.getItem("invoice_id");
+    if (!invoiceId) {
+      alert("⚠️ Спочатку натисни 'Отримати PRO'");
+      return;
+    }
+    try {
+      await fetch("https://relax-time2.onrender.com/notify-payment", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          user_id: userId,
+          invoice_id: invoiceId
+        })
+      });
+      alert("✅ Запит на підтвердження відправлено!");
+    } catch (err) {
+      console.error("Помилка /notify-payment:", err);
+    }
+  }
+
+  // 🔗 Прив'язуємо кнопки
+  document.getElementById('getProBtn').addEventListener('click', getPro);
+  document.getElementById('confirmPaidBtn').addEventListener('click', notifyPaid);
+</script>
 
   
 </body>
