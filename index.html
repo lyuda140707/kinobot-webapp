@@ -1623,7 +1623,8 @@ function showSeries(type = 'Серіал') {
     : [(type || '').trim().toLowerCase()];
 
   const seriesFilms = films.filter(f =>
-    types.includes(((f['Тип'] || '')).trim().toLowerCase())
+    types.includes(((f['Тип'] || '')).trim().toLowerCase()) &&
+    (f.message_id || f.file_id) // показуємо тільки ті серії, де є відео
   );
 
   if (!seriesFilms.length) {
