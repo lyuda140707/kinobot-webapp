@@ -524,7 +524,7 @@
         </div>`;
       throw new Error('Не веб-App Telegram');
     }
-    const tg = window.Telegram.WebApp;
+    
     tg.ready();
 
     // 2) Перевіряємо, що отримали валідні дані користувача
@@ -1830,7 +1830,6 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
   document.getElementById('home').classList.add('active');
   document.querySelector('[data-tab=home]')?.classList.add('active');
 
-  const tg = window.Telegram.WebApp;
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
     alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
     window.location.reload();
@@ -1978,7 +1977,6 @@ function showSkeletonCollections() {
 
   
   Telegram.WebApp.ready();
-  const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
 
   if (!user) {
