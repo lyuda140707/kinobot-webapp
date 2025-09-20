@@ -553,9 +553,17 @@ function unmaskWord(word) {
   // Знімає маскування (прибирає zero-width space)
   return word.replace(/\u200B/g, '');
 }
-function safeId(str) {
-  return String(str || '').replace(/[^\w\d]/g, '_');
+function safeId(str, scope = '') {
+  const s = `${scope}#${String(str || '')}`;
+  // FNV-1a 32-bit
+  let h = 2166136261;
+  for (const ch of s) {
+    h ^= ch.codePointAt(0);
+    h = (h >>> 0) * 16777619;
+  }
+  return 'id_' + (h >>> 0).toString(36);
 }
+
 
 function renderControls(title, description) {
   const film = films.find(f => f['Назва'] === title) || {};
@@ -580,27 +588,34 @@ function episodeKey(ep, i) {
   return `idx:${i}`;                     // інакше — унікальний індекс, щоб не склеїти
 }
 
+// [583–622]
 function groupSeriesEpisodes(list) {
-  const byTitle = new Map();
+  // Ключ нормалізуємо (нижній регістр) лише для групування,
+  // але ЗБЕРІГАЄМО перший оригінальний заголовок для відображення.
+  const byNorm = new Map(); // normTitle -> { orig, map }
 
-  list.forEach((ep, i) => {
-  const title = (ep['Назва'] || '').toLowerCase().trim();
-  if (!byTitle.has(title)) byTitle.set(title, new Map());
+  for (let i = 0; i < list.length; i++) {
+    const ep = list[i];
+    const orig = (ep['Назва'] || '').toString().trim();
+    const norm = orig.toLowerCase();
 
-  const m = byTitle.get(title);
-  const key = episodeKey(ep, i);
+    if (!byNorm.has(norm)) {
+      byNorm.set(norm, { orig, map: new Map() });
+    }
+    const { map } = byNorm.get(norm);
 
-  if (!m.has(key)) {
-    m.set(key, ep);
+    // Ключ епізоду — стабільний: (сезон, серія) або fallback через парсер з опису
+    const key = episodeKey(ep, i);
+    if (!map.has(key)) {
+      map.set(key, ep);
+    }
   }
-});
-
 
   const grouped = {};
-  for (const [title, m] of byTitle.entries()) {
-    const arr = Array.from(m.values());
+  for (const { orig, map } of byNorm.values()) {
+    const arr = Array.from(map.values());
 
-    // Сортування: сезон → серія; якщо серія порожня, парсимо з опису
+    // Сортуємо: спершу сезон, далі серія; якщо 'Серія' порожня — парсимо з опису
     arr.sort((a, b) => {
       const sa = parseInt(a['Сезон'] ?? a['Season'] ?? '1') || 1;
       const sb = parseInt(b['Сезон'] ?? b['Season'] ?? '1') || 1;
@@ -616,10 +631,13 @@ function groupSeriesEpisodes(list) {
       return sa !== sb ? sa - sb : eaNum - ebNum;
     });
 
-    grouped[title] = arr;
+    // Ключ групи — ОРИГІНАЛЬНА назва (з правильним регістром)
+    grouped[orig] = arr;
   }
+
   return grouped;
 }
+
 
 
 const EPISODIC_TYPES = ['серіал','серіали','мультсеріал','мультсеріали'];
@@ -709,7 +727,7 @@ function groupBySeason(list){
 
 // Універсальний рендер картки серіалу (з сезонами або без)
 function renderSeriesCard(title, episodes){
-  const safe   = safeId(title);
+  const safe   = safeId(title, 'series');
   const count  = episodes.length;
   const first  = episodes[0] || {};
   const isPro  = localStorage.getItem('isProUser') === 'true';
@@ -1120,7 +1138,7 @@ function renderBatch() {
     const imgSrc    = (isProFilm && !isPro)
                       ? placeholderImage
                       : (film['Фото'] || placeholderImage);
-    const id        = safeId(film['Назва']);
+    const id        = safeId(film['Назва'], 'catalog');
 
    let btn = '';
    if (isProFilm && !isPro) {
@@ -1718,7 +1736,7 @@ function filterByYear(year) {
   }
 
   container.innerHTML = filtered.map(film => {
-    const id = safeId(film['Назва']);           // ← Оголошуємо id!
+    const id = safeId(film['Назва'], 'country'); // ← Оголошуємо id!
     const isProFilm = film['Доступ'] === 'PRO';
     const imgSrc = (isProFilm && !isPro)
       ? placeholderImage
@@ -1773,7 +1791,7 @@ function filterByYear(year) {
       ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}')">▶️ Дивитись</button>`
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
     return `
-      <div class="film-card" id="film-${safeId(f.title)}">
+      <div class="film-card" id="film-${safeId(f.title, 'fav')}">
       <h3>${maskWord(f.title)}</h3>
       <p>${f.description}</p>
       <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
@@ -2232,7 +2250,7 @@ if (seriesHits.length > 0) {
 
   const isPro = localStorage.getItem('isProUser') === 'true';
   container.innerHTML = unique.map(f => {
-    const id = safeId(f['Назва']);
+    const id = safeId(f['Назва'], 'search');
     const locked = f['Доступ'] === 'PRO' && !isPro;
     const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
     const watchBtn = locked
@@ -2308,7 +2326,7 @@ async function requestWithRetry(url, options, retries = 3, delay = 1000) {
 
 
 function rateFilm(filmName, action) {
-  const key = `rating-${safeId(filmName)}`;
+  const key = `rating-${safeId(filmName, 'rating')}`;
   const previousAction = localStorage.getItem(key);
 
   // Якщо користувач натиснув ту ж саму кнопку — нічого не робимо
@@ -2327,10 +2345,10 @@ function rateFilm(filmName, action) {
   });
 
   // Знаходимо елементи-лічильники
-  const likeBtnCount    = document.getElementById(`like-count-btn-${safeId(filmName)}`);
-  const dislikeBtnCount = document.getElementById(`dislike-count-btn-${safeId(filmName)}`);
-  const likeDisplay     = document.getElementById(`like-count-${safeId(filmName)}`);
-  const dislikeDisplay  = document.getElementById(`dislike-count-${safeId(filmName)}`);
+  const likeBtnCount    = document.getElementById(`like-count-btn-${safeId(filmName, 'rating')}`);
+  const dislikeBtnCount = document.getElementById(`dislike-count-btn-${safeId(filmName, 'rating')}`);
+  const likeDisplay     = document.getElementById(`like-count-${safeId(filmName, 'rating')}`);
+  const dislikeDisplay  = document.getElementById(`dislike-count-${safeId(filmName, 'rating')}`);
 
   // Функція для безпечного оновлення числа
   function upd(el, delta) {
