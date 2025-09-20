@@ -991,7 +991,7 @@ function toggleSeason(seriesId, season){
   <button id="confirmPaidBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold; display:none;">
     ✅ Я оплатив
   </button>
-
+  <p id="proMessage" style="font-size:14px; margin-top:10px;"></p>
 
   <!-- Додай цю кнопку у профіль (аккаунт) -->
   <div id="contact-admin-section" style="margin: 18px 0;">
@@ -3127,7 +3127,10 @@ function closeServiceErrorModal() {
       const data = await resp.json();
       if (data.ok) {
         localStorage.setItem("invoice_id", data.invoice_id);
-        alert("✔️ Запит на PRO створено! Зараз відкриється Monobank. Після оплати натисни 'Я оплатив'.");
+        document.getElementById("proMessage").innerHTML =
+          "✔️ Запит на PRO створено! Зараз відкриється Monobank.<br>" +
+          "<span style='color:red; font-weight:bold;'>Після оплати натисни 'Я оплатив'</span>";
+
         tg.openLink("https://send.monobank.ua/jar/7EZ9XdZe7B");  // ✅ відкриває банку
         document.getElementById("confirmPaidBtn").style.display = "block";
       } else {
