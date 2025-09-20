@@ -984,10 +984,6 @@ function toggleSeason(seriesId, season){
   <hr style="margin: 20px 0; border-color: #444;">
   <h3>🔒 PRO Доступ</h3>
   <p style="font-size:14px; color:#ccc;">Відкриває доступ до всіх відео</p>
-  <p id="proWarning" style="font-size:14px; margin:10px 0; color:red; font-weight:bold; display:none;">
-  Після оплати натисни 'Я оплатив'
-  </p>
-
   <button id="getProBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold;">🚀 Отримати PRO</button>
   <p style="font-size:11px; color:#aaa; margin-top:5px;">Будь-яка сума (від 20 грн) — PRO доступ</p>
 
@@ -995,7 +991,7 @@ function toggleSeason(seriesId, season){
   <button id="confirmPaidBtn" class="account-button" style="background:#00f7ff; color:#000; font-weight:bold; display:none;">
     ✅ Я оплатив
   </button>
-  <p id="proMessage" style="font-size:14px; margin-top:10px;"></p>
+
 
   <!-- Додай цю кнопку у профіль (аккаунт) -->
   <div id="contact-admin-section" style="margin: 18px 0;">
@@ -3117,38 +3113,30 @@ function closeServiceErrorModal() {
 
   // ✅ Кнопка "Отримати PRO"
   async function getPro() {
-  try {
-    const resp = await fetch("https://relax-time2.onrender.com/create-payment", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        user_id: userId,
-        username: username,
-        first_name: firstName,
-        plan: "pro30"
-      })
-    });
-    const data = await resp.json();
-    if (data.ok) {
-      localStorage.setItem("invoice_id", data.invoice_id);
-
-      // 🔴 показуємо текст над кнопкою "Отримати PRO"
-      document.getElementById("proWarning").style.display = "block";
-
-      // 🟢 показуємо повідомлення під кнопками
-      document.getElementById("proMessage").innerHTML =
-        "✔️ Запит на PRO створено! Зараз відкриється Monobank.<br>" +
-        "<span style='color:red; font-weight:bold;'>Після оплати натисни 'Я оплатив'</span>";
-
-      tg.openLink("https://send.monobank.ua/jar/7EZ9XdZe7B");  // відкриває банку
-      document.getElementById("confirmPaidBtn").style.display = "block";
-    } else {
-      alert("❌ Помилка при створенні оплати");
+    try {
+      const resp = await fetch("https://relax-time2.onrender.com/create-payment", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          user_id: userId,
+          username: username,
+          first_name: firstName,
+          plan: "pro30"
+        })
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        localStorage.setItem("invoice_id", data.invoice_id);
+        alert("✔️ Запит на PRO створено! Зараз відкриється Monobank. Після оплати натисни 'Я оплатив'.");
+        tg.openLink("https://send.monobank.ua/jar/7EZ9XdZe7B");  // ✅ відкриває банку
+        document.getElementById("confirmPaidBtn").style.display = "block";
+      } else {
+        alert("❌ Помилка при створенні оплати");
+      }
+    } catch (err) {
+      console.error("Помилка /create-payment:", err);
     }
-  } catch (err) {
-    console.error("Помилка /create-payment:", err);
   }
-}
 
   // ✅ Кнопка "Я оплатив"
   async function notifyPaid() {
