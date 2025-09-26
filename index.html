@@ -528,6 +528,10 @@
 .genre-main-btn.blink {
   animation: blink 1s ease-in-out infinite;
 }
+/* Для кнопок у розділі "Мультики" */
+.cartoon-btn.blink {
+  animation: blink 1s ease-in-out infinite;
+}
 
   </style>
  
@@ -1262,6 +1266,7 @@ async function loadFilms() {
     showGenres();
     startBlinkingGenres(); // запускаємо миготіння
     startBlinkingCategories(); // 🚀 запускаємо миготіння для категорій
+    startBlinkingCartoons(); // 🚀 запускаємо миготіння для "Мультики"
     showCountryFilters();
     showYearFilters();
 
@@ -1330,6 +1335,7 @@ async function fetchAndUpdateFilms() {
     showGenres();
     startBlinkingGenres(); // запускаємо миготіння
     startBlinkingCategories(); // 🚀 запускаємо миготіння для категорій
+    startBlinkingCartoons(); // 🚀 запускаємо миготіння для "Мультики"
     showCountryFilters();
     showYearFilters();
   } catch (error) {
@@ -1629,6 +1635,19 @@ function startBlinkingGenres() {
 
 function startBlinkingCategories() {
   const buttons = document.querySelectorAll('#categories .genre-main-btn'); // ← було .genre-btn
+  if (!buttons.length) return;
+
+  let index = 0;
+  setInterval(() => {
+    buttons.forEach(btn => btn.classList.remove('blink'));
+    buttons[index].classList.add('blink');
+    index = (index + 1) % buttons.length;
+  }, 1500);
+}
+
+// 🚀 Анімація миготіння кнопок у розділі "Мультики"
+function startBlinkingCartoons() {
+  const buttons = document.querySelectorAll('#cartoons .cartoon-btn');
   if (!buttons.length) return;
 
   let index = 0;
