@@ -1257,6 +1257,7 @@ async function loadFilms() {
     showCollections();
     showGenres();
     startBlinkingGenres(); // запускаємо миготіння
+    startBlinkingCategories(); // 🚀 запускаємо миготіння для категорій
     showCountryFilters();
     showYearFilters();
 
@@ -1324,7 +1325,7 @@ async function fetchAndUpdateFilms() {
     showCollections();
     showGenres();
     startBlinkingGenres(); // запускаємо миготіння
-
+    startBlinkingCategories(); // 🚀 запускаємо миготіння для категорій
     showCountryFilters();
     showYearFilters();
   } catch (error) {
@@ -1622,6 +1623,18 @@ function startBlinkingGenres() {
   }, 1500); // кожні 1.5 секунди перемикається
 }
 
+// 🚀 Анімація миготіння кнопок у категоріях "Фільми за жанром / Серіали / Мультики"
+function startBlinkingCategories() {
+  const buttons = document.querySelectorAll('#categories .genre-btn');
+  if (!buttons.length) return;
+
+  let index = 0;
+  setInterval(() => {
+    buttons.forEach(btn => btn.classList.remove('blink'));
+    buttons[index].classList.add('blink');
+    index = (index + 1) % buttons.length;
+  }, 1500); // кожні 1.5 секунди перемикається
+}
 
     
     function showCountryFilters() {
