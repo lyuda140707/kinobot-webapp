@@ -507,6 +507,23 @@
     0 0 10px rgba(255, 105, 180, .6);
 }
 
+/* === Ефект миготіння для кнопок Фільми / Серіали / Мультфільми === */
+@keyframes blink {
+  0%, 100% { 
+    color: #00f7ff; 
+    text-shadow: 0 0 10px #00f7ff; 
+    transform: scale(1.1);
+  }
+  50% { 
+    color: #fff; 
+    text-shadow: none; 
+    transform: scale(1);
+  }
+}
+
+.genre-btn.blink {
+  animation: blink 1s ease-in-out infinite;
+}
 
   </style>
  
@@ -1239,6 +1256,7 @@ async function loadFilms() {
     showFilmOfTheDay();
     showCollections();
     showGenres();
+    startBlinkingGenres(); // запускаємо миготіння
     showCountryFilters();
     showYearFilters();
 
@@ -1305,6 +1323,8 @@ async function fetchAndUpdateFilms() {
     showFilmOfTheDay();
     showCollections();
     showGenres();
+    startBlinkingGenres(); // запускаємо миготіння
+
     showCountryFilters();
     showYearFilters();
   } catch (error) {
@@ -1589,6 +1609,18 @@ function showGenres() {
   document.getElementById('genres').style.display = 'flex';
 }
 
+// 🚀 Анімація миготіння кнопок у розділі "Фільми / Серіали / Мультфільми"
+function startBlinkingGenres() {
+  const buttons = document.querySelectorAll('#genres .genre-btn');
+  if (!buttons.length) return;
+
+  let index = 0;
+  setInterval(() => {
+    buttons.forEach(btn => btn.classList.remove('blink'));
+    buttons[index].classList.add('blink');
+    index = (index + 1) % buttons.length;
+  }, 1500); // кожні 1.5 секунди перемикається
+}
 
 
     
