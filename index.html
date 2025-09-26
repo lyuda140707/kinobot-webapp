@@ -1625,7 +1625,7 @@ function startBlinkingGenres() {
 
 // 🚀 Анімація миготіння кнопок у категоріях "Фільми за жанром / Серіали / Мультики"
 function startBlinkingCategories() {
-  const buttons = document.querySelectorAll('#categories .genre-btn');
+  const buttons = document.querySelectorAll('.category-buttons .genre-btn');
   if (!buttons.length) return;
 
   let index = 0;
@@ -1633,10 +1633,9 @@ function startBlinkingCategories() {
     buttons.forEach(btn => btn.classList.remove('blink'));
     buttons[index].classList.add('blink');
     index = (index + 1) % buttons.length;
-  }, 1500); // кожні 1.5 секунди перемикається
+  }, 1500);
 }
 
-    
     function showCountryFilters() {
   const countries = [...new Set(films.map(f => f['Країна']).filter(Boolean))];
   const container = document.getElementById('country-filters');
