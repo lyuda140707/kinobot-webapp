@@ -1651,9 +1651,8 @@ function startBlinkingCategories() {
   }, 1500);
 }
 
-// 🚀 Анімація миготіння кнопок у розділі "Мультики"
 function startBlinkingCartoons() {
-  const buttons = document.querySelectorAll('#mult .mult-btn'); // правильний селектор
+  const buttons = document.querySelectorAll('#group-cartoons .genre-btn'); 
   if (!buttons.length) return;
 
   let index = 0;
