@@ -877,18 +877,28 @@ return `
 }
 
  
-function toggleSeason(seriesId, season){
+function toggleSeason(seriesId, season) {
   const row = document.getElementById(`seasons-${seriesId}`);
-  if (row){
-    row.querySelectorAll('.season-btn').forEach(b=>b.classList.remove('active'));
-    const btn = Array.from(row.querySelectorAll('.season-btn'))
-      .find(b => (b.textContent||'').replace(/\D/g,'') === String(season));
-    if (btn) btn.classList.add('active');
-  }
-  document.querySelectorAll(`#film-${seriesId} .series-episodes-season`)
-    .forEach(el => el.style.display = 'none');
+  if (!row) return;
+
+  // Прибираємо active з усіх кнопок
+  row.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+
+  // Активуємо вибраний сезон
+  const btn = Array.from(row.querySelectorAll('.season-btn'))
+    .find(b => (b.textContent || '').replace(/\D/g, '') === String(season));
+  if (btn) btn.classList.add('active');
+
+  // Ховаємо всі сезони
+  const allSeasons = document.querySelectorAll(`#film-${seriesId} .series-episodes-season`);
+  allSeasons.forEach(el => el.style.display = 'none');
+
+  // Показуємо лише вибраний
   const grid = document.getElementById(`episodes-${seriesId}-s${season}`);
   if (grid) grid.style.display = 'grid';
+
+  // 📜 Прокручуємо до початку серій цього сезону
+  grid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 
