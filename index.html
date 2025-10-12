@@ -3299,5 +3299,16 @@ function closeServiceErrorModal() {
     document.getElementById('confirmPaidBtn')?.addEventListener('click', notifyPaid);
   });
 </script>
+  <script>
+// ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив"
+document.addEventListener("DOMContentLoaded", () => {
+  const invoiceId = localStorage.getItem("invoice_id");
+  if (invoiceId) {
+    const confirmBtn = document.getElementById("confirmPaidBtn");
+    if (confirmBtn) confirmBtn.style.display = "block";
+  }
+});
+</script>
+
 </body>
 </html>
