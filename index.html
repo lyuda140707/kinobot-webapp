@@ -2187,19 +2187,15 @@ const proRes = await fetch('https://relax-time2.onrender.com/check-pro', {
 });
 const proData = await proRes.json();
 
+if (proData.isPro) {
+  localStorage.setItem('isProUser', 'true');
+  localStorage.removeItem('paymentPending'); // Тут!
 } else {
   localStorage.removeItem('isProUser');
-
-  // ✅ враховуємо і paymentPending, і invoice_id
-  const hasPending =
-    localStorage.getItem('paymentPending') === 'true' ||
-    !!localStorage.getItem('invoice_id');
-
-  if (hasPending) {
+  // Показати кнопку "Я оплатив", якщо paymentPending == true
+  if (localStorage.getItem('paymentPending') === 'true') {
     showConfirmPaidButton(user);
     startProPolling();
-  } else {
-    document.getElementById("confirmPaidBtn").style.display = "none";
   }
 }
 
@@ -2885,21 +2881,15 @@ window.checkProPendingStatus = async function checkProPendingStatus() {
       document.getElementById("confirmPaidBtn").style.display = "none";
       // Показати повідомлення, якщо хочеш
     } else {
-  localStorage.removeItem('isProUser');
-
-  // ✅ враховуємо і paymentPending, і invoice_id
-  const hasPending =
-    localStorage.getItem('paymentPending') === 'true' ||
-    !!localStorage.getItem('invoice_id');
-
-  if (hasPending) {
-    showConfirmPaidButton(user);
-    startProPolling();
-  } else {
-    document.getElementById("confirmPaidBtn").style.display = "none";
-  }
-}
-
+      localStorage.removeItem('isProUser');
+      // Якщо paymentPending == true, показуємо кнопку "Я оплатив"
+      if (localStorage.getItem('paymentPending') === 'true') {
+        showConfirmPaidButton(user);
+        startProPolling();
+      } else {
+        document.getElementById("confirmPaidBtn").style.display = "none";
+      }
+    }
   } catch (e) {
     // Якщо була помилка — залишаємо кнопку для повтору!
     if (localStorage.getItem('paymentPending') === 'true') {
@@ -3270,7 +3260,6 @@ function closeServiceErrorModal() {
       const data = await resp.json();
       if (data.ok) {
         localStorage.setItem("invoice_id", data.invoice_id);
-        localStorage.setItem("paymentPending", "true");
         alert("✔️ Запит на PRO створено! Зараз відкриється Monobank. Після оплати натисни 'Я оплатив'.");
         tg.openLink("https://send.monobank.ua/jar/8FbfB4fY6S");  // ✅ відкриває банку
         document.getElementById("confirmPaidBtn").style.display = "block";
