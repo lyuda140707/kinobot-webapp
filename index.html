@@ -3300,15 +3300,43 @@ function closeServiceErrorModal() {
   });
 </script>
   <script>
-// ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив"
-document.addEventListener("DOMContentLoaded", () => {
+// ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
+document.addEventListener("DOMContentLoaded", async () => {
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  // 1. Перевіряємо PRO статус
+  let isPro = false;
+  try {
+    const resp = await fetch("https://relaxbox.site/check-pro", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: user?.id })
+    });
+    const data = await resp.json();
+    isPro = !!data.isPro;
+  } catch (e) {
+    console.warn("Помилка перевірки PRO:", e);
+  }
+
+  // 2. Перевіряємо чи є незавершена оплата
   const invoiceId = localStorage.getItem("invoice_id");
-  if (invoiceId) {
-    const confirmBtn = document.getElementById("confirmPaidBtn");
+  const confirmBtn = document.getElementById("confirmPaidBtn");
+
+  if (isPro) {
+    // Якщо PRO активний — ховаємо кнопку та очищаємо invoice_id
+    localStorage.removeItem("invoice_id");
+    if (confirmBtn) confirmBtn.style.display = "none";
+  } else if (invoiceId) {
+    // Якщо оплата ще не завершена — показуємо кнопку
     if (confirmBtn) confirmBtn.style.display = "block";
+  } else {
+    // Якщо нічого немає — ховаємо кнопку
+    if (confirmBtn) confirmBtn.style.display = "none";
   }
 });
 </script>
+
 
 </body>
 </html>
