@@ -1260,7 +1260,8 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 // читаємо REST’ом і мапимо у старий формат з українськими ключами
 async function fetchFilmsFromSupabase() {
   const pageSize = 1000;
-  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,collection,country,year,access,imdb,season,episode&order=title.asc,season.asc,episode.asc,id.asc`;
+  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,channel_id,file_id,collection,country,year,access,imdb,season,episode&order=title.asc,season.asc,episode.asc,id.asc`;
+
 
 
   let rows = [];
