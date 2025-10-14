@@ -827,7 +827,7 @@ function renderSeriesCard(title, episodes){
             return locked
               ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
               : (mid
-                  ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}')">${label}</button>`
+                  ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || film['channel_id'] || ''}')">${label}</button>`
                   : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
           }).join('')}
         </div>
@@ -864,7 +864,7 @@ return `
               return locked
                 ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
                 : (mid
-                    ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}')">${label}</button>`
+                    ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || film['channel_id'] || ''}')">${label}</button>`
                     : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
             }).join('')}
           </div>
@@ -1222,7 +1222,7 @@ function renderBatch() {
      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['message_id'] || film['file_id']) {
      const mid = film['message_id'] || film['file_id'];
-     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}')">▶️ Дивитись</button>`;
+     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || film['channel_id'] || ''}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1461,7 +1461,7 @@ async function openVideoById(btn, filmName) {
 }
 
 // Виклик з розмітки: requestFilmByName(this, messageId)
-async function requestFilmByName(btn, fileId) {
+async function requestFilmByName(btn, fileId, channelId) {
   const tg = window.Telegram?.WebApp;
   const user = tg?.initDataUnsafe?.user;
   if (!user) {
@@ -1481,7 +1481,7 @@ async function requestFilmByName(btn, fileId) {
     const response = await fetch('https://relax-time2.onrender.com/send-film-id', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id, message_id: fileId })
+      body: JSON.stringify({ user_id: user.id, message_id: fileId, channel_id: channelId })
     });
     const data = await response.json();
 
@@ -1865,7 +1865,7 @@ function filterByYear(year) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
    } else if (film['message_id'] || film['file_id']) {
       const mid = film['message_id'] || film['file_id'];
-      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}')">▶️ Дивитись</button>`;
+      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || film['channel_id'] || ''}')">▶️ Дивитись</button>`;
     }
 
     return `
