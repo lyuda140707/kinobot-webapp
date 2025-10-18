@@ -3364,43 +3364,45 @@ function closeServiceErrorModal() {
     document.getElementById('confirmPaidBtn')?.addEventListener('click', notifyPaid);
   });
 </script>
-  <script>
-// ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
+<script>
 document.addEventListener("DOMContentLoaded", async () => {
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
+  const urlParams = new URLSearchParams(window.location.search);
+  const filmId = urlParams.get("id");
+  if (!filmId) return;
 
-  // 1. Перевіряємо PRO статус
-  let isPro = false;
-  try {
-    const resp = await fetch("https://relaxbox.site/check-pro", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: user?.id })
-    });
-    const data = await resp.json();
-    isPro = !!data.isPro;
-  } catch (e) {
-    console.warn("Помилка перевірки PRO:", e);
+  // 1️⃣ Отримуємо дані про фільм із Supabase
+  const { data, error } = await supabase
+    .from("films")
+    .select("*")
+    .eq("id", filmId);
+  if (error || !data.length) {
+    alert("Фільм не знайдено 😕");
+    return;
   }
 
-  // 2. Перевіряємо чи є незавершена оплата
-  const invoiceId = localStorage.getItem("invoice_id");
-  const confirmBtn = document.getElementById("confirmPaidBtn");
+  const film = data[0];
+  const msgId = film.message_id;
+  const chId = film.channel_id;
 
-  if (isPro) {
-    // Якщо PRO активний — ховаємо кнопку та очищаємо invoice_id
-    localStorage.removeItem("invoice_id");
-    if (confirmBtn) confirmBtn.style.display = "none";
-  } else if (invoiceId) {
-    // Якщо оплата ще не завершена — показуємо кнопку
-    if (confirmBtn) confirmBtn.style.display = "block";
-  } else {
-    // Якщо нічого немає — ховаємо кнопку
-    if (confirmBtn) confirmBtn.style.display = "none";
+  // 2️⃣ Просимо бекенд віддати CDN-посилання
+  const res = await fetch(`https://твій-бекенд.onrender.com/get-video-url?id=${msgId}&channel=${chId}`);
+  const d = await res.json();
+
+  if (!d.video_url) {
+    alert("Не вдалося отримати відео 😔");
+    return;
   }
+
+  // 3️⃣ Показуємо плеєр
+  document.body.innerHTML = `
+    <h2 style="color:#fff;text-align:center;margin:10px;">${film.title || ""}</h2>
+    <video controls playsinline autoplay style="width:100%;border-radius:12px;">
+      <source src="${d.video_url}" type="video/mp4">
+    </video>
+  `;
 });
 </script>
+
 
 
 </body>
