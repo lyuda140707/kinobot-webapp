@@ -610,7 +610,7 @@
   </script>
 <!-- 🚀 Автоматичне очищення кешу при зміні версії -->
 <script>
-const APP_VERSION = "1.4.3";  // 🔸 змінюй при кожному великому оновленні
+const APP_VERSION = "1.4.4";  // 🔸 змінюй при кожному великому оновленні
 
 try {
   const prevVersion = localStorage.getItem("app_version");
@@ -1292,6 +1292,7 @@ async function fetchFilmsFromSupabase() {
 
   // Мапінг у ваш старий формат з українськими ключами
   return rows.map(r => ({
+    'id': r.id ?? '',
     'Назва'      : r.title ?? '',
     'Тип'        : r.type ?? '',
     'Жанр'       : r.genre ?? '',
@@ -3403,7 +3404,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 <script>
 function openFilm(filmId) {
-  const base = "https://relax-time2.onrender.com"; // твій бекенд на Render
+  if (!filmId || filmId === 'undefined' || filmId === 'null') {
+    alert('⛔ Відео тимчасово недоступне (без ID)');
+    return;
+  }
+
+  const base = "https://relax-time2.onrender.com"; // бекенд Render
   window.location.href = `${base}/watch/${filmId}`;
 }
 </script>
