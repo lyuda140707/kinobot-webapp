@@ -3366,40 +3366,48 @@ function closeServiceErrorModal() {
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const filmId = urlParams.get("id");
-  if (!filmId) return;
+  const params = new URLSearchParams(window.location.search);
+  const msgId = params.get("msg");
+  const chId  = params.get("ch");
 
-  // 1️⃣ Отримуємо дані про фільм із Supabase
-  const { data, error } = await supabase
-    .from("films")
-    .select("*")
-    .eq("id", filmId);
-  if (error || !data.length) {
-    alert("Фільм не знайдено 😕");
+  if (!msgId || !chId) {
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;color:#00f7ff;background:#111;text-align:center;">
+        <h2>🎬 Не знайдено параметри фільму</h2>
+        <p>Спробуйте відкрити з кнопки під відео в боті.</p>
+      </div>`;
     return;
   }
 
-  const film = data[0];
-  const msgId = film.message_id;
-  const chId = film.channel_id;
-
-  // 2️⃣ Просимо бекенд віддати CDN-посилання
-  const res = await fetch(`https://твій-бекенд.onrender.com/get-video-url?id=${msgId}&channel=${chId}`);
-  const d = await res.json();
-
-  if (!d.video_url) {
-    alert("Не вдалося отримати відео 😔");
-    return;
-  }
-
-  // 3️⃣ Показуємо плеєр
+  // 🟢 Показуємо лоадер
   document.body.innerHTML = `
-    <h2 style="color:#fff;text-align:center;margin:10px;">${film.title || ""}</h2>
-    <video controls playsinline autoplay style="width:100%;border-radius:12px;">
-      <source src="${d.video_url}" type="video/mp4">
-    </video>
-  `;
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;color:#00f7ff;background:#111;">
+      <div class="loader"></div>
+      <p style="margin-top:15px;">Завантаження відео...</p>
+    </div>`;
+
+  try {
+    const res = await fetch(`https://relax-time2.onrender.com/get-video-url?id=${msgId}&channel=${chId}`);
+    const data = await res.json();
+
+    if (!data.video_url) {
+      throw new Error("Посилання на відео не знайдено");
+    }
+
+    document.body.innerHTML = `
+      <h2 style="color:#00f7ff;text-align:center;margin:10px;">🎞️ Відео</h2>
+      <video controls autoplay playsinline style="width:100%;border-radius:12px;">
+        <source src="${data.video_url}" type="video/mp4">
+      </video>
+    `;
+  } catch (err) {
+    console.error(err);
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;color:#ff5555;background:#111;text-align:center;">
+        <h2>❌ Не вдалося завантажити відео</h2>
+        <p>${err.message || 'Спробуйте пізніше'}</p>
+      </div>`;
+  }
 });
 </script>
 
