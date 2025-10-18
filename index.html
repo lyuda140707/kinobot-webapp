@@ -1489,49 +1489,40 @@ async function openVideoById(btn, filmName) {
 }
 
 // Виклик з розмітки: requestFilmByName(this, messageId)
-async function requestFilmByName(btn, fileId, channelId) {
-  const tg = window.Telegram?.WebApp;
-  const user = tg?.initDataUnsafe?.user;
-  if (!user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
-    location.reload();
-    return;
-  }
-
-  if (btn?.dataset.sending === '1') return;
-  if (btn) { btn.dataset.sending = '1'; btn.disabled = true; }
-
-  const loader = document.getElementById("loading-indicator");
-  if (loader) loader.style.display = "block";
-
+async function requestFilmByName(button, msgId, channelId) {
   try {
-    const response = await fetch('https://relax-time2.onrender.com/send-film-id', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (!telegramUser) {
+      alert("⛔ Не вдалося отримати дані користувача Telegram");
+      return;
+    }
+
+    const userId = telegramUser.id;
+
+    const res = await fetch("https://relax-time2.onrender.com/send-film-id", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        user_id: user.id,
-        message_id: fileId,
-        channel_id: channelId || ''
+        user_id: userId,
+        message_id: msgId,
+        channel_id: channelId
       })
     });
-    const data = await response.json();
 
-    if (data.success) {
-      showRedirectButton();
+    const data = await res.json();
+
+    if (data.success && data.url) {
+      // 🚀 Одразу відкриваємо дзеркальний канал (без вікна підтвердження)
+      window.location.href = data.url;
     } else {
-      showServiceErrorModal(`❗️ ${data.error || 'Невідома помилка'}`,
-        () => requestFilmByName(btn, fileId, channelId));
+      alert(data.error || "⚠️ Не вдалося відкрити відео");
     }
+
   } catch (error) {
-    console.error(error);
-    showServiceErrorModal("❗️ Сталася помилка при надсиланні фільму.<br>Спробуйте ще раз.",
-      () => requestFilmByName(btn, fileId, channelId));
-  } finally {
-    if (loader) loader.style.display = "none";
-    if (btn) { btn.dataset.sending = '0'; btn.disabled = false; }
+    console.error("❗ Помилка запиту:", error);
+    alert("⚠️ Відео тимчасово недоступне");
   }
 }
-
 
     
 function showRedirectButton() {
