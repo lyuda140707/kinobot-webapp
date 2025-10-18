@@ -1893,10 +1893,10 @@ function filterByYear(year) {
 
     let buttons = '';
     if (isProFilm && !isPro) {
-      // 🔒 PRO блок — показує модальне вікно
+      // 🔒 PRO — показує вікно активації
       buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['message_id'] || film['file_id']) {
-      // 🎞️ Smart кнопка для показу у WebApp або через бота
+    } else {
+      // 🎞️ Розумна кнопка: відкриває через WebApp або надсилає ботом
       buttons = `<button class="search-button" onclick="smartPlay(${film.id})">🎞️ Переглянути</button>`;
     }
 
