@@ -851,9 +851,9 @@ function renderSeriesCard(title, episodes){
 
             return locked
               ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
-              : (mid
-                 ? `<button class="search-button" onclick="smartPlay(${ep.id})">${label}</button>`
-                 : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
+                : (mid
+                   ? `<button class="search-button" onclick="smartPlay(${film.id})">${label}</button>`
+                   : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
             }).join('')}
         </div>
       </div>
@@ -891,7 +891,7 @@ return `
               return locked
                 ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
                 : (mid
-                   ? `<button class="search-button" onclick="smartPlay(${ep.id})">${label}</button>`
+                   ? `<button class="search-button" onclick="smartPlay(${film.id})">${label}</button>`
                    : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
               }).join('')}
           </div>
