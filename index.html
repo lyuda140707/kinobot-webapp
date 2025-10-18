@@ -1895,10 +1895,8 @@ function filterByYear(year) {
     let buttons = '';
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
-   } else if (film['message_id'] || film['file_id']) {
-      const mid = film['message_id'] || film['file_id'];
+    } else if (film['id']) {
       buttons = `<button class="search-button" onclick="openFilm('${film.id}')">▶️ Дивитись</button>`;
-
     }
 
     return `
@@ -3411,6 +3409,16 @@ function openFilm(filmId) {
 
   const base = "https://relax-time2.onrender.com"; // бекенд Render
   window.location.href = `${base}/watch/${filmId}`;
+}
+
+<!-- 🎬 Функція відкриття фільму через бекенд -->
+function openFilm(filmId) {
+  if (!filmId) {
+    alert("❌ ID фільму не знайдено");
+    return;
+  }
+  const backend = "https://relax-time2.onrender.com"; // ⚠️ заміни на свій бекенд Render
+  window.location.href = `${backend}/watch/${filmId}`;
 }
 </script>
 
