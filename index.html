@@ -1893,9 +1893,11 @@ function filterByYear(year) {
 
     let buttons = '';
     if (isProFilm && !isPro) {
-      buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
+      // 🔒 PRO блок — показує модальне вікно
+      buttons = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['message_id'] || film['file_id']) {
-      buttons = `<button class="search-button" onclick="smartPlayById('${film.id}','${film.message_id || ''}','${film.file_id || ''}','${film.channel_id || ''}')">🎞️ Переглянути</button>`;
+      // 🎞️ Smart кнопка для показу у WebApp або через бота
+      buttons = `<button class="search-button" onclick="smartPlay(${film.id})">🎞️ Переглянути</button>`;
     }
 
     return `
