@@ -3137,42 +3137,75 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   }
 
 
-  async function requestFilm(filmName) {
-    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-    if (!telegramUser) {
-      alert("⛔ Не вдалося отримати дані користувача Telegram");
-      return;
-    }
-
-    const userId = telegramUser.id;
-
-    try {
-      const res = await fetch("https://relax-time2.onrender.com/request-film", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, film_name: filmName })
-      });
-
-      const data = await res.json();
-
-      showSuggestResult({
-        success: res.ok,
-        remaining_requests: data?.remaining_requests || 0,
-        is_pro: data?.is_pro || false
-      });
-
-    } catch (error) {
-      console.error("❗ Помилка запиту:", error);
-      // 🔻 Тепер показує гарне модальне вікно, а не alert
-      showSuggestResult({
-        success: false,
-        remaining_requests: 0,
-        is_pro: false
-      });
-    }
+async function requestFilm(filmName) {
+  const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+  if (!telegramUser) {
+    alert("⛔ Не вдалося отримати дані користувача Telegram");
+    return;
   }
 
-let serviceErrorRetry = null;
+  const userId = telegramUser.id;
+
+  try {
+    const res = await fetch("https://relax-time2.onrender.com/send-film-id", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, film_name: filmName })
+    });
+
+    const data = await res.json();
+
+    // ✅ Якщо успішно і є посилання — показуємо кнопку відкриття
+    if (data.success && data.url) {
+      const container = document.createElement("div");
+      container.style.textAlign = "center";
+      container.style.padding = "40px 20px";
+      container.style.color = "#fff";
+      container.style.fontFamily = "'Russo One', sans-serif";
+      container.innerHTML = `
+        <div style="font-size:22px; margin-bottom:15px;">✅ Відео готове!</div>
+        <a href="${data.url}" 
+           target="_blank" 
+           style="
+             display:inline-block;
+             padding:12px 24px;
+             background:linear-gradient(90deg,#00f0ff,#0088ff);
+             border-radius:12px;
+             color:#fff;
+             text-decoration:none;
+             font-size:18px;
+             font-weight:bold;
+             box-shadow:0 0 15px #00aaff;
+             transition:all 0.2s ease;
+           "
+           onmouseover="this.style.boxShadow='0 0 25px #00ffff';"
+           onmouseout="this.style.boxShadow='0 0 15px #00aaff';"
+        >🎬 Відкрити фільм у Telegram</a>
+      `;
+
+      document.body.innerHTML = "";
+      document.body.appendChild(container);
+
+      // 🔒 Закриває WebApp через 4 секунди після показу (опціонально)
+      setTimeout(() => {
+        if (window.Telegram?.WebApp?.close) {
+          window.Telegram.WebApp.close();
+        }
+      }, 4000);
+    } else {
+      alert(data.error || "⚠️ Не вдалося відкрити відео");
+    }
+
+  } catch (error) {
+    console.error("❗ Помилка запиту:", error);
+    showSuggestResult({
+      success: false,
+      remaining_requests: 0,
+      is_pro: false
+    });
+  }
+}
+
 
 function showServiceErrorModal(msg, onRetry = null) {
   const modal   = document.getElementById('service-error-modal');
