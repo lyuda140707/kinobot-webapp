@@ -3401,66 +3401,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
-<script>
-async function smartPlay(filmId) {
-  try {
-    const res = await fetch(`https://relax-time2.onrender.com/get-film-mode?id=${filmId}`);
-    const data = await res.json();
 
-    const tg = window.Telegram?.WebApp;
-    const userId = tg?.initDataUnsafe?.user?.id;
-
-    if (!userId) {
-      alert("❗ Не вдалося отримати Telegram ID. Перезапусти застосунок.");
-      return;
-    }
-
-    if (data.mode === "webapp" && data.file_id) {
-      // 🎬 Граємо напряму у WebApp
-      const r2 = await fetch(`https://relax-time2.onrender.com/get-video-url?file_id=${data.file_id}`);
-      const d2 = await r2.json();
-      if (!d2.video_url) {
-        alert("⚠️ Не вдалося отримати відео. Спробуй через бота.");
-        return;
-      }
-
-      const box = document.getElementById('film-player') || document.body;
-      box.innerHTML = '';
-
-      const video = document.createElement('video');
-      video.src = d2.video_url;
-      video.controls = true;
-      video.preload = "auto";
-      video.style.width = "100%";
-      video.style.borderRadius = "12px";
-      video.style.marginTop = "12px";
-
-      box.appendChild(video);
-      video.play();
-
-    } else if (data.mode === "bot" && data.message_id) {
-      // 📩 Надсилаємо через бота
-      const payload = {
-        user_id: userId,
-        message_id: data.message_id,
-        channel_id: data.channel_id || "",
-      };
-      await fetch("https://relax-time2.onrender.com/send-film-id", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      alert("📩 Фільм надіслано у Telegram!");
-    } else {
-      alert("⚠️ Не вдалося знайти відео для цього фільму.");
-    }
-  } catch (err) {
-    console.error("❌ smartPlay error:", err);
-    alert("❌ Помилка при спробі відтворення.");
-  }
-}
-
-</script>
 <!-- === SMART PLAY FUNCTION === -->
 <script>
 async function smartPlayById(_unused, message_id = "", file_id = "", channel_id = "") {
