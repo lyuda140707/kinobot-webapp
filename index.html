@@ -852,7 +852,7 @@ function renderSeriesCard(title, episodes){
             return locked
               ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
               : (mid
-                 ? `<button class="search-button" onclick="playInWebApp('${mid}')">${label}</button>`
+                 ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">${label}</button>`
                  : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
             }).join('')}
         </div>
@@ -891,7 +891,7 @@ return `
               return locked
                 ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
                 : (mid
-                   ? `<button class="search-button" onclick="playInWebApp('${mid}')">${label}</button>`
+                   ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">${label}</button>`
                    : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
               }).join('')}
           </div>
@@ -1247,9 +1247,9 @@ function renderBatch() {
    let btn = '';
    if (isProFilm && !isPro) {
      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['file_id']) {
-      const fid = film['file_id'];
-      btn = `<button class="search-button" onclick="playInWebApp('${fid}')">▶️ Дивитись</button>`;
+    } else if (film['message_id'] || film['file_id']) {
+     const mid = film['message_id'] || film['file_id'];
+     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1894,11 +1894,11 @@ function filterByYear(year) {
     let buttons = '';
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
-    } else if (film['file_id']) {
-      const fid = film['file_id'];
-      buttons = `<button class="search-button" onclick="playInWebApp('${fid}')">▶️ Дивитись</button>`;
+   } else if (film['message_id'] || film['file_id']) {
+      const mid = film['message_id'] || film['file_id'];
+      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
+
     }
-  
 
     return `
       <div class="film-card" id="film-${id}">
@@ -1939,7 +1939,7 @@ function filterByYear(year) {
     const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
     const chId  = found?.channel_id || f.channel_id || '';
     const watchBtn = msgId
-      ? `<button class="search-button" onclick="event.stopPropagation(); playInWebApp('${msgId}')">▶️ Дивитись</button>`
+      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>`
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
     return `
       <div class="film-card" id="film-${safeId(f.title, 'fav')}">
@@ -2419,8 +2419,8 @@ if (seriesHits.length > 0) {
     const watchBtn = locked
       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
       : (mid
-         ? `<button class="search-button" onclick="playInWebApp('${mid}')">${label}</button>`
-         : `<button class="search-button" onclick="openVideoById(this,'${title}')">${label}</button>`);
+         ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
+         : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
 
     return `
       <div class="film-card" id="film-${id}">
@@ -3201,37 +3201,6 @@ function closeServiceErrorModal() {
   setTimeout(() => modal.style.display = 'none', 300);
 }
 
-async function playInWebApp(fid) {
-  try {
-    const res = await fetch(`https://relax-time2.onrender.com/get-video-url?fid=${encodeURIComponent(fid)}`);
-    const data = await res.json();
-
-    if (!data.ok || !data.video_url) {
-      alert("⚠️ Відео тимчасово недоступне.");
-      return;
-    }
-
-    const box = document.getElementById("film-player") || document.body;
-    box.innerHTML = "";
-
-    const video = document.createElement("video");
-    video.src = data.video_url;
-    video.controls = true;
-    video.autoplay = true;
-    video.preload = "metadata";
-    video.playsInline = true;
-    video.style.width = "100%";
-    video.style.borderRadius = "12px";
-    video.style.marginTop = "12px";
-    video.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-
-    box.appendChild(video);
-    await video.play().catch(() => {});
-  } catch (e) {
-    console.error(e);
-    alert("❌ Не вдалося отримати відео. Спробуй пізніше.");
-  }
-}
 
 </script>
 
@@ -3432,7 +3401,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
-<div id="film-player" style="margin-top:20px;"></div>
 
 
 </body>
