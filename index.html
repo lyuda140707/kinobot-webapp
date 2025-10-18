@@ -3364,53 +3364,43 @@ function closeServiceErrorModal() {
     document.getElementById('confirmPaidBtn')?.addEventListener('click', notifyPaid);
   });
 </script>
-<script>
+  <script>
+// ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
 document.addEventListener("DOMContentLoaded", async () => {
-  const params = new URLSearchParams(window.location.search);
-  const msgId = params.get("msg");
-  const chId  = params.get("ch");
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
 
-  if (!msgId || !chId) {
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;color:#00f7ff;background:#111;text-align:center;">
-        <h2>🎬 Не знайдено параметри фільму</h2>
-        <p>Спробуйте відкрити з кнопки під відео в боті.</p>
-      </div>`;
-    return;
+  // 1. Перевіряємо PRO статус
+  let isPro = false;
+  try {
+    const resp = await fetch("https://relaxbox.site/check-pro", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: user?.id })
+    });
+    const data = await resp.json();
+    isPro = !!data.isPro;
+  } catch (e) {
+    console.warn("Помилка перевірки PRO:", e);
   }
 
-  // 🟢 Показуємо лоадер
-  document.body.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;color:#00f7ff;background:#111;">
-      <div class="loader"></div>
-      <p style="margin-top:15px;">Завантаження відео...</p>
-    </div>`;
+  // 2. Перевіряємо чи є незавершена оплата
+  const invoiceId = localStorage.getItem("invoice_id");
+  const confirmBtn = document.getElementById("confirmPaidBtn");
 
-  try {
-    const res = await fetch(`https://relax-time2.onrender.com/get-video-url?id=${msgId}&channel=${chId}`);
-    const data = await res.json();
-
-    if (!data.video_url) {
-      throw new Error("Посилання на відео не знайдено");
-    }
-
-    document.body.innerHTML = `
-      <h2 style="color:#00f7ff;text-align:center;margin:10px;">🎞️ Відео</h2>
-      <video controls autoplay playsinline style="width:100%;border-radius:12px;">
-        <source src="${data.video_url}" type="video/mp4">
-      </video>
-    `;
-  } catch (err) {
-    console.error(err);
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;color:#ff5555;background:#111;text-align:center;">
-        <h2>❌ Не вдалося завантажити відео</h2>
-        <p>${err.message || 'Спробуйте пізніше'}</p>
-      </div>`;
+  if (isPro) {
+    // Якщо PRO активний — ховаємо кнопку та очищаємо invoice_id
+    localStorage.removeItem("invoice_id");
+    if (confirmBtn) confirmBtn.style.display = "none";
+  } else if (invoiceId) {
+    // Якщо оплата ще не завершена — показуємо кнопку
+    if (confirmBtn) confirmBtn.style.display = "block";
+  } else {
+    // Якщо нічого немає — ховаємо кнопку
+    if (confirmBtn) confirmBtn.style.display = "none";
   }
 });
 </script>
-
 
 
 </body>
