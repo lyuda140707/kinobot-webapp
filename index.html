@@ -1512,8 +1512,12 @@ async function requestFilmByName(button, msgId, channelId) {
     const data = await res.json();
 
     if (data.success && data.url) {
-      // 🚀 Одразу відкриваємо дзеркальний канал (без вікна підтвердження)
-      window.location.href = data.url;
+      // 🚀 Відкриваємо канал напряму через Telegram API
+      if (window.Telegram?.WebApp?.openTelegramLink) {
+        window.Telegram.WebApp.openTelegramLink(data.url);
+      } else {
+        window.location.href = data.url;
+      }
     } else {
       alert(data.error || "⚠️ Не вдалося відкрити відео");
     }
