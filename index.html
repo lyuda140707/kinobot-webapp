@@ -3477,25 +3477,15 @@ function openFilm(filmId) {
   const tg = window.Telegram?.WebApp;
   const userId = tg?.initDataUnsafe?.user?.id || 0;
 
-  // URL бекенду
-  const backend = "https://relax-time2.onrender.com"; // ⚠️ якщо домен інший — заміни
+  // URL бекенду (заміни домен на свій якщо інший)
+  const backend = "https://relax-time2.onrender.com";
   const url = `${backend}/watch/${filmId}?user_id=${userId}`;
 
   console.log("🎬 Відкриваємо:", url);
   window.location.href = url;
 }
-
-
-<!-- 🎬 Функція відкриття фільму через бекенд -->
-function openFilm(filmId) {
-  if (!filmId) {
-    alert("❌ ID фільму не знайдено");
-    return;
-  }
-  const backend = "https://relax-time2.onrender.com"; // ⚠️ заміни на свій бекенд Render
-  window.location.href = `${backend}/watch/${filmId}`;
-}
 </script>
+
 <!-- 🛠️ Повідомлення про технічні роботи -->
 <div id="maintenance-banner" style="
   position: fixed;
