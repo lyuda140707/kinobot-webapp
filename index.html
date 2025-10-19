@@ -1939,7 +1939,7 @@ function filterByYear(year) {
     const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
     const chId  = found?.channel_id || f.channel_id || '';
     const watchBtn = msgId
-      ? `<button class="search-button" onclick="event.stopPropagation(); openFilm('${f.id}')">▶️ Дивитись</button>`
+      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>`
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
     return `
       <div class="film-card" id="film-${safeId(f.title, 'fav')}">
@@ -2419,7 +2419,7 @@ if (seriesHits.length > 0) {
     const watchBtn = locked
       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
       : (mid
-         ? `<button class="search-button" onclick="openFilm('${f.id}')">▶️ Дивитись</button>`
+         ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
          : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
 
     return `
