@@ -1251,7 +1251,7 @@ function renderBatch() {
      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['message_id'] || film['file_id']) {
      const mid = film['message_id'] || film['file_id'];
-     btn = `<button class="search-button" onclick="openFilm('${film.id}')">▶️ Дивитись</button>`;
+     btn = `<button class="search-button" onclick="requestFilmByName(this, '${film.message_id}', '${film.channel_id}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1897,7 +1897,7 @@ function filterByYear(year) {
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
     } else if (film['id']) {
-      buttons = `<button class="search-button" onclick="openFilm('${film.id}')">▶️ Дивитись</button>`;
+      buttons = `<button class="search-button" onclick="requestFilmByName(this, '${film.message_id}', '${film.channel_id}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -3452,6 +3452,43 @@ function openFilm(filmId) {
   console.log("🎬 Відкриваємо:", url);
   window.location.href = url;
 }
+
+<!-- ✅ Додаємо універсальну функцію відтворення фільмів -->
+<script>
+async function smartPlay(film) {
+  try {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || {};
+    const userId = tgUser.id || 0;
+
+    // Якщо film передано не об’єктом — пробуємо знайти потрібні дані
+    const msgId = film?.message_id || film?.id || film;
+    const chId = film?.channel_id || film?.channel || "";
+
+    const response = await fetch("https://relax-time2.onrender.com/send-film-id", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        message_id: msgId,
+        channel_id: chId
+      })
+    });
+
+    const data = await response.json();
+    console.log("🎬 Відповідь від /send-film-id:", data);
+
+    if (data.success && data.url) {
+      window.open(data.url, "_blank"); // відкриває фільм у Telegram
+    } else {
+      alert("⚠️ Не вдалося відкрити фільм.\n" + (data.error || "Невідома помилка"));
+    }
+  } catch (err) {
+    console.error("❌ Помилка smartPlay:", err);
+    alert("Помилка при відкритті фільму 😔");
+  }
+}
+</script>
+
 </script>
 
 </div>
