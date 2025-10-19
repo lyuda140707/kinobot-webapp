@@ -1481,11 +1481,12 @@ let pendingLink = "";
 async function openVideoById(btn, filmName) {
   const tg = window.Telegram?.WebApp;
   const user = tg?.initDataUnsafe?.user;
-  if (!user) {
-    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
-    location.reload();
+  if (!user || !user.id) {
+    alert("❗️ Не вдалося отримати ваш Telegram ID. Відкрий бот і натисни кнопку 'Веб-застосунок' ще раз.");
+    console.error("❌ Telegram WebApp user data:", tg?.initDataUnsafe);
     return;
   }
+  console.log("📱 USER_ID =", user.id);
 
   // 🔒 Перевірка PRO
   const isPro = localStorage.getItem('isProUser') === 'true';
@@ -1529,13 +1530,16 @@ async function openVideoById(btn, filmName) {
 // Виклик з розмітки: requestFilmByName(this, messageId)
 async function requestFilmByName(button, msgId, channelId) {
   try {
-    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-    if (!telegramUser) {
-      alert("⛔ Не вдалося отримати дані користувача Telegram");
+    const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (!telegramUser || !telegramUser.id) {
+      alert("❗️ Не вдалося отримати ваш Telegram ID. Відкрий бот і натисни кнопку 'Веб-застосунок' повторно.");
+      console.error("❌ Telegram user not found:", window.Telegram?.WebApp?.initDataUnsafe);
       return;
     }
 
     const userId = telegramUser.id;
+    console.log("📱 USER_ID =", userId);
+
 
     const res = await fetch("https://relax-time2.onrender.com/send-film-id", {
       method: "POST",
