@@ -591,9 +591,13 @@
     }
     const tg = window.Telegram.WebApp;
     tg.ready();
+   
+
+    // 2) Перевіряємо, що отримали валідні дані користувача
+    const user = tg.initDataUnsafe?.user;
     // 🧱 Тимчасовий режим ремонту
-const ADMIN_IDS = [941416029]; // ← заміни на свій Telegram ID
-const UNDER_MAINTENANCE = true; // ⬅️ міняй на false, щоб вимкнути
+const ADMIN_IDS = [941416029]; // ← твій Telegram ID
+const UNDER_MAINTENANCE = true; // ⬅️ вимкнеш, коли закінчиш
 
 if (UNDER_MAINTENANCE && (!user || !ADMIN_IDS.includes(user.id))) {
   document.body.innerHTML = `
@@ -619,9 +623,6 @@ if (UNDER_MAINTENANCE && (!user || !ADMIN_IDS.includes(user.id))) {
   throw new Error("🔧 Maintenance mode active");
 }
 
-
-    // 2) Перевіряємо, що отримали валідні дані користувача
-    const user = tg.initDataUnsafe?.user;
     if (!user || typeof user.id !== 'number' || user.id === 0) {
       document.body.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#00f7ff;background:#111;padding:1em;text-align:center;">
