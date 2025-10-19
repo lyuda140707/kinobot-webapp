@@ -3468,14 +3468,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 <script>
 function openFilm(filmId) {
-  if (!filmId || filmId === 'undefined' || filmId === 'null') {
-    alert('⛔ Відео тимчасово недоступне (без ID)');
+  if (!filmId) {
+    alert("❌ ID фільму не знайдено");
     return;
   }
 
-  const base = "https://relax-time2.onrender.com"; // бекенд Render
-  window.location.href = `${base}/watch/${filmId}`;
+  // Отримуємо user_id із Telegram WebApp
+  const tg = window.Telegram?.WebApp;
+  const userId = tg?.initDataUnsafe?.user?.id || 0;
+
+  // URL бекенду
+  const backend = "https://relax-time2.onrender.com"; // ⚠️ якщо домен інший — заміни
+  const url = `${backend}/watch/${filmId}?user_id=${userId}`;
+
+  console.log("🎬 Відкриваємо:", url);
+  window.location.href = url;
 }
+
 
 <!-- 🎬 Функція відкриття фільму через бекенд -->
 function openFilm(filmId) {
