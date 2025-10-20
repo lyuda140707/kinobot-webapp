@@ -591,11 +591,44 @@
     }
     const tg = window.Telegram.WebApp;
     tg.ready();
-   
 
     // 2) Перевіряємо, що отримали валідні дані користувача
     const user = tg.initDataUnsafe?.user;
+        // 🧱 Тимчасовий режим ремонту (через username)
+const UNDER_MAINTENANCE = true; // true = показати ремонт
+const ADMIN_USERNAMES = [
+  "KinoBotAdminUA",
+  "RelaxTimeAdmin",
+  "lydmila_zt" // ← твій Telegram username
+];
 
+
+setTimeout(() => {
+  const username = user?.username || "";
+  if (UNDER_MAINTENANCE && !ADMIN_USERNAMES.includes(username)) {
+    document.body.innerHTML = `
+      <div style="
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        height:100vh;
+        background:radial-gradient(circle at 50% 30%, #111 0%, #000 100%);
+        color:#00f7ff;
+        font-family:'Russo One',sans-serif;
+        text-align:center;
+        padding:20px;
+      ">
+        <h1 style="font-size:34px;margin-bottom:10px;text-shadow:0 0 15px #00f7ff;">🛠 Ремонтні роботи</h1>
+        <p style="font-size:18px;color:#ccc;">Ми оновлюємо застосунок,<br>щоб зробити його ще кращим 🎬</p>
+        <p style="margin-top:15px;color:#888;">⏳ Спробуйте зайти трохи пізніше</p>
+        <div style="margin-top:25px;width:40px;height:40px;border:4px solid #00f7ff33;border-top:4px solid #00f7ff;border-radius:50%;animation:spin 1s linear infinite;"></div>
+      </div>
+      <style>@keyframes spin {to{transform:rotate(360deg);}}</style>
+    `;
+    throw new Error("🔧 Maintenance mode active");
+  }
+}, 800);
     if (!user || typeof user.id !== 'number' || user.id === 0) {
       document.body.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#00f7ff;background:#111;padding:1em;text-align:center;">
@@ -612,7 +645,7 @@
   </script>
 <!-- 🚀 Автоматичне очищення кешу при зміні версії -->
 <script>
-const APP_VERSION = "1.4.5";  // 🔸 змінюй при кожному великому оновленні
+const APP_VERSION = "1.4.3";  // 🔸 змінюй при кожному великому оновленні
 
 try {
   const prevVersion = localStorage.getItem("app_version");
@@ -1251,7 +1284,7 @@ function renderBatch() {
      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['message_id'] || film['file_id']) {
      const mid = film['message_id'] || film['file_id'];
-     btn = `<button class="search-button" onclick="requestFilmByName(this, '${film.message_id}', '${film.channel_id}')">▶️ Дивитись</button>`;
+     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
     }
 
     return `
@@ -1294,7 +1327,6 @@ async function fetchFilmsFromSupabase() {
 
   // Мапінг у ваш старий формат з українськими ключами
   return rows.map(r => ({
-    'id': r.id ?? '',
     'Назва'      : r.title ?? '',
     'Тип'        : r.type ?? '',
     'Жанр'       : r.genre ?? '',
@@ -1445,12 +1477,11 @@ let pendingLink = "";
 async function openVideoById(btn, filmName) {
   const tg = window.Telegram?.WebApp;
   const user = tg?.initDataUnsafe?.user;
-  if (!user || !user.id) {
-    alert("❗️ Не вдалося отримати ваш Telegram ID. Відкрий бот і натисни кнопку 'Веб-застосунок' ще раз.");
-    console.error("❌ Telegram WebApp user data:", tg?.initDataUnsafe);
+  if (!user) {
+    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
+    location.reload();
     return;
   }
-  console.log("📱 USER_ID =", user.id);
 
   // 🔒 Перевірка PRO
   const isPro = localStorage.getItem('isProUser') === 'true';
@@ -1492,47 +1523,49 @@ async function openVideoById(btn, filmName) {
 }
 
 // Виклик з розмітки: requestFilmByName(this, messageId)
-async function requestFilmByName(button, msgId, channelId) {
+async function requestFilmByName(btn, fileId, channelId) {
+  const tg = window.Telegram?.WebApp;
+  const user = tg?.initDataUnsafe?.user;
+  if (!user) {
+    alert("⛔️ Не вдалося отримати ваш Telegram ID. Оновіть застосунок!");
+    location.reload();
+    return;
+  }
+
+  if (btn?.dataset.sending === '1') return;
+  if (btn) { btn.dataset.sending = '1'; btn.disabled = true; }
+
+  const loader = document.getElementById("loading-indicator");
+  if (loader) loader.style.display = "block";
+
   try {
-    const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (!telegramUser || !telegramUser.id) {
-      alert("❗️ Не вдалося отримати ваш Telegram ID. Відкрий бот і натисни кнопку 'Веб-застосунок' повторно.");
-      console.error("❌ Telegram user not found:", window.Telegram?.WebApp?.initDataUnsafe);
-      return;
-    }
-
-    const userId = telegramUser.id;
-    console.log("📱 USER_ID =", userId);
-
-
-    const res = await fetch("https://relax-time2.onrender.com/send-film-id", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch('https://relax-time2.onrender.com/send-film-id', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        user_id: userId,
-        message_id: msgId,
-        channel_id: channelId
+        user_id: user.id,
+        message_id: fileId,
+        channel_id: channelId || ''
       })
     });
+    const data = await response.json();
 
-    const data = await res.json();
-
-    if (data.success && data.url) {
-      // 🚀 Відкриваємо канал напряму через Telegram API
-      if (window.Telegram?.WebApp?.openTelegramLink) {
-        window.Telegram.WebApp.openTelegramLink(data.url);
-      } else {
-        window.location.href = data.url;
-      }
+    if (data.success) {
+      showRedirectButton();
     } else {
-      alert(data.error || "⚠️ Не вдалося відкрити відео");
+      showServiceErrorModal(`❗️ ${data.error || 'Невідома помилка'}`,
+        () => requestFilmByName(btn, fileId, channelId));
     }
-
   } catch (error) {
-    console.error("❗ Помилка запиту:", error);
-    alert("⚠️ Відео тимчасово недоступне");
+    console.error(error);
+    showServiceErrorModal("❗️ Сталася помилка при надсиланні фільму.<br>Спробуйте ще раз.",
+      () => requestFilmByName(btn, fileId, channelId));
+  } finally {
+    if (loader) loader.style.display = "none";
+    if (btn) { btn.dataset.sending = '0'; btn.disabled = false; }
   }
 }
+
 
     
 function showRedirectButton() {
@@ -1896,8 +1929,10 @@ function filterByYear(year) {
     let buttons = '';
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
-    } else if (film['id']) {
-      buttons = `<button class="search-button" onclick="requestFilmByName(this, '${film.message_id}', '${film.channel_id}')">▶️ Дивитись</button>`;
+   } else if (film['message_id'] || film['file_id']) {
+      const mid = film['message_id'] || film['file_id'];
+      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
+
     }
 
     return `
@@ -3143,75 +3178,42 @@ function showSuggestResult({ success, remaining_requests, is_pro }) {
   }
 
 
-async function requestFilm(filmName) {
-  const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-  if (!telegramUser) {
-    alert("⛔ Не вдалося отримати дані користувача Telegram");
-    return;
-  }
-
-  const userId = telegramUser.id;
-
-  try {
-    const res = await fetch("https://relax-time2.onrender.com/send-film-id", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, film_name: filmName })
-    });
-
-    const data = await res.json();
-
-    // ✅ Якщо успішно і є посилання — показуємо кнопку відкриття
-    if (data.success && data.url) {
-      const container = document.createElement("div");
-      container.style.textAlign = "center";
-      container.style.padding = "40px 20px";
-      container.style.color = "#fff";
-      container.style.fontFamily = "'Russo One', sans-serif";
-      container.innerHTML = `
-        <div style="font-size:22px; margin-bottom:15px;">✅ Відео готове!</div>
-        <a href="${data.url}" 
-           target="_blank" 
-           style="
-             display:inline-block;
-             padding:12px 24px;
-             background:linear-gradient(90deg,#00f0ff,#0088ff);
-             border-radius:12px;
-             color:#fff;
-             text-decoration:none;
-             font-size:18px;
-             font-weight:bold;
-             box-shadow:0 0 15px #00aaff;
-             transition:all 0.2s ease;
-           "
-           onmouseover="this.style.boxShadow='0 0 25px #00ffff';"
-           onmouseout="this.style.boxShadow='0 0 15px #00aaff';"
-        >🎬 Відкрити фільм у Telegram</a>
-      `;
-
-      document.body.innerHTML = "";
-      document.body.appendChild(container);
-
-      // 🔒 Закриває WebApp через 4 секунди після показу (опціонально)
-      setTimeout(() => {
-        if (window.Telegram?.WebApp?.close) {
-          window.Telegram.WebApp.close();
-        }
-      }, 4000);
-    } else {
-      alert(data.error || "⚠️ Не вдалося відкрити відео");
+  async function requestFilm(filmName) {
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (!telegramUser) {
+      alert("⛔ Не вдалося отримати дані користувача Telegram");
+      return;
     }
 
-  } catch (error) {
-    console.error("❗ Помилка запиту:", error);
-    showSuggestResult({
-      success: false,
-      remaining_requests: 0,
-      is_pro: false
-    });
-  }
-}
+    const userId = telegramUser.id;
 
+    try {
+      const res = await fetch("https://relax-time2.onrender.com/request-film", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, film_name: filmName })
+      });
+
+      const data = await res.json();
+
+      showSuggestResult({
+        success: res.ok,
+        remaining_requests: data?.remaining_requests || 0,
+        is_pro: data?.is_pro || false
+      });
+
+    } catch (error) {
+      console.error("❗ Помилка запиту:", error);
+      // 🔻 Тепер показує гарне модальне вікно, а не alert
+      showSuggestResult({
+        success: false,
+        remaining_requests: 0,
+        is_pro: false
+      });
+    }
+  }
+
+let serviceErrorRetry = null;
 
 function showServiceErrorModal(msg, onRetry = null) {
   const modal   = document.getElementById('service-error-modal');
@@ -3434,64 +3436,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
-<script>
-function openFilm(filmId) {
-  if (!filmId) {
-    alert("❌ ID фільму не знайдено");
-    return;
-  }
-
-  // Отримуємо user_id із Telegram WebApp
-  const tg = window.Telegram?.WebApp;
-  const userId = tg?.initDataUnsafe?.user?.id || 0;
-
-  // URL бекенду (заміни домен на свій якщо інший)
-  const backend = "https://relax-time2.onrender.com";
-  const url = `${backend}/watch/${filmId}?user_id=${userId}`;
-
-  console.log("🎬 Відкриваємо:", url);
-  window.location.href = url;
-}
-
-<!-- ✅ Додаємо універсальну функцію відтворення фільмів -->
-<script>
-async function smartPlay(film) {
-  try {
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || {};
-    const userId = tgUser.id || 0;
-
-    // Якщо film передано не об’єктом — пробуємо знайти потрібні дані
-    const msgId = film?.message_id || film?.id || film;
-    const chId = film?.channel_id || film?.channel || "";
-
-    const response = await fetch("https://relax-time2.onrender.com/send-film-id", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: userId,
-        message_id: msgId,
-        channel_id: chId
-      })
-    });
-
-    const data = await response.json();
-    console.log("🎬 Відповідь від /send-film-id:", data);
-
-    if (data.success && data.url) {
-      window.open(data.url, "_blank"); // відкриває фільм у Telegram
-    } else {
-      alert("⚠️ Не вдалося відкрити фільм.\n" + (data.error || "Невідома помилка"));
-    }
-  } catch (err) {
-    console.error("❌ Помилка smartPlay:", err);
-    alert("Помилка при відкритті фільму 😔");
-  }
-}
-</script>
-
-</script>
-
-</div>
 
 
 </body>
