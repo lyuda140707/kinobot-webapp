@@ -611,7 +611,7 @@
   </script>
 <!-- 🚀 Автоматичне очищення кешу при зміні версії -->
 <script>
-const APP_VERSION = "1.4.5";  // 🔸 змінюй при кожному великому оновленні
+const APP_VERSION = "1.4.6";  // 🔸 змінюй при кожному великому оновленні
 
 try {
   const prevVersion = localStorage.getItem("app_version");
@@ -1130,6 +1130,15 @@ function toggleSeason(seriesId, season) {
 ">
   🔗 Скопіювати моє посилання
 </button>
+<!-- 🌈 Неонова роздільна лінія -->
+<div style="
+  margin:18px auto 10px;
+  height:2px;
+  width:80%;
+  background:linear-gradient(90deg,#00f7ff,#0077ff);
+  box-shadow:0 0 10px rgba(0,247,255,0.6);
+  border-radius:2px;
+"></div>
 
 
   <!-- Додай цю кнопку у профіль (аккаунт) -->
@@ -1147,16 +1156,6 @@ function toggleSeason(seriesId, season) {
       <button id="close-admin-modal-btn" style="margin-top:8px; background:#d52a43; color:#fff; border:none; border-radius:10px; padding:9px 0; font-size:15px;">Скасувати</button>
    </div>
   </div>
- 
- <!-- 🚀 Launcher: перехід до лаунчер-бота -->
-<div id="launcher-section" style="margin: 12px 0;">
-  <button id="launcher-btn"
-          class="account-button"
-          style="background:#00f7ff; color:#000; font-weight:bold;">
-    🚀 Отримувати оновлення через Launcher
-  </button>
-</div>
-
 
 
 <hr style="margin: 20px 0; border-color: #444;">
