@@ -1111,6 +1111,24 @@ function toggleSeason(seriesId, season) {
     ✅ Я оплатив
   </button>
 
+    <hr style="margin: 20px 0; border-color: #444;">
+  <h3>🎁 Отримай PRO безкоштовно</h3>
+  <p style="color:#ccc; font-size:14px;">
+    Запроси 3 друзів — і отримай PRO на 7 днів безкоштовно!
+  </p>
+  <button id="copy-referral-btn" style="
+    background:#00f7ff;
+    color:#000;
+    font-weight:bold;
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    margin-top:8px;">
+    🔗 Скопіювати моє посилання
+  </button>
+
+
 
   <!-- Додай цю кнопку у профіль (аккаунт) -->
   <div id="contact-admin-section" style="margin: 18px 0;">
@@ -3365,6 +3383,29 @@ function closeServiceErrorModal() {
     document.getElementById('confirmPaidBtn')?.addEventListener('click', notifyPaid);
   });
 </script>
+<script>
+// === РЕФЕРАЛЬНЕ ПОСИЛАННЯ ===
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById('copy-referral-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const tg = window.Telegram?.WebApp;
+    const uid = tg?.initDataUnsafe?.user?.id;
+    if (!uid) {
+      alert("Не вдалося отримати ваш Telegram ID 😢");
+      return;
+    }
+
+    // 🔗 Вкажи свій бот username (без @)
+    const link = `https://t.me/RelaxBox_UA_bot?start=ref_${uid}`;
+
+    navigator.clipboard.writeText(link);
+    alert("✅ Посилання скопійовано!\nНадішли його трьом друзям 😉");
+  });
+});
+</script>
+
   <script>
 // ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
 document.addEventListener("DOMContentLoaded", async () => {
