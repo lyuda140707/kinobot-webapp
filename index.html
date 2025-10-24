@@ -3491,22 +3491,21 @@ function openOnTV(streamUrl) {
       return;
     }
 
-    console.log("🎬 Відкриваємо Cloudflare Player:", streamUrl);
-
-    // 🟣 твій Cloudflare Player (той, що ти розгорнула)
+    // 🧩 тут твій Cloudflare Player
     const playerSite = "https://kino-player.pages.dev";
 
-    // 🧩 передаємо посилання потоку у Cloudflare Player
-    const finalLink = `${playerSite}/?src=${encodeURIComponent(streamUrl)}`;
+    // 👇 відкриваємо не напряму, а через редирект
+    const redirectUrl = `${playerSite}/redirect.html#${encodeURIComponent(streamUrl)}`;
 
-    // 🪄 відкриваємо у новій вкладці
-    window.open(finalLink, "_blank");
+    // Telegram WebView блокує ?src=..., але дозволяє #hash
+    window.open(redirectUrl, "_blank");
   } catch (e) {
     console.error("❌ Помилка при відкритті плеєра:", e);
     alert("Не вдалося відкрити відео 😢");
   }
 }
 </script>
+
 
 
 
