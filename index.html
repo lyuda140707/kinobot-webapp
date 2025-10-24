@@ -1308,7 +1308,9 @@ function renderBatch() {
       // якщо фільм PRO, а користувач — ні
       btn = `
         <button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>
-        <button id="tvButton" class="search-button tv-btn">🎬 Дивитись на TV</button>
+        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
+            🎬 Дивитись на TV
+        </button>
 
 
       `;
@@ -1317,7 +1319,9 @@ function renderBatch() {
       const mid = film['message_id'] || film['file_id'];
       btn = `
         <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button id="tvButton" class="search-button tv-btn">🎬 Дивитись на TV</button>
+        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
+            🎬 Дивитись на TV
+        </button>
 
 
       `;
@@ -1976,8 +1980,9 @@ function filterByYear(year) {
       
       btn = `
         <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button id="tvButton" class="search-button tv-btn">🎬 Дивитись на TV</button>
-
+        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
+            🎬 Дивитись на TV
+        </button>
 
       `;
     }
@@ -2024,7 +2029,9 @@ function filterByYear(year) {
     const watchBtn = msgId
       ? `
         <button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>
-        <button id="tvButton" class="search-button tv-btn">🎬 Дивитись на TV</button>
+        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
+            🎬 Дивитись на TV
+        </button>
 
 
 
@@ -3556,30 +3563,29 @@ function openOnTV(streamUrl) {
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const tg = window.Telegram?.WebApp;
-  if (!tg) {
-    console.warn("⚠️ Telegram WebApp API недоступний");
-    return;
-  }
+  const tvButtons = document.querySelectorAll(".tv-btn");
 
-  const tvBtn = document.getElementById("tvButton");
-  if (tvBtn) {
-    tvBtn.addEventListener("click", () => {
-      const streamUrl = window.film?.stream_url;
+  tvButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const streamUrl = btn.getAttribute("data-stream");
       if (!streamUrl) {
         alert("❌ Посилання для TV не знайдено");
         return;
       }
-      const tvLink = `https://kino-player.pages.dev/?src=${encodeURIComponent(
-        'https://relax-time2.onrender.com/proxy-stream?url=' + streamUrl
-      )}`;
-      window.open(tvLink, "_blank");
-    });
-  }
 
-  console.log("✅ WebApp підключено до Telegram");
+      const playerSite = "https://kino-player.pages.dev";
+      const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
+      const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
+
+      console.log("▶️ Відкриваємо:", tvUrl);
+      window.open(tvUrl, "_blank");
+    });
+  });
+
+  console.log(`✅ WebApp підключено до Telegram (${tvButtons.length} TV-кнопок знайдено)`);
 });
 </script>
+
 
 </body>
 </html>
