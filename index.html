@@ -1387,7 +1387,7 @@ async function fetchFilmsFromSupabase() {
     'channel_id' : r.channel_id ?? '',
     'Серія'      : r.episode ?? '',
     'Сезон'      : r.season ?? '',
-    stream_url: r.stream_url ?? ''   // ⬅️ додай це
+    'stream_url' : r.stream_url ?? ''   // ✅ ключ теж у лапках!
     
   }));
 }
