@@ -1246,7 +1246,7 @@ function toggleSeason(seriesId, season) {
 
     const placeholderImage = "https://i.postimg.cc/6q9Cd9sQ/d9d66124-1900-49be-a89c-007edc35bd13.png";
     
-    let films = [];
+    window.films = []; // робимо глобальну змінну
     let isDataLoaded = false;
     let proPollInterval = null;
 
@@ -1332,27 +1332,27 @@ async function fetchFilmsFromSupabase() {
   }
 
   // Мапінг у ваш старий формат з українськими ключами
-  return rows.map(r => ({
-    'Назва'      : r.title ?? '',
-    'Тип'        : r.type ?? '',
-    'Жанр'       : r.genre ?? '',
-    'Опис'       : r.description ?? '',
-    'Фото'       : r.photo ?? '',
-    'IMDb'       : r.imdb ?? '',
-    'Добірка'    : r.collection ?? '',
-    'Доступ'     : r.access ?? '',
-    'Країна'     : r.country ?? '',
-    'Рік'        : r.year ?? '',
-    'message_id' : r.message_id ?? '',
-    'file_id'    : r.file_id ?? '',
-    'channel_id' : r.channel_id ?? '',
-    'stream_url' : r.stream_url ?? '',   // ← ДОДАТИ ОЦЕ
-    'Серія'      : r.episode ?? '',
-    'Сезон'      : r.season ?? ''
-    
-   
-    
-  }));
+window.films = rows.map(r => ({
+  'Назва'      : r.title ?? '',
+  'Тип'        : r.type ?? '',
+  'Жанр'       : r.genre ?? '',
+  'Опис'       : r.description ?? '',
+  'Фото'       : r.photo ?? '',
+  'IMDb'       : r.imdb ?? '',
+  'Добірка'    : r.collection ?? '',
+  'Доступ'     : r.access ?? '',
+  'Країна'     : r.country ?? '',
+  'Рік'        : r.year ?? '',
+  'message_id' : r.message_id ?? '',
+  'file_id'    : r.file_id ?? '',
+  'channel_id' : r.channel_id ?? '',
+  'stream_url' : r.stream_url ?? '',   // ← лишаємо це
+  'Серія'      : r.episode ?? '',
+  'Сезон'      : r.season ?? ''
+}));
+
+return window.films; // 🔹 замість return rows.map(...)
+
 }
 
     
