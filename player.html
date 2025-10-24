@@ -48,7 +48,7 @@
 </head>
 <body>
   <h1 id="filmTitle">🎬 Завантаження...</h1>
-  <video id="video" controls autoplay></video>
+  <video id="videoPlayer" controls autoplay></video>
   <button onclick="history.back()">⬅ Назад у додаток</button>
 
   <script>
@@ -57,64 +57,65 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // anon ключ
     const WORKER_URL = "https://kino-proxy.lyuda14070702.workers.dev"; // твій Worker
 
-    // --- 🔹 Отримуємо ID або назву з URL ---
-    const params = new URLSearchParams(window.location.search);
-    const filmId = params.get("id");
-    const filmTitleParam = params.get("title");
+    // --- 🔹 Отримуємо ID з URL ---
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const filmId = params.get("id");
 
-    async function getFilm() {
-      let url = `${SUPABASE_URL}/rest/v1/films?select=title,stream_url&limit=1`;
-      if (filmId) url += `&id=eq.${filmId}`;
-      else if (filmTitleParam) url += `&title=eq.${encodeURIComponent(filmTitleParam)}`;
-
-      const res = await fetch(url, {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-      });
-      const data = await res.json();
-      return data[0];
-    }
-
-    function playStream(streamUrl, title) {
-      const video = document.getElementById("video");
-      document.getElementById("filmTitle").textContent = "🎬 " + title;
-
-      if (!streamUrl) {
-        document.getElementById("filmTitle").textContent = "❌ Потік не знайдено";
+      if (!filmId) {
+        document.getElementById("filmTitle").textContent = "❌ ID фільму не передано";
         return;
       }
 
-      // Потік через Worker
-      const encoded = btoa(streamUrl);
-      const finalUrl = `${WORKER_URL}/m3u8?src=${encoded}`;
-
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(finalUrl);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-          video.play();
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = finalUrl;
-        video.addEventListener("loadedmetadata", () => video.play());
-      } else {
-        alert("Браузер не підтримує HLS.");
-      }
-    }
-
-    // --- 🔹 Запуск ---
-    (async () => {
       try {
-        const film = await getFilm();
-        playStream(film.stream_url, film.title);
-      } catch (e) {
-        document.getElementById("filmTitle").textContent = "❌ Не вдалося завантажити фільм";
-        console.error(e);
+        // 1️⃣ Отримуємо дані фільму з Supabase по ID
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/films?id=eq.${filmId}&select=title,stream_url`, {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        const [film] = await res.json();
+
+        if (!film) {
+          document.getElementById("filmTitle").textContent = "❌ Фільм не знайдено";
+          return;
+        }
+
+        document.getElementById("filmTitle").textContent = "🎬 " + film.title;
+
+        // 2️⃣ Готуємо відео
+        const stream = film.stream_url;
+        if (!stream) {
+          document.getElementById("filmTitle").textContent = "❌ Потік не знайдено";
+          return;
+        }
+
+        // 3️⃣ Формуємо посилання через Worker
+        const encoded = btoa(stream);
+        const finalUrl = `${WORKER_URL}/m3u8?src=${encoded}`;
+        const video = document.getElementById("videoPlayer");
+
+        // 4️⃣ Відтворення через HLS.js
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(finalUrl);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = finalUrl;
+          video.addEventListener("loadedmetadata", () => video.play());
+        } else {
+          document.getElementById("filmTitle").textContent = "❌ Браузер не підтримує HLS";
+        }
+
+      } catch (err) {
+        document.getElementById("filmTitle").textContent = "❌ Помилка завантаження";
+        console.error(err);
       }
-    })();
+    });
   </script>
 </body>
 </html>
