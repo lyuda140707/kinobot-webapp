@@ -3456,20 +3456,23 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 <script>
 function openOnTV(title, id) {
-  const baseUrl = "https://kinobot-webapp-jhu8.onrender.com/player.html";
-  const url = id
-    ? `${baseUrl}?id=${encodeURIComponent(id)}`
-    : `${baseUrl}?title=${encodeURIComponent(title)}`;
+  // 1. Безпечне кодування назви (щоб кирилиця не ламалася)
+  const encodedTitle = encodeURIComponent(title || '').replace(/%20/g, '+');
 
+  // 2. Формуємо повне посилання на player.html
+  const url = `https://kinobot-webapp-jhu8.onrender.com/player.html?title=${encodedTitle}`;
+
+  // 3. Відкриваємо плеєр правильно через Telegram WebApp або у новій вкладці
   try {
-    if (window.Telegram?.WebApp?.openLink) {
-      window.Telegram.WebApp.openLink(url); // відкриває зовнішній браузер
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.openLink(url, { try_instant_view: false });
+      console.log("📺 Відкрито:", url);
     } else {
-      window.open(url, "_blank"); // звичайний браузер
+      window.open(url, '_blank');
     }
-  } catch (e) {
-    console.error("openOnTV error:", e);
-    window.open(url, "_blank");
+  } catch (err) {
+    console.error("❌ Помилка openOnTV:", err);
+    window.open(url, '_blank');
   }
 }
 </script>
