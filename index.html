@@ -572,6 +572,20 @@
 .cartoon-btn.blink {
   animation: blink 1s ease-in-out infinite;
 }
+/* Стиль для кнопки Дивитись на TV */
+.tv-btn {
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  border-radius: 10px;
+  margin-top: 6px;
+  transition: all 0.3s ease;
+}
+.tv-btn:hover {
+  background: #00f7ff;
+  color: #000;
+}
+
 
   </style>
  
@@ -1264,12 +1278,24 @@ function renderBatch() {
                       : (film['Фото'] || placeholderImage);
     const id        = safeId(film['Назва'], 'catalog');
 
-   let btn = '';
-   if (isProFilm && !isPro) {
-     btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+    let btn = '';
+
+    if (isProFilm && !isPro) {
+        // якщо фільм PRO, а користувач — ні
+        btn = `
+            <button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>
+            <button class="search-button tv-btn" onclick="openOnTV('${film.stream_url || ''}')">🎬 Дивитись на TV</button>
+        `;
     } else if (film['message_id'] || film['file_id']) {
-     const mid = film['message_id'] || film['file_id'];
-     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
+        // якщо фільм звичайний
+        const mid = film['message_id'] || film['file_id'];
+        btn = `
+            <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
+            <button class="search-button tv-btn" onclick="openOnTV('${film.stream_url || ''}')">🎬 Дивитись на TV</button>
+        `;
+    } else {
+        // якщо взагалі нема посилання
+        btn = `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
     }
 
     return `
@@ -1916,8 +1942,10 @@ function filterByYear(year) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
    } else if (film['message_id'] || film['file_id']) {
       const mid = film['message_id'] || film['file_id'];
-      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
-
+      btn = `
+        <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
+        <button class="search-button tv-btn" onclick="openOnTV('${film.stream_url || ''}')">🎬 Дивитись на TV</button>
+      `;
     }
 
     return `
@@ -1958,8 +1986,12 @@ function filterByYear(year) {
     );
     const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
     const chId  = found?.channel_id || f.channel_id || '';
+    const streamUrl = found?.stream_url || f.stream_url || ''; // ✅ додай це
     const watchBtn = msgId
-      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>`
+      ? `
+        <button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>
+        <button class="search-button tv-btn" onclick="event.stopPropagation(); openOnTV('${streamUrl}')">🎬 Дивитись на TV</button>
+      `
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
     return `
       <div class="film-card" id="film-${safeId(f.title, 'fav')}">
@@ -2436,13 +2468,20 @@ if (seriesHits.length > 0) {
     const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
     const mid = (f['message_id'] || f['file_id']);
     const ch  = (f['channel_id'] || '');
+    const streamUrl = f.stream_url || ''; // ✅ беремо посилання з таблиці (якщо є)
     const watchBtn = locked
       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
       : (mid
-         ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
-         : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
-
+         ? `
+            <button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>
+            <button class="search-button tv-btn" onclick="openOnTV('${streamUrl}')">🎬 Дивитись на TV</button>
+          `
+         : `
+            <button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>
+            <button class="search-button tv-btn" onclick="openOnTV('${streamUrl}')">🎬 Дивитись на TV</button>
+          `);
     return `
+           
       <div class="film-card" id="film-${id}">
         ${poster(img, f['Назва'], f['Рік'])}
         <h3>${maskWord(f['Назва'])}</h3>
@@ -3443,6 +3482,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (confirmBtn) confirmBtn.style.display = "none";
   }
 });
+</script>
+<script>
+  function openOnTV(url) {
+    if (!url) {
+      alert("Посилання на фільм відсутнє 😢");
+      return;
+    }
+
+    const player = "https://kino-player.pages.dev"; // твій Cloudflare плеєр
+    const link = `${player}/?src=${encodeURIComponent(url)}`;
+    window.open(link, "_blank");
+  }
 </script>
 
 
