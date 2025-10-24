@@ -1308,8 +1308,7 @@ function renderBatch() {
       // якщо фільм PRO, а користувач — ні
       btn = `
         <button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>
-        <button class="search-button tv-btn" onclick="openOnTV(film.stream_url)">🎬 Дивитись на TV</button>
-
+        <button class="search-button tv-btn" onclick="openOnTV('https://kino-player.pages.dev/?src=https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
 
 
       `;
@@ -1318,8 +1317,7 @@ function renderBatch() {
       const mid = film['message_id'] || film['file_id'];
       btn = `
         <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" onclick="openOnTV(film.stream_url)">🎬 Дивитись на TV</button>
-
+        <button class="search-button tv-btn" onclick="openOnTV('https://kino-player.pages.dev/?src=https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
 
 
       `;
@@ -1978,8 +1976,7 @@ function filterByYear(year) {
       
       btn = `
         <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" onclick="openOnTV(film.stream_url)">🎬 Дивитись на TV</button>
-
+        <button class="search-button tv-btn" onclick="openOnTV('https://kino-player.pages.dev/?src=https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
 
 
       `;
@@ -2027,8 +2024,7 @@ function filterByYear(year) {
     const watchBtn = msgId
       ? `
         <button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" onclick="openOnTV(film.stream_url)">🎬 Дивитись на TV</button>
-
+        <button class="search-button tv-btn" onclick="openOnTV('https://kino-player.pages.dev/?src=https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
 
 
 
@@ -3541,24 +3537,20 @@ function openOnTV(streamUrl) {
       return;
     }
 
-    // 🌐 Твій Cloudflare Player
+    // 🧩 тут твій Cloudflare Player
     const playerSite = "https://kino-player.pages.dev";
 
-    // 🎬 Проксі на твій бекенд (Render)
-    const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
+    // 👇 відкриваємо не напряму, а через редирект
+    const redirectUrl = `${playerSite}/redirect.html#${encodeURIComponent(streamUrl)}`;
 
-    // ✅ Формуємо фінальне посилання для відкриття на TV
-    const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
-
-    // 📺 Відкриваємо у новому вікні (телевізор/браузер)
-    window.open(tvUrl, "_blank");
+    // Telegram WebView блокує ?src=..., але дозволяє #hash
+    window.open(redirectUrl, "_blank");
   } catch (e) {
     console.error("❌ Помилка при відкритті плеєра:", e);
     alert("Не вдалося відкрити відео 😢");
   }
 }
 </script>
-
 
 
 
