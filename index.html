@@ -3562,29 +3562,26 @@ function openOnTV(streamUrl) {
 }
 </script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const tvButtons = document.querySelectorAll(".tv-btn");
+// ✅ Використовуємо делегування — працює навіть якщо фільми додані пізніше
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".tv-btn");
+  if (!btn) return; // якщо клік не по кнопці, нічого не робимо
 
-  tvButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const streamUrl = btn.getAttribute("data-stream");
-      if (!streamUrl) {
-        alert("❌ Посилання для TV не знайдено");
-        return;
-      }
+  const streamUrl = btn.getAttribute("data-stream");
+  if (!streamUrl) {
+    alert("❌ Посилання для TV не знайдено");
+    return;
+  }
 
-      const playerSite = "https://kino-player.pages.dev";
-      const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
-      const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
+  const playerSite = "https://kino-player.pages.dev";
+  const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
+  const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
 
-      console.log("▶️ Відкриваємо:", tvUrl);
-      window.open(tvUrl, "_blank");
-    });
-  });
-
-  console.log(`✅ WebApp підключено до Telegram (${tvButtons.length} TV-кнопок знайдено)`);
+  console.log("▶️ Відкриваємо:", tvUrl);
+  window.open(tvUrl, "_blank");
 });
 </script>
+
 
 
 </body>
