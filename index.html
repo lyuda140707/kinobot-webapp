@@ -1259,17 +1259,26 @@ function renderBatch() {
 
   const html = batch.map(film => {
     const isProFilm = film['Доступ'] === 'PRO';
-    const imgSrc    = (isProFilm && !isPro)
-                      ? placeholderImage
-                      : (film['Фото'] || placeholderImage);
-    const id        = safeId(film['Назва'], 'catalog');
+    const imgSrc = (isProFilm && !isPro)
+      ? placeholderImage
+      : (film['Фото'] || placeholderImage);
+    const id = safeId(film['Назва'], 'catalog');
 
-   let btn = '';
-   if (isProFilm && !isPro) {
-     btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
-    } else if (film['message_id'] || film['file_id']) {
-     const mid = film['message_id'] || film['file_id'];
-     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
+    let btn = '';
+    if (isProFilm && !isPro) {
+      btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
+    } 
+    else if (film['message_id'] || film['file_id']) {
+      const mid = film['message_id'] || film['file_id'];
+      const ch  = film['channel_id'] || '';
+
+      // ▶️ основна кнопка
+      btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`;
+
+      // 📺 кнопка "Дивитись на ТВ" (якщо є stream_url)
+      if (film['stream_url']) {
+        btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id || 'null'})">📺 Дивитись на ТВ</button>`;
+      }
     }
 
     return `
@@ -1287,8 +1296,9 @@ function renderBatch() {
   }).join('');
 
   container.insertAdjacentHTML('beforeend', html);
-  offset += batch.length;
+  offset += batch.length; // 🔹 залишаємо обов’язково!
 }
+
 
 // ==== SUPABASE (підстав свої значення) ====
 const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co'; // перевір точний URL!
@@ -1905,27 +1915,37 @@ function filterByYear(year) {
   }
 
   container.innerHTML = filtered.map(film => {
-    const id = safeId(film['Назва'], 'country'); // ← Оголошуємо id!
+    const id = safeId(film['Назва'], 'year');
     const isProFilm = film['Доступ'] === 'PRO';
     const imgSrc = (isProFilm && !isPro)
       ? placeholderImage
       : (film['Фото'] || placeholderImage);
 
+    // 🔹 генеруємо кнопки
     let buttons = '';
+
     if (isProFilm && !isPro) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
-   } else if (film['message_id'] || film['file_id']) {
+    } 
+    else if (film['message_id'] || film['file_id']) {
       const mid = film['message_id'] || film['file_id'];
-      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
+      const ch = film.channel_id || '';
 
+      // основна кнопка
+      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`;
+
+      // ➕ кнопка для ТВ (якщо є stream_url)
+      if (film['stream_url']) {
+        buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id || 'null'})">📺 Дивитись на ТВ</button>`;
+      }
     }
 
     return `
       <div class="film-card" id="film-${id}">
         ${poster(imgSrc, film['Назва'], film['Рік'])}
         <h3>${maskWord(film['Назва'])}</h3>
-        <p class="film-imdb">IMDb: ${film['IMDb']||'—'}</p>
-        <p>${film['Опис']||''}</p>
+        <p class="film-imdb">IMDb: ${film['IMDb'] || '—'}</p>
+        <p>${film['Опис'] || ''}</p>
         <div class="film-actions">
           ${renderControls(film['Назва'], film['Опис'])}
           ${buttons}
@@ -1940,7 +1960,8 @@ function filterByYear(year) {
 
 
 
-   function showFavorites() {
+
+  function showFavorites() {
   document.querySelectorAll('.film-card').forEach(el => el.remove());
 
   const container = document.getElementById('fav-list');
@@ -1951,33 +1972,41 @@ function filterByYear(year) {
   if (favs.length === 0) {
     container.innerHTML = '<p>Немає улюблених</p>';
   } else {
-  container.innerHTML = favs.map(f => {
-    // Пошук фільму в масиві films по unmaskWord
-    const found  = films.find(item =>
-      unmaskWord(item['Назва']) === unmaskWord(f.title)
-    );
-    const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
-    const chId  = found?.channel_id || f.channel_id || '';
-    const watchBtn = msgId
-      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>`
-      : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
-    return `
-      <div class="film-card" id="film-${safeId(f.title, 'fav')}">
-      <h3>${maskWord(f.title)}</h3>
-      <p>${f.description}</p>
-      <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
-      ${watchBtn}
-    </div>
-  `;
-  }).join('');
+    container.innerHTML = favs.map(f => {
+      // шукаємо фільм у глобальному масиві films
+      const found = films.find(item =>
+        unmaskWord(item['Назва']) === unmaskWord(f.title)
+      );
 
+      const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
+      const chId  = found?.channel_id || f.channel_id || '';
+      const streamUrl = found?.stream_url || f.stream_url || '';
 
+      // 🔹 основна кнопка "Дивитись"
+      const watchBtn = msgId
+        ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>`
+        : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
 
-    
+      // 🔹 друга кнопка "Дивитись на ТВ" (якщо є потік)
+      const tvBtn = streamUrl
+        ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id || 'null'})">📺 Дивитись на ТВ</button>`
+        : '';
+
+      return `
+        <div class="film-card" id="film-${safeId(f.title, 'fav')}">
+          <h3>${maskWord(f.title)}</h3>
+          <p>${f.description}</p>
+          <button class="remove-fav-btn" onclick="removeFromFavorites(${favs.indexOf(f)})">🗑️ Видалити</button>
+          ${watchBtn}
+          ${tvBtn}
+        </div>
+      `;
+    }).join('');
   }
 
   container.style.display = 'grid';
 }
+
 
 function showProModal() {
   const modal = document.getElementById('pro-modal');
@@ -2436,12 +2465,17 @@ if (seriesHits.length > 0) {
     const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
     const mid = (f['message_id'] || f['file_id']);
     const ch  = (f['channel_id'] || '');
+    
+    // 🔹 кнопка "Дивитись"
     const watchBtn = locked
       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
       : (mid
          ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
          : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
-
+    // 🔹 кнопка "Дивитись на ТВ" (якщо є stream_url)
+    const tvBtn = f['stream_url']
+      ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id || 'null'})">📺 Дивитись на ТВ</button>`
+      : '';
     return `
       <div class="film-card" id="film-${id}">
         ${poster(img, f['Назва'], f['Рік'])}
@@ -2451,6 +2485,7 @@ if (seriesHits.length > 0) {
         <div class="film-actions">
           ${renderControls(f['Назва'], f['Опис'])}
           ${watchBtn}
+          ${tvBtn}
         </div>
       </div>
     `;
@@ -3406,7 +3441,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+<script>
+function openOnTV(title, id) {
+  const baseUrl = "https://kinobot-webapp-jhu8.onrender.com/player.html";
+  const url = id
+    ? `${baseUrl}?id=${encodeURIComponent(id)}`
+    : `${baseUrl}?title=${encodeURIComponent(title)}`;
 
+  try {
+    if (window.Telegram?.WebApp?.openLink) {
+      window.Telegram.WebApp.openLink(url); // відкриває зовнішній браузер
+    } else {
+      window.open(url, "_blank"); // звичайний браузер
+    }
+  } catch (e) {
+    console.error("openOnTV error:", e);
+    window.open(url, "_blank");
+  }
+}
+</script>
   <script>
 // ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
 document.addEventListener("DOMContentLoaded", async () => {
