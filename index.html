@@ -3456,13 +3456,13 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 <script>
 function openOnTV(title, id) {
-  // 1. Безпечне кодування назви (щоб кирилиця не ламалася)
-  const encodedTitle = encodeURIComponent(title || '').replace(/%20/g, '+');
+  // 1. Безпечне кодування ID (щоб не впливали символи)
+  const encodedId = encodeURIComponent(id || '').trim();
 
-  // 2. Формуємо повне посилання на player.html
-  const url = `https://kinobot-webapp-jhu8.onrender.com/player.html?title=${encodedTitle}`;
+  // 2. Формуємо URL з ID (назву підтягнемо в player.html)
+  const url = `https://kinobot-webapp-jhu8.onrender.com/player.html?id=${encodedId}`;
 
-  // 3. Відкриваємо плеєр правильно через Telegram WebApp або у новій вкладці
+  // 3. Відкриваємо плеєр
   try {
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.openLink(url, { try_instant_view: false });
@@ -3475,6 +3475,7 @@ function openOnTV(title, id) {
     window.open(url, '_blank');
   }
 }
+
 </script>
   <script>
 // ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
