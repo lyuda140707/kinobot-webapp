@@ -1284,14 +1284,14 @@ function renderBatch() {
         // якщо фільм PRO, а користувач — ні
         btn = `
             <button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>
-            <button class="search-button tv-btn" onclick="openOnTV('${film.stream_url || ''}')">🎬 Дивитись на TV</button>
+            <button class="search-button tv-btn" onclick="openOnTV('${film.title}')">🎬 Дивитись на TV</button>
         `;
     } else if (film['message_id'] || film['file_id']) {
         // якщо фільм звичайний
         const mid = film['message_id'] || film['file_id'];
         btn = `
             <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-            <button class="search-button tv-btn" onclick="openOnTV('${film.stream_url || ''}')">🎬 Дивитись на TV</button>
+            <button class="search-button tv-btn" onclick="openOnTV('${film.title}')">🎬 Дивитись на TV</button>
         `;
     } else {
         // якщо взагалі нема посилання
@@ -1944,7 +1944,7 @@ function filterByYear(year) {
       const mid = film['message_id'] || film['file_id'];
       btn = `
         <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" onclick="openOnTV('${film.stream_url || ''}')">🎬 Дивитись на TV</button>
+        <button class="search-button tv-btn" onclick="openOnTV('${film.title}')">🎬 Дивитись на TV</button>
       `;
     }
 
@@ -3484,17 +3484,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 </script>
 <script>
-  function openOnTV(url) {
-    if (!url) {
+async function openOnTV(title) {
+  try {
+    console.log("🎬 Запитуємо потік для:", title);
+
+    // 👇 тут твій бекенд на Render (FastAPI)
+    const resp = await fetch(`https://relax-time2.onrender.com/get-film-by-name?title=${encodeURIComponent(title)}`);
+    const data = await resp.json();
+
+    if (!data.found || !data.stream_url) {
       alert("Посилання на фільм відсутнє 😢");
       return;
     }
 
-    const player = "https://kino-player.pages.dev"; // твій Cloudflare плеєр
-    const link = `${player}/?src=${encodeURIComponent(url)}`;
+    // 👇 а це твій Cloudflare плеєр
+    const player = "https://kino-player.pages.dev";
+    const link = `${player}/?src=${encodeURIComponent(data.stream_url)}`;
+
     window.open(link, "_blank");
+  } catch (e) {
+    console.error("❌ openOnTV error:", e);
+    alert("Помилка відкриття плеєра");
   }
+}
 </script>
+
 
 
 </body>
