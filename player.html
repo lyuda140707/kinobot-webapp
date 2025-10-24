@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Перегляд фільму</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: white;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 1.2em;
+      margin: 10px 0;
+      text-align: center;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      background: #000;
+    }
+    button {
+      background: #00ffff33;
+      border: 1px solid #00ffff88;
+      border-radius: 10px;
+      color: #00ffff;
+      padding: 8px 20px;
+      margin: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #00ffff77;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="filmTitle">🎬 Завантаження...</h1>
+  <video id="video" controls autoplay></video>
+  <button onclick="history.back()">⬅ Назад у додаток</button>
+
+  <script>
+    // --- 🔹 Налаштування ---
+    const SUPABASE_URL = "https://zerlqvbmqszomlondlte.supabase.co"; // твій
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // anon ключ
+    const WORKER_URL = "https://kino-proxy.lyuda14070702.workers.dev"; // твій Worker
+
+    // --- 🔹 Отримуємо ID або назву з URL ---
+    const params = new URLSearchParams(window.location.search);
+    const filmId = params.get("id");
+    const filmTitleParam = params.get("title");
+
+    async function getFilm() {
+      let url = `${SUPABASE_URL}/rest/v1/films?select=title,stream_url&limit=1`;
+      if (filmId) url += `&id=eq.${filmId}`;
+      else if (filmTitleParam) url += `&title=eq.${encodeURIComponent(filmTitleParam)}`;
+
+      const res = await fetch(url, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      });
+      const data = await res.json();
+      return data[0];
+    }
+
+    function playStream(streamUrl, title) {
+      const video = document.getElementById("video");
+      document.getElementById("filmTitle").textContent = "🎬 " + title;
+
+      if (!streamUrl) {
+        document.getElementById("filmTitle").textContent = "❌ Потік не знайдено";
+        return;
+      }
+
+      // Потік через Worker
+      const encoded = btoa(streamUrl);
+      const finalUrl = `${WORKER_URL}/m3u8?src=${encoded}`;
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(finalUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = finalUrl;
+        video.addEventListener("loadedmetadata", () => video.play());
+      } else {
+        alert("Браузер не підтримує HLS.");
+      }
+    }
+
+    // --- 🔹 Запуск ---
+    (async () => {
+      try {
+        const film = await getFilm();
+        playStream(film.stream_url, film.title);
+      } catch (e) {
+        document.getElementById("filmTitle").textContent = "❌ Не вдалося завантажити фільм";
+        console.error(e);
+      }
+    })();
+  </script>
+</body>
+</html>
