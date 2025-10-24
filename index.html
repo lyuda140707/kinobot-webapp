@@ -1284,7 +1284,7 @@ function renderBatch() {
         // якщо фільм PRO, а користувач — ні
         btn = `
             <button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>
-            <button class="search-button tv-btn" onclick="openOnTV('https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
+            <button class="search-button tv-btn" onclick="openOnTV(`https://kino-player.pages.dev/?src=https://kino-proxy.lyuda14070702.workers.dev/?url=${encodeURIComponent(film.stream_url || '')}`)">🎬 Дивитись на TV</button>
 
         `;
     } else if (film['message_id'] || film['file_id']) {
@@ -1292,7 +1292,7 @@ function renderBatch() {
         const mid = film['message_id'] || film['file_id'];
         btn = `
             <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-            <button class="search-button tv-btn" onclick="openOnTV('https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
+            <button class="search-button tv-btn" onclick="openOnTV(`https://kino-player.pages.dev/?src=https://kino-proxy.lyuda14070702.workers.dev/?url=${encodeURIComponent(film.stream_url || '')}`)">🎬 Дивитись на TV</button>
 
         `;
     } else {
@@ -1946,7 +1946,7 @@ function filterByYear(year) {
       const mid = film['message_id'] || film['file_id'];
       btn = `
         <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" onclick="openOnTV('https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
+        <button class="search-button tv-btn" onclick="openOnTV(`https://kino-player.pages.dev/?src=https://kino-proxy.lyuda14070702.workers.dev/?url=${encodeURIComponent(film.stream_url || '')}`)">🎬 Дивитись на TV</button>
 
       `;
     }
@@ -1993,7 +1993,7 @@ function filterByYear(year) {
     const watchBtn = msgId
       ? `
         <button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" onclick="openOnTV('https://relax-time2.onrender.com/proxy-stream?url=' + encodeURIComponent('${film.stream_url || ''}'))">🎬 Дивитись на TV</button>
+        <button class="search-button tv-btn" onclick="openOnTV(`https://kino-player.pages.dev/?src=https://kino-proxy.lyuda14070702.workers.dev/?url=${encodeURIComponent(film.stream_url || '')}`)">🎬 Дивитись на TV</button>
 
       `
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
