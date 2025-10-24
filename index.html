@@ -572,6 +572,16 @@
 .cartoon-btn.blink {
   animation: blink 1s ease-in-out infinite;
 }
+.tv-btn {
+  background: #00ffff33;
+  border: 1px solid #00ffff88;
+  color: #00ffff;
+  margin-top: 6px;
+}
+.tv-btn:hover {
+  background: #00ffff77;
+  color: #000;
+}
 
   </style>
  
@@ -1300,6 +1310,7 @@ function renderBatch() {
 }
 
 
+
 // ==== SUPABASE (підстав свої значення) ====
 const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co'; // перевір точний URL!
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplcmxxdmJtcXN6b21sb25kbHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzMzg3NzQsImV4cCI6MjA3MDkxNDc3NH0.8wUBYIeQRC6KVp6vdzv0oqofIf4PeZyzbV5GcD0vxTE';              // Settings → API → anon public
@@ -1335,6 +1346,7 @@ async function fetchFilmsFromSupabase() {
     'message_id' : r.message_id ?? '',
     'file_id'    : r.file_id ?? '',
     'channel_id' : r.channel_id ?? '',
+    'stream_url' : r.stream_url ?? '',   // ← ДОДАТИ ОЦЕ
     'Серія'      : r.episode ?? '',
     'Сезон'      : r.season ?? ''
     
@@ -1931,10 +1943,10 @@ function filterByYear(year) {
       const mid = film['message_id'] || film['file_id'];
       const ch = film.channel_id || '';
 
-      // основна кнопка
+      // ▶️ основна кнопка
       buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`;
 
-      // ➕ кнопка для ТВ (якщо є stream_url)
+      // 📺 кнопка для ТВ (якщо є stream_url)
       if (film['stream_url']) {
         buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id || 'null'})">📺 Дивитись на ТВ</button>`;
       }
@@ -1956,8 +1968,6 @@ function filterByYear(year) {
 
   container.scrollIntoView({ behavior: 'smooth' });
 }
-
-
 
 
 
@@ -2472,10 +2482,11 @@ if (seriesHits.length > 0) {
       : (mid
          ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
          : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
-    // 🔹 кнопка "Дивитись на ТВ" (якщо є stream_url)
     const tvBtn = f['stream_url']
       ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id || 'null'})">📺 Дивитись на ТВ</button>`
       : '';
+    // 🔹 кнопка "Дивитись на ТВ" (якщо є stream_url)
+   
     return `
       <div class="film-card" id="film-${id}">
         ${poster(img, f['Назва'], f['Рік'])}
