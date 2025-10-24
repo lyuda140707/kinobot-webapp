@@ -3484,27 +3484,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 </script>
 <script>
-async function openOnTV(title) {
+function openOnTV(streamUrl) {
   try {
-    console.log("🎬 Запитуємо потік для:", title);
-
-    // 👇 тут твій бекенд на Render (FastAPI)
-    const resp = await fetch(`https://relax-time2.onrender.com/get-film-by-name?title=${encodeURIComponent(title)}`);
-    const data = await resp.json();
-
-    if (!data.found || !data.stream_url) {
+    if (!streamUrl) {
       alert("Посилання на фільм відсутнє 😢");
       return;
     }
 
-    // 👇 а це твій Cloudflare плеєр
-    const player = "https://kino-player.pages.dev";
-    const link = `${player}/?src=${encodeURIComponent(data.stream_url)}`;
+    console.log("🎬 Відкриваємо Cloudflare Player:", streamUrl);
 
-    window.open(link, "_blank");
+    // 🟣 твій Cloudflare Player (той, що ти розгорнула)
+    const playerSite = "https://kino-player.pages.dev";
+
+    // 🧩 передаємо посилання потоку у Cloudflare Player
+    const finalLink = `${playerSite}/?src=${encodeURIComponent(streamUrl)}`;
+
+    // 🪄 відкриваємо у новій вкладці
+    window.open(finalLink, "_blank");
   } catch (e) {
-    console.error("❌ openOnTV error:", e);
-    alert("Помилка відкриття плеєра");
+    console.error("❌ Помилка при відкритті плеєра:", e);
+    alert("Не вдалося відкрити відео 😢");
   }
 }
 </script>
