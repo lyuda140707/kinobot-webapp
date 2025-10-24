@@ -1357,7 +1357,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 // читаємо REST’ом і мапимо у старий формат з українськими ключами
 async function fetchFilmsFromSupabase() {
   const pageSize = 1000;
-  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,channel_id,collection,country,year,access,imdb,season,episode&order=title.asc,season.asc,episode.asc,id.asc`;
+  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,channel_id,collection,country,year,access,imdb,season,episode,stream_url&order=title.asc,season.asc,episode.asc,id.asc`;
 
   let rows = [];
   for (let pageOffset = 0; ; pageOffset += pageSize) {
@@ -1387,8 +1387,7 @@ async function fetchFilmsFromSupabase() {
     'channel_id' : r.channel_id ?? '',
     'Серія'      : r.episode ?? '',
     'Сезон'      : r.season ?? ''
-    
-   
+    stream_url: r.stream_url ?? ''   // ⬅️ додай це
     
   }));
 }
@@ -1978,11 +1977,10 @@ function filterByYear(year) {
       const mid = film['message_id'] || film['file_id'];
       const tvLink = buildTvLink(film.stream_url || '');
       
-      btn = `
+      buttons = `
         <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
-            🎬 Дивитись на TV
-        </button>
+        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">🎬 Дивитись на TV</button>
+      `;
 
       `;
     }
@@ -2025,19 +2023,11 @@ function filterByYear(year) {
     );
     const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
     const chId  = found?.channel_id || f.channel_id || '';
-    const tvLink = buildTvLink(streamUrl);
+    const stream = found?.stream_url || '';  // беремо з знайденого фільму
     const watchBtn = msgId
       ? `
         <button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
-            🎬 Дивитись на TV
-        </button>
-
-
-
-
-
-
+        <button class="search-button tv-btn" data-stream="${stream}">🎬 Дивитись на TV</button>
       `
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
     return `
@@ -3581,8 +3571,6 @@ document.addEventListener("click", (e) => {
   window.open(tvUrl, "_blank");
 });
 </script>
-
-
 
 </body>
 </html>
