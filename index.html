@@ -1287,7 +1287,7 @@ function renderBatch() {
 
       // 📺 кнопка "Дивитись на ТВ" (якщо є stream_url)
       if (film['stream_url']) {
-        buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+        btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id || 'null'})">📺 Дивитись на ТВ</button>`;
       }
     }
 
@@ -1950,7 +1950,7 @@ function filterByYear(year) {
 
       // 📺 кнопка для ТВ (якщо є stream_url)
       if (film['stream_url']) {
-        buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+        buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id || 'null'})">📺 Дивитись на ТВ</button>`;
       }
     }
 
@@ -2001,7 +2001,7 @@ function filterByYear(year) {
 
       // 🔹 друга кнопка "Дивитись на ТВ" (якщо є потік)
       const tvBtn = streamUrl
-        ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id})">📺 Дивитись на ТВ</button>`
+        ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id || 'null'})">📺 Дивитись на ТВ</button>`
         : '';
 
       return `
@@ -2485,7 +2485,7 @@ if (seriesHits.length > 0) {
          ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
          : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
     const tvBtn = f['stream_url']
-      ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">📺 Дивитись на ТВ</button>`
+      ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id || 'null'})">📺 Дивитись на ТВ</button>`
       : '';
     // 🔹 кнопка "Дивитись на ТВ" (якщо є stream_url)
    
