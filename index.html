@@ -3536,7 +3536,7 @@ function openOnTV(streamUrl) {
     const playerSite = "https://kino-player.pages.dev";
 
     // 🎬 Проксі на твій бекенд (Render)
-    const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
+    const proxiedUrl = `https://kino-proxy.lyuda14070702.workers.dev/?url=${encodeURIComponent(streamUrl)}`;
 
     // ✅ Формуємо фінальне посилання для відкриття на TV
     const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
@@ -3562,7 +3562,7 @@ document.addEventListener("click", (e) => {
   }
 
   const playerSite = "https://kino-player.pages.dev";
-  const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
+  const proxiedUrl = `https://kino-proxy.lyuda14070702.workers.dev/?url=${encodeURIComponent(streamUrl)}`;
   const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
 
   console.log("▶️ Відкриваємо:", tvUrl);
