@@ -572,20 +572,6 @@
 .cartoon-btn.blink {
   animation: blink 1s ease-in-out infinite;
 }
-/* Стиль для кнопки Дивитись на TV */
-.tv-btn {
-  background: #fff;
-  color: #000;
-  font-weight: 600;
-  border-radius: 10px;
-  margin-top: 6px;
-  transition: all 0.3s ease;
-}
-.tv-btn:hover {
-  background: #00f7ff;
-  color: #000;
-}
-
 
   </style>
  
@@ -666,26 +652,6 @@ function safeId(str, scope = '') {
   }
   return 'id_' + (h >>> 0).toString(36);
 }
-// === 🔧 TV-плеєр допоміжні функції ===
-function buildTvLink(stream) {
-  // Створює правильне посилання через proxy і player
-  return `https://kino-player.pages.dev/?src=https://kino-proxy.lyuda14070702.workers.dev/?url=${encodeURIComponent(stream || '')}`;
-}
-
-function openOnTV(link) {
-  // Відкриває фільм у новій вкладці (через confirm або напряму)
-  try {
-    if (!link) {
-      alert("Посилання на фільм відсутнє 😢");
-      return;
-    }
-    window.open(link, "_blank");
-  } catch (e) {
-    console.error("Помилка відкриття плеєра:", e);
-    alert("Не вдалося відкрити плеєр 😢");
-  }
-}
-
 
 
 function renderControls(title, description) {
@@ -1298,39 +1264,14 @@ function renderBatch() {
                       : (film['Фото'] || placeholderImage);
     const id        = safeId(film['Назва'], 'catalog');
 
-    // 🧩 Ось новий правильний блок
-    let btn = '';
-
-    const stream = film.stream_url || '';
-    const tvLink = buildTvLink(stream);
-
-    if (isProFilm && !isPro) {
-      // якщо фільм PRO, а користувач — ні
-      btn = `
-        <button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>
-        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
-            🎬 Дивитись на TV
-        </button>
-
-
-      `;
+   let btn = '';
+   if (isProFilm && !isPro) {
+     btn = `<button class="search-button" onclick="showProModal()">🔒 PRO Доступ</button>`;
     } else if (film['message_id'] || film['file_id']) {
-      // якщо фільм звичайний
-      const mid = film['message_id'] || film['file_id'];
-      btn = `
-        <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">
-            🎬 Дивитись на TV
-        </button>
-
-
-      `;
-    } else {
-      // якщо взагалі нема посилання
-      btn = `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
+     const mid = film['message_id'] || film['file_id'];
+     btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
     }
 
-    // решта залишається без змін
     return `
       <div class="film-card" id="film-${id}">
         ${poster(imgSrc, film['Назва'], film['Рік'])}
@@ -1349,7 +1290,6 @@ function renderBatch() {
   offset += batch.length;
 }
 
-
 // ==== SUPABASE (підстав свої значення) ====
 const SUPABASE_URL  = 'https://zerlqvbmqszomlondlte.supabase.co'; // перевір точний URL!
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplcmxxdmJtcXN6b21sb25kbHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzMzg3NzQsImV4cCI6MjA3MDkxNDc3NH0.8wUBYIeQRC6KVp6vdzv0oqofIf4PeZyzbV5GcD0vxTE';              // Settings → API → anon public
@@ -1357,7 +1297,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 // читаємо REST’ом і мапимо у старий формат з українськими ключами
 async function fetchFilmsFromSupabase() {
   const pageSize = 1000;
-  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,channel_id,collection,country,year,access,imdb,season,episode,stream_url&order=title.asc,season.asc,episode.asc,id.asc`;
+  const base = `${SUPABASE_URL}/rest/v1/films?select=id,title,type,genre,description,photo,message_id,file_id,channel_id,collection,country,year,access,imdb,season,episode&order=title.asc,season.asc,episode.asc,id.asc`;
 
   let rows = [];
   for (let pageOffset = 0; ; pageOffset += pageSize) {
@@ -1386,8 +1326,9 @@ async function fetchFilmsFromSupabase() {
     'file_id'    : r.file_id ?? '',
     'channel_id' : r.channel_id ?? '',
     'Серія'      : r.episode ?? '',
-    'Сезон'      : r.season ?? '',
-    'stream_url' : r.stream_url ?? ''   // ✅ ключ теж у лапках!
+    'Сезон'      : r.season ?? ''
+    
+   
     
   }));
 }
@@ -1975,12 +1916,8 @@ function filterByYear(year) {
       buttons = `<button class="search-button" onclick="alert('🔒 Фільм доступний лише для PRO')">🔒 PRO Доступ</button>`;
    } else if (film['message_id'] || film['file_id']) {
       const mid = film['message_id'] || film['file_id'];
-      const tvLink = buildTvLink(film.stream_url || '');
-      
-      buttons = `
-        <button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" data-stream="${film.stream_url || ''}">🎬 Дивитись на TV</button>
-      `;
+      buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${film.channel_id || ''}')">▶️ Дивитись</button>`;
+
     }
 
     return `
@@ -2021,12 +1958,8 @@ function filterByYear(year) {
     );
     const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
     const chId  = found?.channel_id || f.channel_id || '';
-    const stream = found?.stream_url || '';  // беремо з знайденого фільму
     const watchBtn = msgId
-      ? `
-        <button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>
-        <button class="search-button tv-btn" data-stream="${stream}">🎬 Дивитись на TV</button>
-      `
+      ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>`
       : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
     return `
       <div class="film-card" id="film-${safeId(f.title, 'fav')}">
@@ -2503,26 +2436,13 @@ if (seriesHits.length > 0) {
     const img = locked ? placeholderImage : (f['Фото'] || placeholderImage);
     const mid = (f['message_id'] || f['file_id']);
     const ch  = (f['channel_id'] || '');
-    const streamUrl = f.stream_url || ''; // ✅ беремо посилання з таблиці (якщо є)
     const watchBtn = locked
       ? `<button class="search-button" onclick="showProModal()">🔒 PRO</button>`
       : (mid
-         ? `
-            <button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>
-            <button class="search-button tv-btn" onclick="openOnTV('https://kino-player.pages.dev/?src=https://kino-proxy.lyuda14070702.workers.dev/?url=' + encodeURIComponent(f.stream_url || ''))">🎬 Дивитись на TV</button>
+         ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
+         : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
 
-
-
-          `
-         : `
-            <button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>
-            <button class="search-button tv-btn" onclick="openOnTV('https://kino-player.pages.dev/?src=https://kino-proxy.lyuda14070702.workers.dev/?url=' + encodeURIComponent(f.stream_url || ''))">🎬 Дивитись на TV</button>
-
-
-
-          `);
     return `
-           
       <div class="film-card" id="film-${id}">
         ${poster(img, f['Назва'], f['Рік'])}
         <h3>${maskWord(f['Назва'])}</h3>
@@ -3524,51 +3444,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
-<script>
-function openOnTV(streamUrl) {
-  try {
-    if (!streamUrl) {
-      alert("Посилання на фільм відсутнє 😢");
-      return;
-    }
 
-    // 🌐 Твій Cloudflare Player
-    const playerSite = "https://kino-player.pages.dev";
-
-    // 🎬 Проксі на твій бекенд (Render)
-    const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
-
-    // ✅ Формуємо фінальне посилання для відкриття на TV
-    const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
-
-    // 📺 Відкриваємо у новому вікні (телевізор/браузер)
-    window.open(tvUrl, "_blank");
-  } catch (e) {
-    console.error("❌ Помилка при відкритті плеєра:", e);
-    alert("Не вдалося відкрити відео 😢");
-  }
-}
-</script>
-<script>
-// ✅ Використовуємо делегування — працює навіть якщо фільми додані пізніше
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".tv-btn");
-  if (!btn) return; // якщо клік не по кнопці, нічого не робимо
-
-  const streamUrl = btn.getAttribute("data-stream");
-  if (!streamUrl) {
-    alert("❌ Посилання для TV не знайдено");
-    return;
-  }
-
-  const playerSite = "https://kino-player.pages.dev";
-  const proxiedUrl = `https://relax-time2.onrender.com/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
-  const tvUrl = `${playerSite}/?src=${encodeURIComponent(proxiedUrl)}`;
-
-  console.log("▶️ Відкриваємо:", tvUrl);
-  window.open(tvUrl, "_blank");
-});
-</script>
 
 </body>
 </html>
