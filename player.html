@@ -17,6 +17,7 @@
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
+      transition: background-color 0.6s ease; /* 🟢 плавне затемнення */
     }
 
     h2 {
@@ -27,9 +28,11 @@
 
     video {
       width: 100%;
-      height: 100%;
-      background-color: #000;
+      height: calc(100vh - 80px);
+      background: #000;
+      border: none;
       outline: none;
+      object-fit: contain;
     }
 
     .loading {
@@ -62,6 +65,25 @@
       const titleEl = document.getElementById("filmTitle");
       const statusEl = document.getElementById("statusText");
       const video = document.getElementById("videoPlayer");
+      // 💾 ЗАПАМ'ЯТОВУВАННЯ ПОЗИЦІЇ ВІДТВОРЕННЯ
+      const posKey = "lastPosition_" + filmId;
+      
+      // Кожні кілька секунд зберігаємо поточний час відео
+      video.addEventListener("timeupdate", () => {
+        try {
+          localStorage.setItem(posKey, video.currentTime);
+        } catch (e) {
+          console.warn("Не вдалося зберегти позицію:", e);
+        }
+      });
+      
+      // Коли відео завантажено — відновлюємо позицію
+      video.addEventListener("loadedmetadata", () => {
+        const pos = parseFloat(localStorage.getItem(posKey) || "0");
+        if (pos > 3) { // якщо більше 3 секунд — відновлюємо
+          video.currentTime = pos;
+        }
+      });
 
       if (!filmId) {
         titleEl.textContent = "❌ ID фільму не передано";
@@ -117,6 +139,22 @@
         statusEl.textContent = "";
       }
     });
+
+  // 🎬 Режим кіно (затемнення фону при Picture-in-Picture або Fullscreen)
+video.addEventListener("enterpictureinpicture", () => {
+  document.body.style.background = "#000";
+});
+video.addEventListener("leavepictureinpicture", () => {
+  document.body.style.background = "#000";
+});
+video.addEventListener("fullscreenchange", () => {
+  if (document.fullscreenElement) {
+    document.body.style.background = "#000";
+  } else {
+    document.body.style.background = "#000";
+  }
+});
+
   </script>
 </body>
 </html>
