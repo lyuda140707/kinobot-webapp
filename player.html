@@ -170,14 +170,13 @@ video.addEventListener("fullscreenchange", () => {
 // 🎧 Кнопка "Увімкнути звук"
 const video = document.getElementById("videoPlayer");
 const unmuteBtn = document.getElementById("unmuteBtn");
-
-// коли сторінка повністю завантажена
-document.addEventListener("DOMContentLoaded", () => {
-  // якщо відео вимкнене — показуємо кнопку
+// якщо відео вимкнене — показуємо кнопку після невеликої паузи
+setTimeout(() => {
   if (video.muted) {
     unmuteBtn.style.display = "block";
   }
-});
+}, 1000);
+
 
 // при кліку по кнопці — увімкнути звук і сховати кнопку
 unmuteBtn.addEventListener("click", () => {
