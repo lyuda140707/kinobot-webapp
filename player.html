@@ -185,18 +185,6 @@ video.addEventListener("fullscreenchange", () => {
   }
 });
 
-
-
-// при кліку по кнопці — увімкнути звук і сховати кнопку
-unmuteBtn.addEventListener("click", () => {
-  video.muted = false;
-  video.volume = 1.0;
-  video.play().catch(()=>{});
-  unmuteBtn.style.opacity = "0";
-  setTimeout(() => (unmuteBtn.style.display = "none"), 400);
-});
-
-
   </script>
 </body>
 </html>
