@@ -3462,7 +3462,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-function openOnTV(title, id) {
+async function openOnTV(title, id) {
   let filmId = id;
   if (!filmId && window.films?.length) {
     const found = window.films.find(f => f['Назва'] === title);
@@ -3474,6 +3474,25 @@ function openOnTV(title, id) {
     return;
   }
 
+  // 🎬 Надсилаємо лог на бекенд (Render)
+  try {
+    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const uid = user ? user.id : "unknown";
+
+    await fetch("https://relax-time2.onrender.com/log-tv", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        uid: uid,
+        film_name: title
+      })
+    });
+    console.log(`📡 Лог відправлено: ${title} (${uid})`);
+  } catch (e) {
+    console.warn("⚠️ Не вдалося записати лог перегляду ТВ:", e);
+  }
+
+  // 🔹 Відкриваємо плеєр
   const encodedId = encodeURIComponent(filmId);
   const url = `https://kinobot-webapp-jhu8.onrender.com/player.html?id=${encodedId}`;
 
