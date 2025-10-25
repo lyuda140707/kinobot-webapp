@@ -68,17 +68,6 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       const params = new URLSearchParams(window.location.search);
-      // 📺 Надсилаємо лог на бекенд
-      const uid = params.get("uid");
-      const filmId = params.get("id");
-
-      if (uid && filmId) {
-        fetch(`${backendUrl}/log-tv`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uid, filmId })
-        }).catch(err => console.warn("Не вдалося записати лог:", err));
-      }
       const filmId = params.get("id");
 
       const titleEl = document.getElementById("filmTitle");
