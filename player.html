@@ -3,118 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎬 Перегляд фільму</title>
+  <title>🎬 Відтворення фільму</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body {
       margin: 0;
       background-color: #000;
-      color: white;
-      font-family: system-ui, sans-serif;
+      color: #fff;
+      font-family: "Segoe UI", sans-serif;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
       height: 100vh;
       overflow: hidden;
     }
-    h1 {
-      font-size: 1.4em;
-      margin: 15px 0;
-      text-align: center;
-      color: #00ffff;
-      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+
+    h2 {
+      margin: 16px 0;
+      font-weight: 500;
+      color: #00e0ff;
     }
+
     video {
       width: 100%;
-      height: auto;
-      max-height: 80vh;
-      background: #000;
+      height: 100%;
+      background-color: #000;
+      outline: none;
     }
-    button {
-      background: #00ffff33;
-      border: 1px solid #00ffff88;
-      border-radius: 10px;
-      color: #00ffff;
-      padding: 8px 20px;
-      margin: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.3s;
+
+    .loading {
+      color: #aaa;
+      font-size: 16px;
+      margin-top: 15px;
     }
-    button:hover {
-      background: #00ffff77;
-      color: #000;
+
+    .error {
+      color: #ff4444;
+      font-size: 18px;
+      margin-top: 20px;
     }
   </style>
 </head>
+
 <body>
-  <h1 id="filmTitle">🎬 Завантаження...</h1>
+  <h2 id="filmTitle">🎞️ Завантаження відео...</h2>
   <video id="videoPlayer" controls autoplay></video>
-  <button onclick="history.back()">⬅ Назад у додаток</button>
+  <p class="loading" id="statusText">⏳ Підготовка до відтворення...</p>
 
   <script>
-    // --- 🔹 Конфігурація ---
-    const SUPABASE_URL = "https://zerlqvbmqszomlondlte.supabase.co"; // 🔹 твій URL
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // 🔹 твій anon ключ
-    const WORKER_URL = "https://kino-proxy.lyuda14070702.workers.dev"; // 🔹 твій Cloudflare Worker
+    const backendUrl = "https://relax-time2.onrender.com"; // ← бекенд Render
+    const WORKER_URL = "https://kino-proxy.lyuda14070702.workers.dev"; // ← Cloudflare Worker
 
     document.addEventListener("DOMContentLoaded", async () => {
       const params = new URLSearchParams(window.location.search);
       const filmId = params.get("id");
 
+      const titleEl = document.getElementById("filmTitle");
+      const statusEl = document.getElementById("statusText");
+      const video = document.getElementById("videoPlayer");
+
       if (!filmId) {
-        document.getElementById("filmTitle").textContent = "❌ ID фільму не передано";
+        titleEl.textContent = "❌ ID фільму не передано";
+        statusEl.textContent = "";
         return;
       }
 
       try {
-        // 1️⃣ Отримуємо дані фільму з Supabase
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/films?select=id,title,stream_url&eq.id=${filmId}`, {
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`
-          }
-        });
+        // 🔹 Отримуємо stream_url із бекенду (через service_role)
+        const res = await fetch(`${backendUrl}/stream/${filmId}`);
         const data = await res.json();
-        const film = data[0];
 
-        if (!film) {
-          document.getElementById("filmTitle").textContent = "❌ Фільм не знайдено";
+        if (!data || data.error || !data.stream_url) {
+          titleEl.textContent = "❌ Фільм не знайдено";
+          statusEl.textContent = "";
+          console.error("Відповідь сервера:", data);
           return;
         }
 
-        // 2️⃣ Виводимо назву фільму
-        document.getElementById("filmTitle").textContent = "🎬 " + film.title;
+        const stream = data.stream_url;
+        titleEl.textContent = "🎬 Відтворення фільму";
+        statusEl.textContent = "🔗 Підключення до потоку...";
 
-        // 3️⃣ Перевіряємо наявність stream_url
-        const stream = film.stream_url;
-        if (!stream) {
-          document.getElementById("filmTitle").textContent = "❌ Потік не знайдено";
-          return;
-        }
-
-        // 4️⃣ Формуємо URL через твій Cloudflare Worker
-        const encoded = btoa(stream); // кодуємо адресу у base64
+        // 🔹 Формуємо захищений URL через Cloudflare Worker
+        const encoded = btoa(stream);
         const finalUrl = `${WORKER_URL}/m3u8?src=${encoded}`;
-        const video = document.getElementById("videoPlayer");
 
-        // 5️⃣ Відтворення через HLS.js
+        // 🔹 Відтворення через HLS.js
         if (Hls.isSupported()) {
           const hls = new Hls();
           hls.loadSource(finalUrl);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            statusEl.textContent = "";
+            video.play();
+          });
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            console.error("HLS error:", data);
+            statusEl.textContent = "⚠️ Помилка відтворення потоку";
+          });
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = finalUrl;
-          video.addEventListener("loadedmetadata", () => video.play());
+          video.addEventListener("loadedmetadata", () => {
+            statusEl.textContent = "";
+            video.play();
+          });
         } else {
-          document.getElementById("filmTitle").textContent = "❌ Браузер не підтримує HLS";
+          titleEl.textContent = "❌ Браузер не підтримує HLS";
+          statusEl.textContent = "";
         }
-
       } catch (err) {
-        document.getElementById("filmTitle").textContent = "❌ Помилка завантаження";
         console.error(err);
+        titleEl.textContent = "❌ Помилка завантаження відео";
+        statusEl.textContent = "";
       }
     });
   </script>
