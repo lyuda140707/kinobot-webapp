@@ -86,7 +86,7 @@
 
         // 🔹 Формуємо захищений URL через Cloudflare Worker
         const encoded = btoa(stream);
-        const finalUrl = `${WORKER_URL}/m3u8?src=${encoded}`;
+        const finalUrl = `${WORKER_URL}/m3u8?src=${encodeURIComponent(encoded)}`;
 
         // 🔹 Відтворення через HLS.js
         if (Hls.isSupported()) {
