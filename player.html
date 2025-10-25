@@ -120,7 +120,14 @@
 
         // 🔹 Відтворення через HLS.js
         if (Hls.isSupported()) {
-          const hls = new Hls();
+          const hls = new Hls({
+            lowLatencyMode: true,
+            enableWorker: true,
+            fragLoadingTimeOut: 20000,   // максимум 20 сек. очікування
+            maxBufferLength: 10,         // невеликий буфер для швидкої реакції
+            startLevel: -1,              // автоматичний вибір якості
+            maxMaxBufferLength: 30
+          });
           hls.loadSource(finalUrl);
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -135,6 +142,12 @@
             } else {
               console.warn("HLS warning:", data.details);
             }
+          });
+          // 🐢 Авто-зниження якості при повільному потоці
+          hls.on(Hls.Events.FRAG_LOAD_ERROR, () => {
+            console.warn("🐢 Потік повільний — переключаю на нижчу якість");
+            const level = Math.max(0, hls.currentLevel - 1);
+            hls.currentLevel = level;
           });
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = finalUrl;
