@@ -70,13 +70,14 @@
 
       try {
         // 1️⃣ Отримуємо дані фільму з Supabase
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/films?id=eq.${filmId}&select=title,stream_url`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/films?select=id,title,stream_url&eq.id=${filmId}`, {
           headers: {
             apikey: SUPABASE_KEY,
             Authorization: `Bearer ${SUPABASE_KEY}`
           }
         });
-        const [film] = await res.json();
+        const data = await res.json();
+        const film = data[0];
 
         if (!film) {
           document.getElementById("filmTitle").textContent = "❌ Фільм не знайдено";
