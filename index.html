@@ -1285,9 +1285,11 @@ function renderBatch() {
       // ▶️ основна кнопка
       btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`;
 
-      // 📺 кнопка "Дивитись на ТВ" (якщо є stream_url)
+      // 📺 кнопка "Дивитись на ТВ" (лише якщо не PRO або користувач має PRO)
       if (film['stream_url']) {
-        btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+        if (!(film.access === "PRO" && !isPro)) {
+          btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+        }
       }
     }
 
@@ -1949,9 +1951,11 @@ function filterByYear(year) {
       // ▶️ основна кнопка
       buttons = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`;
 
-      // 📺 кнопка для ТВ (якщо є stream_url)
+      // 📺 кнопка для ТВ (тільки якщо користувач має PRO або фільм не PRO)
       if (film['stream_url']) {
-        buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+        if (!(film.access === "PRO" && !isPro)) {
+          buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+        }
       }
     }
 
@@ -2000,10 +2004,11 @@ function filterByYear(year) {
         ? `<button class="search-button" onclick="event.stopPropagation(); requestFilmByName(this,'${msgId}','${chId}')">▶️ Дивитись</button>`
         : `<span style="color:#888; display:block; margin-top:8px;">Недоступно</span>`;
 
-      // 🔹 друга кнопка "Дивитись на ТВ" (якщо є потік)
-      const tvBtn = streamUrl
-        ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id})">📺 Дивитись на ТВ</button>`
-        : '';
+      // 🔹 друга кнопка "Дивитись на ТВ" (лише якщо не PRO або користувач має PRO)
+      const tvBtn =
+        streamUrl && !(f.access === "PRO" && !isPro)
+          ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id})">📺 Дивитись на ТВ</button>`
+          : '';
 
       return `
         <div class="film-card" id="film-${safeId(f.title, 'fav')}">
@@ -2485,10 +2490,11 @@ if (seriesHits.length > 0) {
       : (mid
          ? `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`
          : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
-    const tvBtn = f['stream_url']
-      ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">📺 Дивитись на ТВ</button>`
-      : '';
-    // 🔹 кнопка "Дивитись на ТВ" (якщо є stream_url)
+    // 🔹 кнопка "Дивитись на ТВ" (показується тільки якщо користувач має PRO або фільм не PRO)
+    const tvBtn =
+      f['stream_url'] && !(f.access === "PRO" && !isPro)
+        ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">📺 Дивитись на ТВ</button>`
+        : '';
    
     return `
       <div class="film-card" id="film-${id}">
@@ -3489,6 +3495,7 @@ function openOnTV(title, id) {
   <script>
 // ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
 document.addEventListener("DOMContentLoaded", async () => {
+  let isPro = localStorage.getItem("isPro") === "true";
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
 
