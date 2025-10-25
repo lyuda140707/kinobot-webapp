@@ -85,8 +85,7 @@
         statusEl.textContent = "🔗 Підключення до потоку...";
 
         // 🔹 Формуємо захищений URL через Cloudflare Worker
-        const encoded = btoa(stream);
-        const finalUrl = `${WORKER_URL}/m3u8?src=${encodeURIComponent(encoded)}`;
+        const finalUrl = `${WORKER_URL}/m3u8?src=${btoa(stream)}`;
 
         // 🔹 Відтворення через HLS.js
         if (Hls.isSupported()) {
