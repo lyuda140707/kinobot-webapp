@@ -19,9 +19,11 @@
       overflow: hidden;
     }
     h1 {
-      font-size: 1.2em;
-      margin: 10px 0;
+      font-size: 1.4em;
+      margin: 15px 0;
       text-align: center;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
     }
     video {
       width: 100%;
@@ -52,12 +54,11 @@
   <button onclick="history.back()">⬅ Назад у додаток</button>
 
   <script>
-    // --- 🔹 Налаштування ---
-    const SUPABASE_URL = "https://zerlqvbmqszomlondlte.supabase.co"; // твій
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // anon ключ
-    const WORKER_URL = "https://kino-proxy.lyuda14070702.workers.dev"; // твій Worker
+    // --- 🔹 Конфігурація ---
+    const SUPABASE_URL = "https://zerlqvbmqszomlondlte.supabase.co"; // 🔹 твій URL
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // 🔹 твій anon ключ
+    const WORKER_URL = "https://kino-proxy.lyuda14070702.workers.dev"; // 🔹 твій Cloudflare Worker
 
-    // --- 🔹 Отримуємо ID з URL ---
     document.addEventListener("DOMContentLoaded", async () => {
       const params = new URLSearchParams(window.location.search);
       const filmId = params.get("id");
@@ -68,7 +69,7 @@
       }
 
       try {
-        // 1️⃣ Отримуємо дані фільму з Supabase по ID
+        // 1️⃣ Отримуємо дані фільму з Supabase
         const res = await fetch(`${SUPABASE_URL}/rest/v1/films?id=eq.${filmId}&select=title,stream_url`, {
           headers: {
             apikey: SUPABASE_KEY,
@@ -82,28 +83,27 @@
           return;
         }
 
+        // 2️⃣ Виводимо назву фільму
         document.getElementById("filmTitle").textContent = "🎬 " + film.title;
 
-        // 2️⃣ Готуємо відео
+        // 3️⃣ Перевіряємо наявність stream_url
         const stream = film.stream_url;
         if (!stream) {
           document.getElementById("filmTitle").textContent = "❌ Потік не знайдено";
           return;
         }
 
-        // 3️⃣ Формуємо посилання через Worker
-        const encoded = btoa(stream);
+        // 4️⃣ Формуємо URL через твій Cloudflare Worker
+        const encoded = btoa(stream); // кодуємо адресу у base64
         const finalUrl = `${WORKER_URL}/m3u8?src=${encoded}`;
         const video = document.getElementById("videoPlayer");
 
-        // 4️⃣ Відтворення через HLS.js
+        // 5️⃣ Відтворення через HLS.js
         if (Hls.isSupported()) {
           const hls = new Hls();
           hls.loadSource(finalUrl);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play();
-          });
+          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = finalUrl;
           video.addEventListener("loadedmetadata", () => video.play());
