@@ -1334,6 +1334,7 @@ async function fetchFilmsFromSupabase() {
 
   // Мапінг у ваш старий формат з українськими ключами
 window.films = rows.map(r => ({
+  'id'         : r.id ?? '',
   'Назва'      : r.title ?? '',
   'Тип'        : r.type ?? '',
   'Жанр'       : r.genre ?? '',
@@ -3459,7 +3460,7 @@ function openOnTV(title, id) {
   let filmId = id;
   if (!filmId && window.films?.length) {
     const found = window.films.find(f => f['Назва'] === title);
-    if (found) filmId = found.id || found.ID || found['id'];
+    if (found) filmId = found.id || found['id'];
   }
 
   if (!filmId) {
