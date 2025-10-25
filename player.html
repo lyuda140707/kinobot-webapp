@@ -52,6 +52,14 @@
 <body>
   <h2 id="filmTitle">🎞️ Завантаження відео...</h2>
   <video id="videoPlayer" controls muted autoplay playsinline></video>
+  <!-- 🔊 Кнопка для увімкнення звуку -->
+  <button id="unmuteBtn"
+          style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+                 background:rgba(0,224,255,0.9); color:#000; font-weight:600;
+                 padding:12px 20px; border:none; border-radius:10px; cursor:pointer;
+                 font-size:16px; display:none; z-index:5; transition:opacity 0.4s ease;">
+    🔊 Увімкнути звук
+  </button>
   <p class="loading" id="statusText">⏳ Підготовка до відтворення...</p>
 
   <script>
@@ -159,15 +167,27 @@ video.addEventListener("fullscreenchange", () => {
     document.body.style.background = "#000";
   }
 });
-// 🎧 Вмикаємо звук при першій взаємодії користувача
-document.addEventListener("click", () => {
-  const video = document.getElementById("videoPlayer");
+// 🎧 Кнопка "Увімкнути звук"
+const video = document.getElementById("videoPlayer");
+const unmuteBtn = document.getElementById("unmuteBtn");
+
+// коли сторінка повністю завантажена
+document.addEventListener("DOMContentLoaded", () => {
+  // якщо відео вимкнене — показуємо кнопку
   if (video.muted) {
-    video.muted = false;
-    video.volume = 1.0;
-    console.log("🔊 Звук увімкнено");
+    unmuteBtn.style.display = "block";
   }
-}, { once: true });
+});
+
+// при кліку по кнопці — увімкнути звук і сховати кнопку
+unmuteBtn.addEventListener("click", () => {
+  video.muted = false;
+  video.volume = 1.0;
+  video.play().catch(()=>{});
+  unmuteBtn.style.opacity = "0";
+  setTimeout(() => (unmuteBtn.style.display = "none"), 400);
+});
+
 
   </script>
 </body>
