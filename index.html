@@ -2492,7 +2492,7 @@ if (seriesHits.length > 0) {
          : `<button class="search-button" onclick="openVideoById(this,'${f['Назва']}')">▶️ Дивитись</button>`);
     // 🔹 кнопка "Дивитись на ТВ" (показується тільки якщо користувач має PRO або фільм не PRO)
     const tvBtn =
-      f['stream_url'] && !(f.access === "PRO" && !isPro)
+      f['stream_url'] && !(f['Доступ'] === "PRO" && !isPro)
         ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">📺 Дивитись на ТВ</button>`
         : '';
    
