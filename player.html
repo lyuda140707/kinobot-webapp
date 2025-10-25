@@ -151,6 +151,23 @@
         titleEl.textContent = "❌ Помилка завантаження відео";
         statusEl.textContent = "";
       }
+    // 🎧 Кнопка "Увімкнути звук"
+    const unmuteBtn = document.getElementById("unmuteBtn");
+
+    // через невелику паузу перевіряємо mute і показуємо кнопку
+    setTimeout(() => {
+      if (video.muted) {
+        unmuteBtn.style.display = "block";
+      }
+    }, 1000);
+    // при кліку по кнопці — увімкнути звук і сховати кнопку
+    unmuteBtn.addEventListener("click", () => {
+      video.muted = false;
+      video.volume = 1.0;
+      video.play().catch(()=>{});
+      unmuteBtn.style.opacity = "0";
+      setTimeout(() => (unmuteBtn.style.display = "none"), 400);
+      });
     });
 
   // 🎬 Режим кіно (затемнення фону при Picture-in-Picture або Fullscreen)
@@ -167,15 +184,7 @@ video.addEventListener("fullscreenchange", () => {
     document.body.style.background = "#000";
   }
 });
-// 🎧 Кнопка "Увімкнути звук"
-const video = document.getElementById("videoPlayer");
-const unmuteBtn = document.getElementById("unmuteBtn");
-// якщо відео вимкнене — показуємо кнопку після невеликої паузи
-setTimeout(() => {
-  if (video.muted) {
-    unmuteBtn.style.display = "block";
-  }
-}, 1000);
+
 
 
 // при кліку по кнопці — увімкнути звук і сховати кнопку
