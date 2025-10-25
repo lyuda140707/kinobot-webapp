@@ -120,8 +120,13 @@
             video.play();
           });
           hls.on(Hls.Events.ERROR, (event, data) => {
-            console.error("HLS error:", data);
-            statusEl.textContent = "⚠️ Помилка відтворення потоку";
+            // показуємо помилку лише якщо потік справді зупинився
+            if (data.fatal) {
+              console.error("HLS fatal error:", data);
+              statusEl.textContent = "⚠️ Помилка відтворення потоку";
+            } else {
+              console.warn("HLS warning:", data.details);
+            }
           });
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = finalUrl;
@@ -154,6 +159,15 @@ video.addEventListener("fullscreenchange", () => {
     document.body.style.background = "#000";
   }
 });
+// 🎧 Вмикаємо звук при першій взаємодії користувача
+document.addEventListener("click", () => {
+  const video = document.getElementById("videoPlayer");
+  if (video.muted) {
+    video.muted = false;
+    video.volume = 1.0;
+    console.log("🔊 Звук увімкнено");
+  }
+}, { once: true });
 
   </script>
 </body>
