@@ -286,35 +286,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
+    
 // 🎥 Клік по відео → ховає всі елементи і вмикає повний екран
 const videoEl = document.getElementById("videoPlayer");
 let isUiHidden = false;
 
 videoEl.addEventListener("click", () => {
   if (!document.fullscreenElement) {
-    // Увійти у fullscreen
     videoEl.requestFullscreen().catch(err => console.warn("Fullscreen error:", err));
   } else {
-    // Вийти з fullscreen
     document.exitFullscreen();
   }
-
-// Ховаємо / показуємо елементи
-isUiHidden = !isUiHidden;
-["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.style.display = isUiHidden ? "none" : "block";
+  // Ховаємо / показуємо елементи
+  isUiHidden = !isUiHidden;
+  ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isUiHidden ? "none" : "block";
+  });
 });
 // ❌ Кнопка закриття (Telegram або браузер)
 document.getElementById("closeBtn").addEventListener("click", () => {
   try {
     if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.close(); // закриває вкладку у Telegram
+      window.Telegram.WebApp.close();
     } else if (window.history.length > 1) {
-      window.history.back(); // повертає на попередню сторінку
+      window.history.back();
     } else {
-      window.close(); // якщо окреме вікно
+      window.close();
     }
   } catch (err) {
     window.close();
