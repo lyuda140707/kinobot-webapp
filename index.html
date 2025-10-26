@@ -1288,7 +1288,7 @@ function renderBatch() {
       // 📺 кнопка "Дивитись на ТВ" (лише якщо не PRO або користувач має PRO)
       if (film['stream_url']) {
         if (!(film.access === "PRO" && !isPro)) {
-          btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+          btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Відкрити у плеєрі</button>`;
         }
       }
     }
@@ -1954,7 +1954,7 @@ function filterByYear(year) {
       // 📺 кнопка для ТВ (тільки якщо користувач має PRO або фільм не PRO)
       if (film['stream_url']) {
         if (!(film.access === "PRO" && !isPro)) {
-          buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">📺 Дивитись на ТВ</button>`;
+          buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Відкрити у плеєрі</button>`;
         }
       }
     }
@@ -2007,7 +2007,7 @@ function filterByYear(year) {
       // 🔹 друга кнопка "Дивитись на ТВ" (лише якщо не PRO або користувач має PRO)
       const tvBtn =
         streamUrl && !(f.access === "PRO" && !isPro)
-          ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id})">📺 Дивитись на ТВ</button>`
+          ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id})">🎬 Відкрити у плеєрі</button>`
           : '';
 
       return `
@@ -2493,7 +2493,7 @@ if (seriesHits.length > 0) {
     // 🔹 кнопка "Дивитись на ТВ" (показується тільки якщо користувач має PRO або фільм не PRO)
     const tvBtn =
       f['stream_url'] && !(f['Доступ'] === "PRO" && !isPro)
-        ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">📺 Дивитись на ТВ</button>`
+        ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">🎬 Відкрити у плеєрі</button>`
         : '';
    
     return `
