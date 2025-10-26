@@ -230,7 +230,7 @@ videoEl.addEventListener("click", () => {
   isUiHidden = !isUiHidden;
 
   // 🔸 Ховаємо абсолютно всі елементи, залишаємо лише відео
-  ["filmTitle", "statusText", "castButton", "airplayButton", "unmuteBtn", "closeBtn"].forEach(id => {
+  ["filmTitle", "statusText", "castButton", "airplayButton", "unmuteBtn"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.style.opacity = isUiHidden ? "0" : "1";
@@ -255,7 +255,7 @@ document.addEventListener("click", (e) => {
     isUiHidden = true;
 
     // 🔸 Ховаємо абсолютно всі елементи, залишаємо лише відео
-    ["filmTitle", "statusText", "castButton", "airplayButton", "unmuteBtn", "closeBtn"].forEach(id => {
+    ["filmTitle", "statusText", "castButton", "airplayButton", "unmuteBtn"].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.style.opacity = isUiHidden ? "0" : "1";
