@@ -79,6 +79,11 @@
           video.play().catch(()=>{});
         }
       }, { once: true });
+      // 🕐 Автоматична імітація дотику через 0.8 сек для Telegram WebView
+      setTimeout(() => {
+        const ev = new Event('touchstart');
+        document.body.dispatchEvent(ev);
+      }, 800);
       // 💾 ЗАПАМ'ЯТОВУВАННЯ ПОЗИЦІЇ ВІДТВОРЕННЯ
       const posKey = "lastPosition_" + filmId;
       
