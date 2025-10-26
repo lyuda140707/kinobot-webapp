@@ -35,6 +35,12 @@
       outline: none;
       object-fit: contain;
     }
+    
+    #filmTitle, #statusText, #closeBtn, #castButton, #airplayButton {
+      transition: opacity 0.4s ease;
+      position: relative;
+      z-index: 15;
+    }
 
     .loading {
       color: #aaa;
@@ -209,24 +215,55 @@
         titleEl.textContent = "❌ Помилка завантаження відео";
         statusEl.textContent = "";
       }
-    // 🎧 Кнопка "Увімкнути звук"
-    const unmuteBtn = document.getElementById("unmuteBtn");
+// 🎧 Кнопка "Увімкнути звук"
+const unmuteBtn = document.getElementById("unmuteBtn");
+setTimeout(() => { if (video.muted) unmuteBtn.style.display = "block"; }, 1000);
+unmuteBtn.addEventListener("click", () => {
+  video.muted = false;
+  video.volume = 1.0;
+  video.play().catch(()=>{});
+  unmuteBtn.style.opacity = "0";
+  setTimeout(() => (unmuteBtn.style.display = "none"), 400);
+});
+// ❌ Кнопка закриття (Telegram або браузер)
+const closeBtn = document.getElementById("closeBtn");
+closeBtn.addEventListener("click", () => {
+  try {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.close();
+    } else if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.close();
+    }
+  } catch (err) {
+    window.close();
+  }
+});
+// 🎥 Клік по відео → ховає всі елементи і вмикає повний екран
+const videoEl = document.getElementById("videoPlayer");
+let isUiHidden = false;
 
-    // через невелику паузу перевіряємо mute і показуємо кнопку
-    setTimeout(() => {
-      if (video.muted) {
-        unmuteBtn.style.display = "block";
-      }
-    }, 1000);
-    // при кліку по кнопці — увімкнути звук і сховати кнопку
-    unmuteBtn.addEventListener("click", () => {
-      video.muted = false;
-      video.volume = 1.0;
-      video.play().catch(()=>{});
-      unmuteBtn.style.opacity = "0";
-      setTimeout(() => (unmuteBtn.style.display = "none"), 400);
-      });
-    });
+videoEl.addEventListener("click", () => {
+  if (!document.fullscreenElement) {
+    videoEl.requestFullscreen().catch(err => console.warn("Fullscreen error:", err));
+  } else {
+    document.exitFullscreen();
+  }
+
+  // Ховаємо / показуємо елементи
+  isUiHidden = !isUiHidden;
+  ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.opacity = isUiHidden ? "0" : "1";
+      el.style.pointerEvents = isUiHidden ? "none" : "auto";
+    }
+  });
+});
+
+});
 
   // 🎬 Режим кіно (затемнення фону при Picture-in-Picture або Fullscreen)
 video.addEventListener("enterpictureinpicture", () => {
@@ -274,53 +311,19 @@ async function castToTV() {
 document.getElementById('castButton').addEventListener('click', castToTV);
 
 // === ПІДТРИМКА AIRPLAY (IPHONE / SAFARI) ===
-document.addEventListener("DOMContentLoaded", () => {
-  const video = document.getElementById("videoPlayer");
-  const airplayBtn = document.getElementById("airplayButton");
-
-  if (window.WebKitPlaybackTargetAvailabilityEvent) {
-    airplayBtn.style.display = 'block';
-    airplayBtn.addEventListener('click', () => {
-      if (video.webkitShowPlaybackTargetPicker) {
-        video.webkitShowPlaybackTargetPicker();
-      }
-    });
-  }
-});
-    
-// 🎥 Клік по відео → ховає всі елементи і вмикає повний екран
-const videoEl = document.getElementById("videoPlayer");
-let isUiHidden = false;
-
-videoEl.addEventListener("click", () => {
-  if (!document.fullscreenElement) {
-    videoEl.requestFullscreen().catch(err => console.warn("Fullscreen error:", err));
-  } else {
-    document.exitFullscreen();
-  }
-  // Ховаємо / показуємо елементи (включно з назвою і кнопкою ✖)
-  isUiHidden = !isUiHidden;
-  const idsToToggle = ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"];
-  idsToToggle.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.opacity = isUiHidden ? "0" : "1";
-    if (el) el.style.pointerEvents = isUiHidden ? "none" : "auto";
-  });
-});
-// ❌ Кнопка закриття (Telegram або браузер)
-document.getElementById("closeBtn").addEventListener("click", () => {
-  try {
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.close();
-    } else if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.close();
+const airplayBtn = document.getElementById("airplayButton");
+if (window.WebKitPlaybackTargetAvailabilityEvent) {
+  airplayBtn.style.display = 'block';
+  airplayBtn.addEventListener('click', () => {
+    if (video.webkitShowPlaybackTargetPicker) {
+      video.webkitShowPlaybackTargetPicker();
     }
-  } catch (err) {
-    window.close();
-  }
-});
+  });
+}
+
+    
+
+
 
   </script>
 </body>
