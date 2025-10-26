@@ -6,6 +6,7 @@
   <title>🎬 Відтворення фільму</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
       margin: 0;
@@ -299,12 +300,11 @@ videoEl.addEventListener("click", () => {
     document.exitFullscreen();
   }
 
-  // Ховаємо / показуємо елементи
-  isUiHidden = !isUiHidden;
-  document.getElementById("filmTitle").style.display = isUiHidden ? "none" : "block";
-  document.getElementById("statusText").style.display = isUiHidden ? "none" : "block";
-  document.getElementById("castButton").style.display = isUiHidden ? "none" : "block";
-  document.getElementById("airplayButton").style.display = isUiHidden ? "none" : "block";
+// Ховаємо / показуємо елементи
+isUiHidden = !isUiHidden;
+["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.style.display = isUiHidden ? "none" : "block";
 });
 // ❌ Кнопка закриття (Telegram або браузер)
 document.getElementById("closeBtn").addEventListener("click", () => {
