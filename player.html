@@ -46,12 +46,40 @@
       font-size: 18px;
       margin-top: 20px;
     }
+    .cast-btn, .airplay-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #00e0ff, #00bcd4);
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 224, 255, 0.6);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      z-index: 10;
+    }
+    .cast-btn:hover, .airplay-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 224, 255, 0.8);
+    }
+  
   </style>
+
+<!-- Підключення Cast API -->
+<script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
 </head>
 
 <body>
   <h2 id="filmTitle">🎞️ Завантаження відео...</h2>
   <video id="videoPlayer" controls muted autoplay playsinline></video>
+  <!-- Кнопки трансляції -->
+  <button id="castButton" class="cast-btn" style="display:none;">📺 Передати на ТВ</button>
+  <button id="airplayButton" class="airplay-btn" style="display:none;">🍏 AirPlay</button>
+
   <!-- 🔊 Кнопка для увімкнення звуку -->
   <button id="unmuteBtn"
           style="position:absolute; top:35%;; left:50%; transform:translate(-50%, -50%);
@@ -61,6 +89,16 @@
     🔊 Увімкнути звук
   </button>
   <p class="loading" id="statusText">⏳ Підготовка до відтворення...</p>
+  <!-- Кнопка Повернення -->
+  <button id="backBtn"
+          style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+                 background:linear-gradient(90deg,#00e0ff,#00bcd4);
+                 color:#000; font-weight:600; border:none; border-radius:10px;
+                 padding:10px 18px; font-size:16px; cursor:pointer;
+                 box-shadow:0 0 10px rgba(0,224,255,0.5);
+                 transition:transform 0.2s ease, box-shadow 0.2s ease; z-index:10;">
+    ⬅️ Повернутись у Telegram
+  </button>
 
   <script>
     const backendUrl = "https://relax-time2.onrender.com"; // ← бекенд Render
@@ -195,6 +233,63 @@ video.addEventListener("fullscreenchange", () => {
     document.body.style.background = "#000";
   } else {
     document.body.style.background = "#000";
+  }
+});
+// === ПІДТРИМКА CAST (ANDROID / CHROME) ===
+window.__onGCastApiAvailable = function(isAvailable) {
+  if (isAvailable) {
+    const context = cast.framework.CastContext.getInstance();
+    context.setOptions({
+      receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+      autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+    });
+    document.getElementById('castButton').style.display = 'block';
+  }
+};
+
+// 📺 Відправлення відео на ТВ
+async function castToTV() {
+  const video = document.getElementById("videoPlayer");
+  const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+  if (castSession && video.src) {
+    const mediaInfo = new chrome.cast.media.MediaInfo(video.src, 'application/x-mpegURL');
+    const request = new chrome.cast.media.LoadRequest(mediaInfo);
+    try {
+      await castSession.loadMedia(request);
+      console.log("📺 Відтворення на ТВ розпочато");
+    } catch (err) {
+      console.error("❌ Помилка Cast:", err);
+    }
+  } else {
+    alert("Не знайдено пристроїв Chromecast поблизу");
+  }
+}
+document.getElementById('castButton').addEventListener('click', castToTV);
+
+// === ПІДТРИМКА AIRPLAY (IPHONE / SAFARI) ===
+document.addEventListener("DOMContentLoaded", () => {
+  const video = document.getElementById("videoPlayer");
+  const airplayBtn = document.getElementById("airplayButton");
+
+  if (window.WebKitPlaybackTargetAvailabilityEvent) {
+    airplayBtn.style.display = 'block';
+    airplayBtn.addEventListener('click', () => {
+      if (video.webkitShowPlaybackTargetPicker) {
+        video.webkitShowPlaybackTargetPicker();
+      }
+    });
+  }
+});
+// 🔙 Кнопка повернення в Telegram або браузер
+document.getElementById("backBtn").addEventListener("click", () => {
+  try {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.close(); // закрити WebApp
+    } else {
+      window.history.back(); // якщо відкрито з браузера
+    }
+  } catch (err) {
+    window.history.back();
   }
 });
 
