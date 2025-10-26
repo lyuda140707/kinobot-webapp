@@ -89,16 +89,7 @@
     🔊 Увімкнути звук
   </button>
   <p class="loading" id="statusText">⏳ Підготовка до відтворення...</p>
-  <!-- Кнопка Повернення -->
-  <button id="backBtn"
-          style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-                 background:linear-gradient(90deg,#00e0ff,#00bcd4);
-                 color:#000; font-weight:600; border:none; border-radius:10px;
-                 padding:10px 18px; font-size:16px; cursor:pointer;
-                 box-shadow:0 0 10px rgba(0,224,255,0.5);
-                 transition:transform 0.2s ease, box-shadow 0.2s ease; z-index:10;">
-    ⬅️ Повернутись у Telegram
-  </button>
+  
 
   <script>
     const backendUrl = "https://relax-time2.onrender.com"; // ← бекенд Render
@@ -280,18 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-// 🔙 Кнопка повернення в Telegram або браузер
-document.getElementById("backBtn").addEventListener("click", () => {
-  try {
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.close(); // закрити WebApp
-    } else {
-      window.history.back(); // якщо відкрито з браузера
-    }
-  } catch (err) {
-    window.history.back();
-  }
-});
+
 
   </script>
 </body>
