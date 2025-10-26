@@ -89,18 +89,7 @@
   <!-- Кнопки трансляції -->
   <button id="castButton" class="cast-btn" style="display:none;">📺 Передати на ТВ</button>
   <button id="airplayButton" class="airplay-btn" style="display:none;">🍏 AirPlay</button>
-  <!-- ❌ Кнопка закриття -->
-  <button id="closeBtn"
-    style="position:absolute; top:12px; left:12px;
-           background:rgba(0,0,0,0.6); color:#fff;
-           border:none; border-radius:50%;
-           width:38px; height:38px; font-size:20px;
-           cursor:pointer; z-index:20;
-           box-shadow:0 0 10px rgba(0,224,255,0.6);
-           transition:transform 0.2s ease, box-shadow 0.2s ease;">
-    ✖
-  </button>
-
+  
   <!-- 🔊 Кнопка для увімкнення звуку -->
   <button id="unmuteBtn"
           style="position:absolute; top:35%;; left:50%; transform:translate(-50%, -50%);
@@ -225,24 +214,7 @@ unmuteBtn.addEventListener("click", () => {
   unmuteBtn.style.opacity = "0";
   setTimeout(() => (unmuteBtn.style.display = "none"), 400);
 });
-// ❌ Кнопка закриття (Telegram або браузер)
-const closeBtn = document.getElementById("closeBtn");
-closeBtn.addEventListener("click", () => {
-  const tg = window.Telegram?.WebApp;
 
-  try {
-    if (tg && tg.initDataUnsafe) {
-      tg.close(); // ✅ Закриває Telegram WebApp
-    } else if (window.history.length > 1) {
-      window.history.back(); // якщо є історія
-    } else {
-      window.open('', '_self').close(); // намагаємось закрити вкладку
-    }
-  } catch (err) {
-    console.warn("Помилка при закритті:", err);
-    window.open('', '_self').close();
-  }
-});
 
 
 // 🎥 Клік по відео або будь-де → ховає всі елементи і вмикає повний екран
@@ -257,7 +229,7 @@ videoEl.addEventListener("click", () => {
 
   isUiHidden = !isUiHidden;
 
-  ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
+  ["filmTitle", "statusText", "castButton", "airplayButton"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.style.opacity = isUiHidden ? "0" : "1";
@@ -268,6 +240,8 @@ videoEl.addEventListener("click", () => {
 
 // 🔸 Клік будь-де (крім кнопок) — повністю ховає інтерфейс
 document.addEventListener("click", (e) => {
+  // Якщо клік по відео — не чіпаємо, бо це вже обробляється вище
+  if (e.target.id === "videoPlayer") return;
   // Ігноруємо кліки по службових кнопках
   const ignoreIds = ["castButton", "airplayButton", "closeBtn", "unmuteBtn"];
   if (ignoreIds.includes(e.target.id)) return;
@@ -279,7 +253,7 @@ document.addEventListener("click", (e) => {
     }
     isUiHidden = true;
 
-    ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
+    ["filmTitle", "statusText", "castButton", "airplayButton"].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.style.opacity = "0";
