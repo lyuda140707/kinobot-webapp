@@ -141,7 +141,7 @@
         }
 
         const stream = data.stream_url;
-        titleEl.textContent = "🎬 Відтворення фільму";
+        titleEl.textContent = "🎬 " + (data.title || data.name || "Фільм");
         statusEl.textContent = "🔗 Підключення до потоку...";
 
         // 🔹 Формуємо захищений URL через Cloudflare Worker
@@ -272,6 +272,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// 🎥 Клік по відео → ховає всі елементи і вмикає повний екран
+const videoEl = document.getElementById("videoPlayer");
+let isUiHidden = false;
+
+videoEl.addEventListener("click", () => {
+  if (!document.fullscreenElement) {
+    // Увійти у fullscreen
+    videoEl.requestFullscreen().catch(err => console.warn("Fullscreen error:", err));
+  } else {
+    // Вийти з fullscreen
+    document.exitFullscreen();
+  }
+
+  // Ховаємо / показуємо елементи
+  isUiHidden = !isUiHidden;
+  document.getElementById("filmTitle").style.display = isUiHidden ? "none" : "block";
+  document.getElementById("statusText").style.display = isUiHidden ? "none" : "block";
+  document.getElementById("castButton").style.display = isUiHidden ? "none" : "block";
+  document.getElementById("airplayButton").style.display = isUiHidden ? "none" : "block";
+});
 
   </script>
 </body>
