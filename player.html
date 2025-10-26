@@ -73,17 +73,6 @@
       const titleEl = document.getElementById("filmTitle");
       const statusEl = document.getElementById("statusText");
       const video = document.getElementById("videoPlayer");
-      // 🟢 Telegram WebView fix — штучна взаємодія для автоплей
-      document.body.addEventListener("touchstart", () => {
-        if (video.paused) {
-          video.play().catch(()=>{});
-        }
-      }, { once: true });
-      // 🕐 Автоматична імітація дотику через 0.8 сек для Telegram WebView
-      setTimeout(() => {
-        const ev = new Event('touchstart');
-        document.body.dispatchEvent(ev);
-      }, 800);
       // 💾 ЗАПАМ'ЯТОВУВАННЯ ПОЗИЦІЇ ВІДТВОРЕННЯ
       const posKey = "lastPosition_" + filmId;
       
@@ -141,8 +130,6 @@
           });
           hls.loadSource(finalUrl);
           hls.attachMedia(video);
-          video.muted = true; 
-          video.play().catch(()=>{}); // 🔹 форсує старт без взаємодії
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             statusEl.textContent = "";
             video.play();
