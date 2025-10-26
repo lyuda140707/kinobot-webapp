@@ -228,33 +228,35 @@ unmuteBtn.addEventListener("click", () => {
 // ❌ Кнопка закриття (Telegram або браузер)
 const closeBtn = document.getElementById("closeBtn");
 closeBtn.addEventListener("click", () => {
+  const tg = window.Telegram?.WebApp;
+
   try {
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.close(); // Закрити Telegram WebApp
+    if (tg && tg.initDataUnsafe) {
+      tg.close(); // ✅ Закриває Telegram WebApp
+    } else if (window.history.length > 1) {
+      window.history.back(); // якщо є історія
     } else {
-      // Якщо відкрито у браузері — спробувати закрити вкладку
-      window.history.back();
-      setTimeout(() => window.close(), 300);
+      window.open('', '_self').close(); // намагаємось закрити вкладку
     }
-  } catch {
-    window.close();
+  } catch (err) {
+    console.warn("Помилка при закритті:", err);
+    window.open('', '_self').close();
   }
 });
 
-// 🎥 Клік по відео → ховає всі елементи і вмикає повний екран
+
+// 🎥 Клік по відео або будь-де → ховає всі елементи і вмикає повний екран
 const videoEl = document.getElementById("videoPlayer");
 let isUiHidden = false;
 
+// Клік по самому відео — перемикає показ / приховування елементів
 videoEl.addEventListener("click", () => {
   if (!document.fullscreenElement) {
     videoEl.requestFullscreen().catch(err => console.warn("Fullscreen error:", err));
-  } else {
-    document.exitFullscreen();
   }
 
-  // Ховаємо / показуємо елементи
   isUiHidden = !isUiHidden;
+
   ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -263,14 +265,20 @@ videoEl.addEventListener("click", () => {
     }
   });
 });
-// 🔸 Клік будь-де на екрані — теж ховає всі елементи, залишаючи лише відео
-document.body.addEventListener("click", (e) => {
-  // Якщо клік не по самому відео — тоді ховаємо інтерфейс
+
+// 🔸 Клік будь-де (крім кнопок) — повністю ховає інтерфейс
+document.addEventListener("click", (e) => {
+  // Ігноруємо кліки по службових кнопках
+  const ignoreIds = ["castButton", "airplayButton", "closeBtn", "unmuteBtn"];
+  if (ignoreIds.includes(e.target.id)) return;
+
+  // Якщо клік не по самому відео — приховуємо елементи
   if (e.target.id !== "videoPlayer") {
     if (!document.fullscreenElement) {
       videoEl.requestFullscreen().catch(err => console.warn("Fullscreen error:", err));
     }
     isUiHidden = true;
+
     ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -280,9 +288,7 @@ document.body.addEventListener("click", (e) => {
     });
   }
 });
-
 });
-
   // 🎬 Режим кіно (затемнення фону при Picture-in-Picture або Fullscreen)
 video.addEventListener("enterpictureinpicture", () => {
   document.body.style.background = "#000";
@@ -338,10 +344,6 @@ if (window.WebKitPlaybackTargetAvailabilityEvent) {
     }
   });
 }
-
-    
-
-
 
   </script>
 </body>
