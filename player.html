@@ -231,16 +231,17 @@ closeBtn.addEventListener("click", () => {
   try {
     const tg = window.Telegram?.WebApp;
     if (tg) {
-      tg.close();
-    } else if (window.history.length > 1) {
-      window.history.back();
+      tg.close(); // Закрити Telegram WebApp
     } else {
-      window.close();
+      // Якщо відкрито у браузері — спробувати закрити вкладку
+      window.history.back();
+      setTimeout(() => window.close(), 300);
     }
-  } catch (err) {
+  } catch {
     window.close();
   }
 });
+
 // 🎥 Клік по відео → ховає всі елементи і вмикає повний екран
 const videoEl = document.getElementById("videoPlayer");
 let isUiHidden = false;
@@ -261,6 +262,23 @@ videoEl.addEventListener("click", () => {
       el.style.pointerEvents = isUiHidden ? "none" : "auto";
     }
   });
+});
+// 🔸 Клік будь-де на екрані — теж ховає всі елементи, залишаючи лише відео
+document.body.addEventListener("click", (e) => {
+  // Якщо клік не по самому відео — тоді ховаємо інтерфейс
+  if (e.target.id !== "videoPlayer") {
+    if (!document.fullscreenElement) {
+      videoEl.requestFullscreen().catch(err => console.warn("Fullscreen error:", err));
+    }
+    isUiHidden = true;
+    ["filmTitle", "statusText", "castButton", "airplayButton", "closeBtn"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.opacity = "0";
+        el.style.pointerEvents = "none";
+      }
+    });
+  }
 });
 
 });
