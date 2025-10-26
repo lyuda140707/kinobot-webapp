@@ -73,6 +73,12 @@
       const titleEl = document.getElementById("filmTitle");
       const statusEl = document.getElementById("statusText");
       const video = document.getElementById("videoPlayer");
+      // 🟢 Telegram WebView fix — штучна взаємодія для автоплей
+      document.body.addEventListener("touchstart", () => {
+        if (video.paused) {
+          video.play().catch(()=>{});
+        }
+      }, { once: true });
       // 💾 ЗАПАМ'ЯТОВУВАННЯ ПОЗИЦІЇ ВІДТВОРЕННЯ
       const posKey = "lastPosition_" + filmId;
       
