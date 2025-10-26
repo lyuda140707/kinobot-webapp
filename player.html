@@ -130,6 +130,8 @@
           });
           hls.loadSource(finalUrl);
           hls.attachMedia(video);
+          video.muted = true; 
+          video.play().catch(()=>{}); // 🔹 форсує старт без взаємодії
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             statusEl.textContent = "";
             video.play();
