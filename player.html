@@ -229,14 +229,18 @@ videoEl.addEventListener("click", () => {
 
   isUiHidden = !isUiHidden;
 
-  // 🔸 Ховаємо абсолютно всі елементи, залишаємо лише відео
-  ["filmTitle", "statusText", "castButton", "airplayButton", "unmuteBtn"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.style.opacity = isUiHidden ? "0" : "1";
-      el.style.pointerEvents = isUiHidden ? "none" : "auto";
+// 🔸 Ховаємо абсолютно всі елементи, включно з назвою "Фільм"
+["filmTitle", "statusText", "castButton", "airplayButton", "unmuteBtn"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.opacity = isUiHidden ? "0" : "1";
+    el.style.pointerEvents = isUiHidden ? "none" : "auto";
+    
+    // 🟡 Додаємо: щоб назва "Фільм" реально зникала (display: none)
+    if (id === "filmTitle") {
+      el.style.display = isUiHidden ? "none" : "block";
     }
-  });
+  }
 });
 
 // 🔸 Клік будь-де (крім кнопок) — повністю ховає інтерфейс
@@ -254,16 +258,19 @@ document.addEventListener("click", (e) => {
     }
     isUiHidden = true;
 
-    // 🔸 Ховаємо абсолютно всі елементи, залишаємо лише відео
+    // 🔸 Ховаємо абсолютно всі елементи, включно з назвою "Фільм"
     ["filmTitle", "statusText", "castButton", "airplayButton", "unmuteBtn"].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.style.opacity = isUiHidden ? "0" : "1";
         el.style.pointerEvents = isUiHidden ? "none" : "auto";
+        
+        // 🟡 Додаємо: щоб назва "Фільм" реально зникала повністю
+        if (id === "filmTitle") {
+          el.style.display = isUiHidden ? "none" : "block";
         }
-      });
-  }
-});
+      }
+    });
 });
   // 🎬 Режим кіно (затемнення фону при Picture-in-Picture або Fullscreen)
 video.addEventListener("enterpictureinpicture", () => {
