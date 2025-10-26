@@ -65,7 +65,10 @@
       transform: scale(1.05);
       box-shadow: 0 0 15px rgba(0, 224, 255, 0.8);
     }
-  
+  #closeBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0,224,255,0.8);
+  }
   </style>
 
 <!-- Підключення Cast API -->
@@ -79,6 +82,17 @@
   <!-- Кнопки трансляції -->
   <button id="castButton" class="cast-btn" style="display:none;">📺 Передати на ТВ</button>
   <button id="airplayButton" class="airplay-btn" style="display:none;">🍏 AirPlay</button>
+  <!-- ❌ Кнопка закриття -->
+  <button id="closeBtn"
+    style="position:absolute; top:12px; left:12px;
+           background:rgba(0,0,0,0.6); color:#fff;
+           border:none; border-radius:50%;
+           width:38px; height:38px; font-size:20px;
+           cursor:pointer; z-index:20;
+           box-shadow:0 0 10px rgba(0,224,255,0.6);
+           transition:transform 0.2s ease, box-shadow 0.2s ease;">
+    ✖
+  </button>
 
   <!-- 🔊 Кнопка для увімкнення звуку -->
   <button id="unmuteBtn"
@@ -291,6 +305,20 @@ videoEl.addEventListener("click", () => {
   document.getElementById("statusText").style.display = isUiHidden ? "none" : "block";
   document.getElementById("castButton").style.display = isUiHidden ? "none" : "block";
   document.getElementById("airplayButton").style.display = isUiHidden ? "none" : "block";
+});
+// ❌ Кнопка закриття (Telegram або браузер)
+document.getElementById("closeBtn").addEventListener("click", () => {
+  try {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.close(); // закриває вкладку у Telegram
+    } else if (window.history.length > 1) {
+      window.history.back(); // повертає на попередню сторінку
+    } else {
+      window.close(); // якщо окреме вікно
+    }
+  } catch (err) {
+    window.close();
+  }
 });
 
   </script>
