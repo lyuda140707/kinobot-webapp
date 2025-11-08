@@ -2245,7 +2245,9 @@ function showSkeletonCollections() {
       font-family: 'Russo One', sans-serif;
     ">
       <h1 style="font-size: 28px; margin-bottom: 20px;">❗ Щоб користуватись застосунком</h1>
-      <h2 style="font-size: 22px; margin-bottom: 20px;">Підпишіться на <u>обидва</u> канали 🎬</h2>
+      <h2 style="font-size: 22px; margin-bottom: 20px; color:#ff4d4d;">
+        Підпишіться на <u>обидва канали 🎬</u>
+      </h2>
 
       <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px;">
         <a href="https://t.me/KinoTochkaUA" target="_blank" style="
@@ -2270,7 +2272,8 @@ function showSkeletonCollections() {
           box-shadow: 0 0 15px #00f7ff;
         ">🎥 Підписатись на KinoTochka Films</a>
       </div>
-      <!-- 🔹 ось тут вставляємо кнопку "Я підписався" -->
+
+      <!-- 🔹 Кнопка для повторної перевірки -->
       <button onclick="window.location.reload()" style="
         margin-top: 10px;
         background: none;
@@ -2280,17 +2283,22 @@ function showSkeletonCollections() {
         border-radius: 10px;
         font-size: 16px;
         cursor: pointer;
-      ">🔄 Я підписався</button>
+        transition: 0.3s;
+      " onmouseover="this.style.background='#00f7ff';this.style.color='#000';"
+        onmouseout="this.style.background='none';this.style.color='#00f7ff';">
+        🔄 Я підписався на два канали
+      </button>
 
-      <h2 style="font-size: 22px; margin-bottom: 40px;">Активуйте доступ до контенту 🎬</h2>
+      <h2 style="font-size: 22px; margin: 40px 0 20px;">Активуйте доступ до контенту 🎬</h2>
 
-      <p style="margin-top: 20px; font-size: 16px; color: #ccc;">
+      <p style="font-size: 16px; color: #ccc;">
         Після підписки — натисніть <b>оновити застосунок 📲</b>
       </p>
     </div>
   `;
   return;
 }
+
 
   // ✅ Тут вставляємо перевірку PRO
 const proRes = await fetch('https://relax-time2.onrender.com/check-pro', {
