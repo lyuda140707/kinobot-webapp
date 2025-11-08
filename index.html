@@ -2230,7 +2230,7 @@ function showSkeletonCollections() {
  
     const data = await res.json();
 
-   if (!data.subscribed) {
+  if (!data.subscribed) {
   document.body.innerHTML = `
     <div style="
       display: flex;
@@ -2245,35 +2245,37 @@ function showSkeletonCollections() {
       font-family: 'Russo One', sans-serif;
     ">
       <h1 style="font-size: 28px; margin-bottom: 20px;">❗ Щоб користуватись застосунком</h1>
-      <h2 style="font-size: 22px; margin-bottom: 40px;">Підпишіться на канал 🎥</h2>
+      <h2 style="font-size: 22px; margin-bottom: 20px;">Підпишіться на <u>обидва</u> канали 🎬</h2>
 
-     <h2 style="font-size: 22px; margin-bottom: 40px;">Активуйте доступ до контенту 🎬</h2>
+      <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px;">
+        <a href="https://t.me/KinoTochkaUA" target="_blank" style="
+          background: #00f7ff;
+          color: #000;
+          padding: 15px 30px;
+          border-radius: 12px;
+          font-size: 18px;
+          font-weight: bold;
+          text-decoration: none;
+          box-shadow: 0 0 15px #00f7ff;
+        ">🇺🇦 Підписатись на KinoTochka UA</a>
 
-<div style="display: flex; flex-direction: column; gap: 15px;">
-  <a href="https://t.me/KinoTochkaUA" target="_blank" style="
-    background: #00f7ff;
-    color: #000;
-    padding: 15px 30px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 0 15px #00f7ff;
-  ">🎬 Доступ до контенту</a>
+        <a href="https://t.me/KinoTochkaFilms1" target="_blank" style="
+          background: #00f7ff;
+          color: #000;
+          padding: 15px 30px;
+          border-radius: 12px;
+          font-size: 18px;
+          font-weight: bold;
+          text-decoration: none;
+          box-shadow: 0 0 15px #00f7ff;
+        ">🎥 Підписатись на KinoTochka Films</a>
+      </div>
 
-  <a href="https://t.me/KinoTochkaFilms" target="_blank" style="
-    background: #00f7ff;
-    color: #000;
-    padding: 15px 30px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 0 15px #00f7ff;
-  ">🎬 Доступ до контенту</a>
-</div>
+      <h2 style="font-size: 22px; margin-bottom: 40px;">Активуйте доступ до контенту 🎬</h2>
 
-      <p style="margin-top: 40px; font-size: 16px; color: #ccc;">Після підписки оновіть застосунок 📲</p>
+      <p style="margin-top: 20px; font-size: 16px; color: #ccc;">
+        Після підписки — натисніть <b>оновити застосунок 📲</b>
+      </p>
     </div>
   `;
   return;
