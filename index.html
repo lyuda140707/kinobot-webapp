@@ -3489,29 +3489,57 @@ async function openOnTV(title, id) {
 
   const section = document.getElementById('section-player') || document.body;
   section.style.display = 'block';
-  section.innerHTML = `
-    <div style="text-align:center; margin-top:60px;">
-      <button 
-        onclick="window.open('https://kino-site.top/', '_blank')" 
-        style="background: linear-gradient(90deg,#00fff2,#ff00c8);
-               color:#000; font-weight:bold; font-size:18px;
-               border:none; border-radius:12px; padding:14px 28px;
-               cursor:pointer; box-shadow:0 0 20px #00fff2;
-               transition:all 0.3s;">
-        🎬 Дивитись на сайті
-      </button>
+  section.innerHTML = ''; // очищаємо попереднє
 
-      <br/><br/>
-
-      <button 
-        onclick="returnToApp()" 
-        style="background:#111; color:#00fff2; font-weight:bold; font-size:16px;
-               border:1px solid #00fff2; border-radius:10px; padding:10px 22px;
-               cursor:pointer; box-shadow:0 0 10px #00fff2; transition:all 0.3s;">
-        ⬅️ Повернутись у застосунок
-      </button>
-    </div>
+  // Створюємо контейнер
+  const div = document.createElement('div');
+  div.style.cssText = `
+    text-align:center;
+    margin-top:60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
   `;
+
+  // Кнопка "Дивитись на сайті"
+  const siteBtn = document.createElement('button');
+  siteBtn.textContent = '🎬 Дивитись на сайті';
+  siteBtn.style.cssText = `
+    background: linear-gradient(90deg,#00fff2,#ff00c8);
+    color:#000;
+    font-weight:bold;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    padding:14px 28px;
+    cursor:pointer;
+    box-shadow:0 0 20px #00fff2;
+    transition:all 0.3s;
+  `;
+  siteBtn.onclick = () => window.open('https://kino-site.top/', '_blank');
+
+  // Кнопка "Повернутись у застосунок"
+  const backBtn = document.createElement('button');
+  backBtn.textContent = '⬅️ Повернутись у застосунок';
+  backBtn.style.cssText = `
+    background:#111;
+    color:#00fff2;
+    font-weight:bold;
+    font-size:16px;
+    border:1px solid #00fff2;
+    border-radius:10px;
+    padding:10px 22px;
+    cursor:pointer;
+    box-shadow:0 0 10px #00fff2;
+    transition:all 0.3s;
+  `;
+  backBtn.onclick = returnToApp;
+
+  // Додаємо обидві кнопки
+  div.appendChild(siteBtn);
+  div.appendChild(backBtn);
+  section.appendChild(div);
 }
 
 function returnToApp() {
