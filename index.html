@@ -3482,6 +3482,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+<!--
 <script>
 async function openOnTV(title, id) {
   let filmId = id;
@@ -3529,9 +3530,28 @@ async function openOnTV(title, id) {
     window.open(url, "_blank");
   }
 }
-
-
 </script>
+-->
+<script>
+async function openOnTV(title, id) {
+  // 🔹 Замість плеєра показуємо кнопку переходу
+  const section = document.getElementById('section-player') || document.body;
+  section.innerHTML = `
+    <div style="text-align:center; margin-top:40px;">
+      <button 
+        onclick="window.open('https://kino-site.top/', '_blank')" 
+        style="background: linear-gradient(90deg,#00fff2,#ff00c8);
+               color:#000; font-weight:bold; font-size:18px;
+               border:none; border-radius:12px; padding:14px 28px;
+               cursor:pointer; box-shadow:0 0 15px #00fff2;
+               transition:all 0.3s;">
+        🎬 Мій сайт KinoSite.top
+      </button>
+    </div>
+  `;
+}
+</script>
+
   <script>
 // ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
 document.addEventListener("DOMContentLoaded", async () => {
