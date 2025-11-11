@@ -621,7 +621,7 @@
   </script>
 <!-- 🚀 Автоматичне очищення кешу при зміні версії -->
 <script>
-const APP_VERSION = "1.4.12";  // 🔸 змінюй при кожному великому оновленні
+const APP_VERSION = "1.4.13";  // 🔸 змінюй при кожному великому оновленні
 
 try {
   const prevVersion = localStorage.getItem("app_version");
@@ -3482,18 +3482,42 @@ document.addEventListener("DOMContentLoaded", () => {
 async function openOnTV(title, id) {
   const section = document.getElementById('section-player') || document.body;
   section.innerHTML = `
-    <div style="text-align:center; margin-top:40px;">
+    <div style="text-align:center; margin-top:60px;">
       <button 
         onclick="window.open('https://kino-site.top/', '_blank')" 
         style="background: linear-gradient(90deg,#00fff2,#ff00c8);
                color:#000; font-weight:bold; font-size:18px;
                border:none; border-radius:12px; padding:14px 28px;
-               cursor:pointer; box-shadow:0 0 15px #00fff2;
+               cursor:pointer; box-shadow:0 0 20px #00fff2;
                transition:all 0.3s;">
         🎬 Дивитись на сайті
       </button>
+
+      <br/><br/>
+
+      <button 
+        onclick="returnToApp()" 
+        style="background:#111; color:#00fff2; font-weight:bold; font-size:16px;
+               border:1px solid #00fff2; border-radius:10px; padding:10px 22px;
+               cursor:pointer; box-shadow:0 0 10px #00fff2; transition:all 0.3s;">
+        ⬅️ Повернутись у застосунок
+      </button>
     </div>
   `;
+}
+
+// 🔙 окрема функція для повернення назад
+function returnToApp() {
+  const section = document.getElementById('section-player');
+  if (section) {
+    section.innerHTML = ''; // очищаємо секцію
+  }
+  // показуємо головну частину застосунку
+  const main = document.getElementById('genre-results');
+  if (main) {
+    main.style.display = 'grid';
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 </script>
