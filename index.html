@@ -3479,8 +3479,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
+let lastOpenedFilmId = null; // запам'ятовуємо, де користувач був
+
 async function openOnTV(title, id) {
+  lastOpenedFilmId = `film-${id}`;
+
+  const main = document.getElementById('genre-results');
+  if (main) main.style.display = 'none';
+
   const section = document.getElementById('section-player') || document.body;
+  section.style.display = 'block';
   section.innerHTML = `
     <div style="text-align:center; margin-top:60px;">
       <button 
@@ -3506,21 +3514,27 @@ async function openOnTV(title, id) {
   `;
 }
 
-// 🔙 окрема функція для повернення назад
 function returnToApp() {
   const section = document.getElementById('section-player');
   if (section) {
-    section.innerHTML = ''; // очищаємо секцію
+    section.innerHTML = '';
+    section.style.display = 'none';
   }
-  // показуємо головну частину застосунку
+
   const main = document.getElementById('genre-results');
   if (main) {
     main.style.display = 'grid';
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
+  if (lastOpenedFilmId) {
+    const target = document.getElementById(lastOpenedFilmId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+}
 </script>
+
 
   <script>
 // ✅ Якщо є незавершена оплата — показує кнопку "Я оплатив" навіть після перезапуску
