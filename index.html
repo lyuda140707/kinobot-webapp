@@ -1284,14 +1284,10 @@ function renderBatch() {
 
       // ▶️ основна кнопка
       btn = `<button class="search-button" onclick="requestFilmByName(this,'${mid}','${ch}')">▶️ Дивитись</button>`;
-
-      // 📺 кнопка "Дивитись на ТВ" (лише якщо не PRO або користувач має PRO)
-      if (film['stream_url']) {
-        if (!(film.access === "PRO" && !isPro)) {
-          btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Дивитись на сайті</button>`;
-        }
-      }
     }
+
+    // 🎬 Кнопка "Дивитись на сайті" — завжди під кожним фільмом
+    btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Дивитись на сайті</button>`;
 
     return `
       <div class="film-card" id="film-${id}">
