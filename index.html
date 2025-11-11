@@ -3479,30 +3479,35 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-let lastOpenedFilmId = null; // запам'ятовуємо, де користувач був
+let lastOpenedFilmId = null;
 
 async function openOnTV(title, id) {
   lastOpenedFilmId = `film-${id}`;
 
+  // Ховаємо головну сітку фільмів
   const main = document.getElementById('genre-results');
   if (main) main.style.display = 'none';
 
-  const section = document.getElementById('section-player') || document.body;
-  section.style.display = 'block';
-  section.innerHTML = ''; // очищаємо попереднє
+  // Готуємо контейнер для кнопок
+  let section = document.getElementById('section-player');
+  if (!section) {
+    section = document.createElement('div');
+    section.id = 'section-player';
+    document.body.appendChild(section);
+  }
 
-  // Створюємо контейнер
-  const div = document.createElement('div');
-  div.style.cssText = `
-    text-align:center;
-    margin-top:60px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:20px;
-  `;
+  section.style.display = 'flex';
+  section.style.flexDirection = 'column';
+  section.style.alignItems = 'center';
+  section.style.justifyContent = 'center';
+  section.style.gap = '20px';
+  section.style.minHeight = '80vh';
+  section.style.background = '#000';
+  section.style.zIndex = '9999';
+  section.style.position = 'relative';
+  section.innerHTML = ''; // очищаємо
 
-  // Кнопка "Дивитись на сайті"
+  // --- Кнопка "Дивитись на сайті"
   const siteBtn = document.createElement('button');
   siteBtn.textContent = '🎬 Дивитись на сайті';
   siteBtn.style.cssText = `
@@ -3515,11 +3520,12 @@ async function openOnTV(title, id) {
     padding:14px 28px;
     cursor:pointer;
     box-shadow:0 0 20px #00fff2;
-    transition:all 0.3s;
   `;
-  siteBtn.onclick = () => window.open('https://kino-site.top/', '_blank');
+  siteBtn.addEventListener('click', () => {
+    window.open('https://kino-site.top/', '_blank');
+  });
 
-  // Кнопка "Повернутись у застосунок"
+  // --- Кнопка "Повернутись у застосунок"
   const backBtn = document.createElement('button');
   backBtn.textContent = '⬅️ Повернутись у застосунок';
   backBtn.style.cssText = `
@@ -3532,20 +3538,16 @@ async function openOnTV(title, id) {
     padding:10px 22px;
     cursor:pointer;
     box-shadow:0 0 10px #00fff2;
-    transition:all 0.3s;
   `;
-  backBtn.onclick = returnToApp;
+  backBtn.addEventListener('click', returnToApp);
 
-  // Додаємо обидві кнопки
-  div.appendChild(siteBtn);
-  div.appendChild(backBtn);
-  section.appendChild(div);
+  section.appendChild(siteBtn);
+  section.appendChild(backBtn);
 }
 
 function returnToApp() {
   const section = document.getElementById('section-player');
   if (section) {
-    section.innerHTML = '';
     section.style.display = 'none';
   }
 
@@ -3562,6 +3564,7 @@ function returnToApp() {
   }
 }
 </script>
+
 
 
   <script>
