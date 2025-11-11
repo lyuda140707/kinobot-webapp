@@ -621,7 +621,7 @@
   </script>
 <!-- 🚀 Автоматичне очищення кешу при зміні версії -->
 <script>
-const APP_VERSION = "1.4.11";  // 🔸 змінюй при кожному великому оновленні
+const APP_VERSION = "1.4.12";  // 🔸 змінюй при кожному великому оновленні
 
 try {
   const prevVersion = localStorage.getItem("app_version");
@@ -1288,7 +1288,7 @@ function renderBatch() {
       // 📺 кнопка "Дивитись на ТВ" (лише якщо не PRO або користувач має PRO)
       if (film['stream_url']) {
         if (!(film.access === "PRO" && !isPro)) {
-          btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Відкрити у плеєрі</button>`;
+          btn += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Дивитись на сайті</button>`;
         }
       }
     }
@@ -1954,7 +1954,7 @@ function filterByYear(year) {
       // 📺 кнопка для ТВ (тільки якщо користувач має PRO або фільм не PRO)
       if (film['stream_url']) {
         if (!(film.access === "PRO" && !isPro)) {
-          buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Відкрити у плеєрі</button>`;
+          buttons += `<button class="search-button tv-btn" onclick="openOnTV('${film['Назва']}', ${film.id})">🎬 Дивитись на сайті</button>`;
         }
       }
     }
@@ -2007,7 +2007,7 @@ function filterByYear(year) {
       // 🔹 друга кнопка "Дивитись на ТВ" (лише якщо не PRO або користувач має PRO)
       const tvBtn =
         streamUrl && !(f.access === "PRO" && !isPro)
-          ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id})">🎬 Відкрити у плеєрі</button>`
+          ? `<button class="search-button tv-btn" onclick="openOnTV('${f.title}', ${found?.id})">🎬 Дивитись на сайті</button>`
           : '';
 
       return `
@@ -2514,7 +2514,7 @@ if (seriesHits.length > 0) {
     // 🔹 кнопка "Дивитись на ТВ" (показується тільки якщо користувач має PRO або фільм не PRO)
     const tvBtn =
       f['stream_url'] && !(f['Доступ'] === "PRO" && !isPro)
-        ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">🎬 Відкрити у плеєрі</button>`
+        ? `<button class="search-button tv-btn" onclick="openOnTV('${f['Назва']}', ${f.id})">🎬 Дивитись на сайті</button>`
         : '';
    
     return `
@@ -3482,59 +3482,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-<!--
 <script>
 async function openOnTV(title, id) {
-  let filmId = id;
-  if (!filmId && window.films?.length) {
-    const found = window.films.find(f => f['Назва'] === title);
-    if (found) filmId = found.id || found['id'];
-  }
-
-  if (!filmId) {
-    alert("❌ Не вдалося знайти ID фільму");
-    return;
-  }
-
-  // 🎬 Надсилаємо лог на бекенд (Render)
-  try {
-    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    const uid = user ? user.id : "unknown";
-
-    await fetch("https://relax-time2.onrender.com/log-tv", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uid: uid,
-        film_name: title
-      })
-    });
-    console.log(`📡 Лог відправлено: ${title} (${uid})`);
-  } catch (e) {
-    console.warn("⚠️ Не вдалося записати лог перегляду ТВ:", e);
-  }
-
-  // 🔹 Відкриваємо плеєр
-  const encodedId = encodeURIComponent(filmId);
-  const url = `https://kinobot-webapp-jhu8.onrender.com/player.html?id=${encodedId}`;
-
-  try {
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.openLink(url, { try_instant_view: false });
-      console.log("📺 Відкрито:", url);
-    } else {
-      window.open(url, "_blank");
-    }
-  } catch (err) {
-    console.error("❌ Помилка openOnTV:", err);
-    window.open(url, "_blank");
-  }
-}
-</script>
--->
-<script>
-async function openOnTV(title, id) {
-  // 🔹 Замість плеєра показуємо кнопку переходу
   const section = document.getElementById('section-player') || document.body;
   section.innerHTML = `
     <div style="text-align:center; margin-top:40px;">
@@ -3545,11 +3494,12 @@ async function openOnTV(title, id) {
                border:none; border-radius:12px; padding:14px 28px;
                cursor:pointer; box-shadow:0 0 15px #00fff2;
                transition:all 0.3s;">
-        🎬 Мій сайт KinoSite.top
+        🎬 Дивитись на сайті
       </button>
     </div>
   `;
 }
+
 </script>
 
   <script>
