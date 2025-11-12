@@ -621,7 +621,7 @@
   </script>
 <!-- 🚀 Автоматичне очищення кешу при зміні версії -->
 <script>
-const APP_VERSION = "1.4.13";  // 🔸 змінюй при кожному великому оновленні
+const APP_VERSION = "1.4.14";  // 🔸 змінюй при кожному великому оновленні
 
 try {
   const prevVersion = localStorage.getItem("app_version");
@@ -3484,11 +3484,15 @@ let lastOpenedFilmId = null;
 async function openOnTV(title, id) {
   lastOpenedFilmId = `film-${id}`;
 
-  // Ховаємо головну сітку фільмів
+  // 🔹 Ховаємо результати пошуку (якщо відкривали через пошук)
+  const searchResults = document.getElementById('searchResults');
+  if (searchResults) searchResults.style.display = 'none';
+
+  // 🔹 Ховаємо головну сітку фільмів
   const main = document.getElementById('genre-results');
   if (main) main.style.display = 'none';
 
-  // Готуємо контейнер для кнопок
+  // 🔹 Готуємо контейнер для кнопок (як окрему сторінку)
   let section = document.getElementById('section-player');
   if (!section) {
     section = document.createElement('div');
@@ -3525,7 +3529,7 @@ async function openOnTV(title, id) {
     window.open('https://kino-site.top/', '_blank');
   });
 
-  // --- Кнопка "Повернутись у застосунок"
+  // --- Кнопка "⬅️ Повернутись у застосунок"
   const backBtn = document.createElement('button');
   backBtn.textContent = '⬅️ Повернутись у застосунок';
   backBtn.style.cssText = `
@@ -3547,15 +3551,19 @@ async function openOnTV(title, id) {
 
 function returnToApp() {
   const section = document.getElementById('section-player');
-  if (section) {
-    section.style.display = 'none';
+  if (section) section.style.display = 'none';
+
+  // 🟢 Якщо відкривали через пошук — повертаємо пошукові результати
+  const searchResults = document.getElementById('searchResults');
+  if (searchResults && searchResults.childElementCount > 0) {
+    searchResults.style.display = 'grid';
+  } else {
+    // 🔹 Інакше — головна сітка
+    const main = document.getElementById('genre-results');
+    if (main) main.style.display = 'grid';
   }
 
-  const main = document.getElementById('genre-results');
-  if (main) {
-    main.style.display = 'grid';
-  }
-
+  // 🔙 Плавно повертаємось до останнього фільму
   if (lastOpenedFilmId) {
     const target = document.getElementById(lastOpenedFilmId);
     if (target) {
@@ -3563,6 +3571,7 @@ function returnToApp() {
     }
   }
 }
+
 </script>
 
 
