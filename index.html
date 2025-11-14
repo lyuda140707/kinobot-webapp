@@ -3618,6 +3618,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 
 
+function sanitizeText(text) {
+  if (!text) return "";
+  return text
+    .replace(/[\u2018\u2019]/g, "'")   // ’ → '
+    .replace(/[\u201C\u201D]/g, '"')   // “ ” → "
+    .replace(/[\u00A0]/g, ' ')         // нерозривні пробіли
+    .replace(/\s+/g, ' ')              // всі дивні пробіли
+    .trim();
+}
 
 </body>
 </html>
