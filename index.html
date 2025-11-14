@@ -663,16 +663,15 @@ function safeId(str, scope = '') {
   return 'id_' + (h >>> 0).toString(36);
 }
 
-
-function renderControls(title, description) {
-  const film = films.find(f => f['Назва'] === title) || {};
+function renderControls(title) {
   return `
     <button class="favorite-btn"
-      onclick='addToFavorites(${JSON.stringify(title)}, ${JSON.stringify(description || "")}, ${JSON.stringify(film.message_id || "")})'>
+      onclick='addToFavorites(${JSON.stringify(title)})'>
       💛
     </button>
   `;
 }
+
 
 
 
@@ -2546,20 +2545,16 @@ if (seriesHits.length > 0) {
 
 
 
-function addToFavorites(title, description, message_id) {
-  const nTitle = normalize(title);
-  const nDescription = normalize(description || "");
+function addToFavorites(title) {
+  const film = films.find(f => normalize(f['Назва']) === normalize(title));
 
-  const film = films.find(f =>
-    normalize(f['Назва']) === nTitle
-  );
-
-  const real_message_id = film?.message_id || film?.file_id || message_id || '';
-  const real_channel_id = film?.channel_id || '';
+  const nTitle = normalize(film['Назва']);
+  const nDescription = normalize(film['Опис'] || "");
+  const real_message_id = film.message_id || film.file_id || "";
+  const real_channel_id = film.channel_id || "";
 
   let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-  // Перевірка дубля через normalize()
   if (favs.some(f => normalize(f.title) === nTitle)) {
     showServiceErrorModal('Вже в улюбленому 💛');
     return;
@@ -2574,7 +2569,7 @@ function addToFavorites(title, description, message_id) {
 
   localStorage.setItem('favorites', JSON.stringify(favs));
   showFavorites();
-  alert('Додано в улюблене!');
+  alert("Додано в улюблене!");
 }
 
 
