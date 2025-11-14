@@ -2547,22 +2547,41 @@ if (seriesHits.length > 0) {
 
 
 function addToFavorites(title, description, message_id) {
+
+  // 🔹 нормалізуємо апострофи у вхідних даних
+  title = sanitizeText(unmaskWord(title));
+  description = sanitizeText(description || "");
+
+  // 🔹 шукаємо фільм у масиві films з нормалізацією
   const film = films.find(f =>
-    unmaskWord(f['Назва']).trim().toLowerCase() === unmaskWord(title).trim().toLowerCase()
+    sanitizeText(unmaskWord(f['Назва']).trim().toLowerCase()) ===
+    sanitizeText(title.trim().toLowerCase())
   );
+
   const real_message_id = film?.message_id || film?.file_id || message_id || '';
   const real_channel_id = film?.channel_id || '';
 
-  const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  if (favs.find(f => f.title === title)) {
+  let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+  // 🔹 перевірка дубля з нормалізацією
+  if (favs.some(f => sanitizeText(f.title) === sanitizeText(title))) {
     showServiceErrorModal('Вже в улюбленому 💛');
     return;
   }
-  favs.push({ title, description, message_id: real_message_id, channel_id: real_channel_id });
+
+  // 🔹 зберігаємо нормалізовану назву
+  favs.push({
+    title: title,
+    description: description,
+    message_id: real_message_id,
+    channel_id: real_channel_id
+  });
+
   localStorage.setItem('favorites', JSON.stringify(favs));
   showFavorites();
   alert('Додано в улюблене!');
 }
+
 
 
 window.addToFavorites = addToFavorites;
