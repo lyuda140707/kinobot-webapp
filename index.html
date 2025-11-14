@@ -2547,7 +2547,9 @@ if (seriesHits.length > 0) {
 
 
 function addToFavorites(title, description, message_id) {
-  const film = films.find(f => unmaskWord(f['Назва']) === unmaskWord(title));
+  const film = films.find(f =>
+    unmaskWord(f['Назва']).trim().toLowerCase() === unmaskWord(title).trim().toLowerCase()
+  );
   const real_message_id = film?.message_id || film?.file_id || message_id || '';
   const real_channel_id = film?.channel_id || '';
 
