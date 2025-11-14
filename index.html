@@ -1988,7 +1988,7 @@ function filterByYear(year) {
     container.innerHTML = favs.map(f => {
       // шукаємо фільм у глобальному масиві films
       const found = films.find(item =>
-        unmaskWord(item['Назва']) === unmaskWord(f.title)
+        normalize(item['Назва']) === normalize(f.title)
       );
 
       const msgId = found?.message_id || f.message_id || found?.file_id || f.file_id || '';
@@ -2547,15 +2547,11 @@ if (seriesHits.length > 0) {
 
 
 function addToFavorites(title, description, message_id) {
+  const nTitle = normalize(title);
+  const nDescription = normalize(description || "");
 
-  // 🔹 нормалізуємо апострофи у вхідних даних
-  title = sanitizeText(unmaskWord(title));
-  description = sanitizeText(description || "");
-
-  // 🔹 шукаємо фільм у масиві films з нормалізацією
   const film = films.find(f =>
-    sanitizeText(unmaskWord(f['Назва']).trim().toLowerCase()) ===
-    sanitizeText(title.trim().toLowerCase())
+    normalize(f['Назва']) === nTitle
   );
 
   const real_message_id = film?.message_id || film?.file_id || message_id || '';
@@ -2563,16 +2559,15 @@ function addToFavorites(title, description, message_id) {
 
   let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-  // 🔹 перевірка дубля з нормалізацією
-  if (favs.some(f => sanitizeText(f.title) === sanitizeText(title))) {
+  // Перевірка дубля через normalize()
+  if (favs.some(f => normalize(f.title) === nTitle)) {
     showServiceErrorModal('Вже в улюбленому 💛');
     return;
   }
 
-  // 🔹 зберігаємо нормалізовану назву
   favs.push({
-    title: title,
-    description: description,
+    title: nTitle,
+    description: nDescription,
     message_id: real_message_id,
     channel_id: real_channel_id
   });
@@ -3636,16 +3631,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 </script>
 
+
 <script>
-function sanitizeText(text) {
-  if (!text) return "";
-  return text
-    .replace(/[\u2018\u2019]/g, "'")   // ’ → '
-    .replace(/[\u201C\u201D]/g, '"')   // “ ” → "
-    .replace(/[\u00A0]/g, ' ')         // нерозривні пробіли
-    .replace(/\s+/g, ' ')              // всі дивні пробіли
-    .trim();
+function normalize(text) {
+  return (text || "")
+    .replace(/[\u2018\u2019\u02BC´`]/g, "'")     // усі види апострофів → '
+    .replace(/[\u201C\u201D«»]/g, '"')           // усі лапки → "
+    .replace(/\u200B/g, "")                      // прибрати zero-width space
+    .replace(/[\u00A0]/g, " ")                   // нерозривні пробіли → звичайні
+    .replace(/\s+/g, " ")                        // багато пробілів → один
+    .trim()
+    .toLowerCase();
 }
 </script>
+
 </body>
 </html>
