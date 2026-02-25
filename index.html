@@ -2074,8 +2074,26 @@ function removeFromFavorites(index) {
 }
 
 
-
+function normalizeSearch(str) {
+  return String(str || '')
+    .toLowerCase()
+    .replace(/\u00A0/g, ' ')                 // NBSP
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')   // zero-width
+    .replace(/[’ʼ`´]/g, "'")                 // апострофи
+    .replace(/[-–—]+/g, ' ')                 // тире/дефіси -> пробіл
+    .replace(/[^0-9a-zа-яёіїєґ' ]+/giu, ' ')  // прибрати сміття
+    .replace(/\s+/g, ' ')
+    .trim();
+}
     function searchInBot(query) {
+
+    const rawQuery = query;           // як ввів користувач
+    const q = normalizeSearch(query); // нормалізований запит
+  
+    if (!q) {
+      showServiceErrorModal("Введи назву для пошуку 🙂");
+      return;
+    }
       // 🧹 Повне очищення залишків
 document.getElementById('history-list').innerHTML = '';
 document.getElementById('searchResults').innerHTML = '';
@@ -2106,12 +2124,12 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
   fetch('https://relax-time2-rq28.onrender.com/search-in-bot', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: user.id, query })
+    body: JSON.stringify({ user_id: user.id, query: q })
   }).then(r => r.json()).then(d => {
     if (d.found && d.videoUrl) {
       const existing = JSON.parse(localStorage.getItem('history') || '[]');
-      if (!existing.find(f => f.title === query)) {
-        const film = films.find(f => f['Назва'] === query);
+      if (!existing.find(f => normalizeSearch(f.title) === q)) {
+        const film = films.find(f => normalizeSearch(f['Назва']) === q);
         if (film) {
           existing.unshift({ title: film['Назва'], description: film['Опис'] });
           if (existing.length > 20) existing.pop();
@@ -2124,7 +2142,7 @@ document.querySelectorAll('.film-card').forEach(card => card.remove());
     }
   }).catch(err => {
     console.error(err);
-    showServiceErrorModal("❗️ Помилка пошуку.<br>Спробуйте ще раз.", () => searchInBot(query));
+    showServiceErrorModal("❗️ Помилка пошуку.<br>Спробуйте ще раз.", () => searchInBot(rawQuery));
   }).finally(() => {
     document.getElementById("loading-indicator").style.display = "none";
   });
